@@ -1,16 +1,16 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {MovieService} from "../movie/movie.service";
-import {GenresService} from "../genres/genres.service";
-import {PeopleService} from "../people/people.service";
+import { MovieService } from "../movie/movie.service";
+import { GenresService } from "../genres/genres.service";
+import { PeopleService } from "../people/people.service";
 
 
 
 @Injectable()
 export class ParseService {
     constructor(private movieService: MovieService,
-                private genreService: GenresService,
-                private peopleService: PeopleService) {
+        private genreService: GenresService,
+        private peopleService: PeopleService) {
     }
 
 
@@ -21,6 +21,8 @@ export class ParseService {
         const operators = [];
         const writers = [];
         const urls = [];
+        const tmpImgsLinks = [];
+        const rightImgsLink = [];
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
@@ -46,20 +48,18 @@ export class ParseService {
                     waitUntil: 'domcontentloaded',
                 });
 
-                // Выдает не то, что на сайте
-                const imgEl = await page.$('img')
-                const img = await imgEl.evaluate(el => el.getAttribute('srcset'));
-                console.log(img);
-
 
                 const titleEl = await page.$('.styles_title__65Zwx');
                 const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
                 const title = titleText.split(' ');
                 console.log(title[0]);
 
-                const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');
-                const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
-                console.log(originalTitle);
+                const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
+                if (originalTitleEl) {
+                    const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
+                    console.log(originalTitle);
+                }
+
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
                 const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
@@ -174,12 +174,43 @@ export class ParseService {
                     operators.push(name);
                 }
 
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+
+
+                await page.goto(url + 'posters/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+
+                const tmpImgs = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+                for (const img of tmpImgs) {
+                    const cutLinkEl = await img.$('.styles_link__HN8dS');
+                    const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
+                    const link = 'https://www.kinopoisk.ru' + cutLink;
+                    tmpImgsLinks.push(link);
+                }
+
+                for (const imgLink of tmpImgsLinks) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    await page.goto(imgLink, {
+                        waitUntil: 'domcontentloaded',
+                    });
+                    const imgLinkEl = await page.$('.styles_root__SJO0R .styles_root__OQv_q');
+                    const rightLink = await imgLinkEl.evaluate(el => el.getAttribute('href'));
+                    rightImgsLink.push('https:' + rightLink);
+                }
+
+                console.log(rightImgsLink);
+
                 console.log(operators);
                 console.log(writers);
                 console.log(producers);
                 console.log(actors);
                 console.log(directors);
                 // Обнуляю массивы
+                tmpImgsLinks.length = 0;
+                rightImgsLink.length = 0;
                 operators.length = 0;
                 writers.length = 0;
                 producers.length = 0;
@@ -191,10 +222,10 @@ export class ParseService {
             // закрываю страницу
             await page.close();
 
-            }
         }
-
     }
+
+}
 
     // Надо вытянуть всю подобную инфу типо страна, слоган и т д
     // Но миллион ифов не варик писать, нужно будет с сайта много что тянуть
