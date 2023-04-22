@@ -22,7 +22,8 @@ export class ParseService {
         const writers = [];
         const urls = [];
         const posters = [];
-        
+        const covers = [];
+
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
@@ -182,22 +183,42 @@ export class ParseService {
                     waitUntil: 'domcontentloaded',
                 });
 
-                const tmpImgs = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
-                for (const img of tmpImgs) {
+                const postersEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+                for (const img of postersEl) {
                     const cutLinkEl = await img.$('.styles_root__OQv_q');
                     const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
                     posters.push('https:' + cutLink);
-                    
+
                 }
 
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+
+
+                await page.goto(url + 'covers/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                const coversEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+                for (const img of coversEl) {
+                    const cutLinkEl = await img.$('.styles_root__OQv_q');
+                    const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
+                    covers.push('https:' + cutLink);
+
+                }
+
+                console.log("Постеры");
                 console.log(posters);
-        
+                console.log("Коверсы");
+                console.log(covers);
+
                 console.log(operators);
                 console.log(writers);
                 console.log(producers);
                 console.log(actors);
                 console.log(directors);
                 // Обнуляю массивы
+                covers.length = 0;
                 posters.length = 0;
                 operators.length = 0;
                 writers.length = 0;
