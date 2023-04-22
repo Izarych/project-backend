@@ -8,7 +8,7 @@ export class Genres extends Model<Genres> {
     @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
     id: number;
 
-    @Column
+    @Column({type: DataType.STRING, unique: true})
     genre: string;
 
     @BelongsToMany(() => Movie, () => MovieGenres)

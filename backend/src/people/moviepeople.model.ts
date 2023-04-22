@@ -8,6 +8,7 @@ export class MoviePeople extends Model<MoviePeople> {
     id: number;
 
     @ForeignKey(() => People)
+    @Column({type: DataType.INTEGER})
     peopleId: number;
 
     @ForeignKey(() => Movie)

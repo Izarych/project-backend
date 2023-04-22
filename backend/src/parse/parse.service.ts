@@ -14,12 +14,12 @@ export class ParseService {
     }
 
 
-    async parse() {
-        let actors = [];
-        let directors = [];
-        let producers = [];
-        let operators = [];
-        let writers = [];
+    async parse() {         //Не хватает: режисер дубля, переводчик, актепы дубля, композер, монтажер, художник
+        let actors = [];    //актеры
+        let directors = []; //Режисеры
+        let producers = []; //Проды
+        let operators = []; //Оперы
+        let writers = [];   //Писатели
         const urls = [];
         let posters = [];
         let covers = [];
@@ -217,3 +217,4 @@ export class ParseService {
     // Таймауты пока не пишем, будем писать только когда надо будет постоянно страницы менять, пока работаем с одной
     // Комменты из функции можешь удалить, я их оставил чтобы тебе проще было влиться в puppeteer
     // Эти комменты не удаляй пусть будут, будем еще добавлять сюда инфу/способы, потом удалим их
+

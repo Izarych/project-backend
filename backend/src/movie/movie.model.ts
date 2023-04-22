@@ -36,6 +36,8 @@ export class Movie extends Model<Movie> {
     @Column
     img: string;
 
+    //Награды?
+
     @BelongsToMany(() => People, () => MoviePeople)
     people: People[]
 
