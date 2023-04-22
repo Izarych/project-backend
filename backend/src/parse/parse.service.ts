@@ -199,7 +199,6 @@ export class ParseService {
                 console.log(directors);
                 // Обнуляю массивы
                 posters.length = 0;
-                posters.length = 0;
                 operators.length = 0;
                 writers.length = 0;
                 producers.length = 0;
