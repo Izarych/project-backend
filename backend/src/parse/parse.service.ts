@@ -1,26 +1,36 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {MovieService} from "../movie/movie.service";
-import {GenresService} from "../genres/genres.service";
-import {PeopleService} from "../people/people.service";
+import { MovieService } from "../movie/movie.service";
+import { GenresService } from "../genres/genres.service";
+import { PeopleService } from "../people/people.service";
 
 
 
 @Injectable()
 export class ParseService {
     constructor(private movieService: MovieService,
-                private genreService: GenresService,
-                private peopleService: PeopleService) {
+        private genreService: GenresService,
+        private peopleService: PeopleService) {
     }
 
-
+    //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
     async parse() {
-        const actors = [];
-        const directors = [];
-        const producers = [];
-        const operators = [];
-        const writers = [];
+        let actors = [];    //актеры
+        let directors = []; //Режисеры
+        let producers = []; //Проды
+        let operators = []; //Оперы
+        let writers = [];   //Писатели
         const urls = [];
+        let posters = [];
+        let covers = [];
+        let translators = [];   //переводчик
+        let dubbingActors = []; //дубляж
+        let dubbingDirectors = [];  //реж дубля
+        let composers = [];     //композиторы
+        let editors = [];       //монтажеры
+        let artists = [];       //художники
+
+
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
@@ -46,20 +56,18 @@ export class ParseService {
                     waitUntil: 'domcontentloaded',
                 });
 
-                // Выдает не то, что на сайте
-                const imgEl = await page.$('img')
-                const img = await imgEl.evaluate(el => el.getAttribute('srcset'));
-                console.log(img);
-
 
                 const titleEl = await page.$('.styles_title__65Zwx');
                 const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
                 const title = titleText.split(' ');
                 console.log(title[0]);
 
-                const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');
-                const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
-                console.log(originalTitle);
+                const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
+                if (originalTitleEl) {
+                    const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
+                    console.log(originalTitle);
+                }
+
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
                 const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
@@ -87,7 +95,7 @@ export class ParseService {
                         case 'Страна':
                             const countryEl = await element.$('.styles_value__g6yP4');
                             const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
-                            console.log(country);
+                            console.log(country.split(','));
                             break;
                         case 'Премьера в России':
                             const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
@@ -105,96 +113,189 @@ export class ParseService {
                 }
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
                 const description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
+
                 console.log(description);
 
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/actor/', {
-                    waitUntil: 'domcontentloaded',
-                });
+                actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                const actorsEl = await page.$$('.dub .info .name');
-                for (const actor of actorsEl) {
-                    const nameEl = await actor.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    actors.push(name);
-                }
+                directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/director/', {
-                    waitUntil: 'domcontentloaded',
-                });
 
-                const directorEl = await page.$$('.dub .info .name');
-                for (const director of directorEl) {
-                    const nameEl = await director.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    directors.push(name);
-                }
+                producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
 
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/producer/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const producerEl = await page.$$('.dub .info .name');
-                for (const producer of producerEl) {
-                    const nameEl = await producer.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    producers.push(name);
-                }
+                dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/writer/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const writerEl = await page.$$('.dub .info .name');
-                for (const writer of writerEl) {
-                    const nameEl = await writer.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    writers.push(name);
-                }
+                translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
 
 
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/operator/', {
-                    waitUntil: 'domcontentloaded',
-                });
+                dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
 
-                const operatorEl = await page.$$('.dub .info .name');
-                for (const operator of operatorEl) {
-                    const nameEl = await operator.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    operators.push(name);
-                }
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
+                composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
+
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                posters = await this.stealImgs(page, `${url}posters/`);
+
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                covers = await this.stealImgs(page, `${url}covers/`);
+                
+                /*    @Column({type: DataType.STRING, allowNull: false})
+    title: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    originalTitle: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    ageRate: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    description: string;
+
+    @Column({type: DataType.INTEGER, allowNull: false})
+    year: number;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    country: string;
+
+    @Column({type: DataType.STRING})
+    premierRussia: string;
+
+    @Column({type: DataType.STRING})
+    premier: string;
+
+    @Column({type: DataType.TEXT})
+    img: string;
+
+        @BelongsToMany(() => People, () => MoviePeople)
+    people: People[]
+
+    @BelongsToMany(() => Genres, () => MovieGenres)
+    genres: Genres[]
+    */
+
+                console.log("Постеры");
+                console.log(posters);
+                console.log("Коверсы");
+                console.log(covers);
+                console.log("Операторы");
                 console.log(operators);
+                console.log("Врайтеры");
                 console.log(writers);
+                console.log("Продюсеры");
                 console.log(producers);
+                console.log("Актеры");
                 console.log(actors);
+                console.log("Режисеры");
                 console.log(directors);
+                console.log("Пердевочики");
+                console.log(translators);
+                console.log("Актепы дуплежа");
+                console.log(dubbingActors);
+                console.log("Режисеры дуплежа");
+                console.log(dubbingDirectors);
+                console.log("Композиторы");
+                console.log(composers);
+                console.log("Монтожеры");
+                console.log(editors);
+                console.log("Художники");
+                console.log(artists);
+
                 // Обнуляю массивы
+                covers.length = 0;
+                posters.length = 0;
                 operators.length = 0;
                 writers.length = 0;
                 producers.length = 0;
                 actors.length = 0;
                 directors.length = 0;
+                translators.length = 0;
+                dubbingActors.length = 0;
+                dubbingDirectors.length = 0;
+                composers.length = 0;
+                editors.length = 0;
+                artists.length = 0;
             }
             urls.length = 0;
 
             // закрываю страницу
             await page.close();
 
-            }
+        }
+    }
+
+    private async stealNamesOfCreators(page, url) {
+        const array = [];
+
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        const itemsEl = await page.$$('.dub .info .name');
+
+        if (!itemsEl) {
+            return [];
         }
 
+        for (const items of itemsEl) {
+            const nameEl = await items.$('a')
+            const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+            array.push(name);
+        }
+        return array;
     }
+
+    private async stealImgs(page, url) {
+        const array = [];
+
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        const imgEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+
+        for (const img of imgEl) {
+            const cutLinkEl = await img.$('.styles_root__OQv_q');
+            const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
+            array.push('https:' + cutLink);
+        }
+        return array;
+    }
+
+}
 
     // Надо вытянуть всю подобную инфу типо страна, слоган и т д
     // Но миллион ифов не варик писать, нужно будет с сайта много что тянуть
@@ -210,7 +311,4 @@ export class ParseService {
     // Таймауты пока не пишем, будем писать только когда надо будет постоянно страницы менять, пока работаем с одной
     // Комменты из функции можешь удалить, я их оставил чтобы тебе проще было влиться в puppeteer
     // Эти комменты не удаляй пусть будут, будем еще добавлять сюда инфу/способы, потом удалим их
-
-
-
 

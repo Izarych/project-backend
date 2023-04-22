@@ -9,32 +9,34 @@ export class Movie extends Model<Movie> {
     @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
     id: number;
 
-    @Column
+    @Column({type: DataType.STRING, allowNull: false})
     title: string;
 
-    @Column
+    @Column({type: DataType.STRING, allowNull: false})
     originalTitle: string;
 
-    @Column
+    @Column({type: DataType.STRING, allowNull: false})
     ageRate: string;
 
-    @Column
+    @Column({type: DataType.STRING, allowNull: false})
     description: string;
 
-    @Column
+    @Column({type: DataType.INTEGER, allowNull: false})
     year: number;
 
-    @Column
+    @Column({type: DataType.STRING, allowNull: false})
     country: string;
 
-    @Column
+    @Column({type: DataType.STRING})
     premierRussia: string;
 
-    @Column
+    @Column({type: DataType.STRING})
     premier: string;
 
-    @Column
+    @Column({type: DataType.TEXT})
     img: string;
+
+    //Награды?
 
     @BelongsToMany(() => People, () => MoviePeople)
     people: People[]
