@@ -13,8 +13,8 @@ export class ParseService {
         private peopleService: PeopleService) {
     }
 
-
-    async parse() {         //Не хватает: режисер дубля, переводчик, актепы дубля, композер, монтажер, художник
+    //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
+    async parse() {          
         let actors = [];    //актеры
         let directors = []; //Режисеры
         let producers = []; //Проды
@@ -23,6 +23,13 @@ export class ParseService {
         const urls = [];
         let posters = [];
         let covers = [];
+        let translators = [];   //переводчик
+        let dubbingActors = []; //дубляж
+        let dubbingDirectors = [];  //реж дубля
+        let composers = [];     //композиторы
+        let editors = [];       //монтажеры
+        let artists = [];       //художники
+
 
         const browser = await puppeteer.launch({
             headless: false,
@@ -130,6 +137,33 @@ export class ParseService {
 
                 operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
 
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
+
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
+
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
+
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 posters = await this.stealImgs(page, `${url}posters/`);
@@ -139,17 +173,33 @@ export class ParseService {
 
                 covers = await this.stealImgs(page, `${url}covers/`);
 
-
                 console.log("Постеры");
                 console.log(posters);
                 console.log("Коверсы");
                 console.log(covers);
-
+                console.log("Операторы");
                 console.log(operators);
+                console.log("Врайтеры");
                 console.log(writers);
+                console.log("Продюсеры");
                 console.log(producers);
+                console.log("Актеры");
                 console.log(actors);
+                console.log("Режисеры");
                 console.log(directors);
+                console.log("Пердевочики");
+                console.log(translators);
+                console.log("Актепы дуплежа");
+                console.log(dubbingActors);
+                console.log("Режисеры дуплежа");
+                console.log(dubbingDirectors);
+                console.log("Композиторы");
+                console.log(composers);
+                console.log("Монтожеры");
+                console.log(editors);
+                console.log("Художники");
+                console.log(artists);
+                
                 // Обнуляю массивы
                 covers.length = 0;
                 posters.length = 0;
@@ -158,6 +208,12 @@ export class ParseService {
                 producers.length = 0;
                 actors.length = 0;
                 directors.length = 0;
+                translators.length = 0;
+                dubbingActors.length = 0;
+                dubbingDirectors.length = 0;
+                composers.length = 0;
+                editors.length = 0;
+                artists.length = 0;
             }
             urls.length = 0;
 
@@ -175,6 +231,10 @@ export class ParseService {
         });
 
         const itemsEl = await page.$$('.dub .info .name');
+
+        if (!itemsEl) {
+            return [];
+        }
 
         for (const items of itemsEl) {
             const nameEl = await items.$('a')
