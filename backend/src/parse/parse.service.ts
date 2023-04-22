@@ -1,49 +1,198 @@
 import { Injectable} from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
+import {MovieService} from "../movie/movie.service";
+import {GenresService} from "../genres/genres.service";
+import {PeopleService} from "../people/people.service";
 
 
 
 @Injectable()
 export class ParseService {
-    constructor() {
+    constructor(private movieService: MovieService,
+                private genreService: GenresService,
+                private peopleService: PeopleService) {
     }
-    // После прочтения всех комментов функции загляни в самый низ, там тоже оставил комменты
+
+
     async parse() {
-        // ссылка на фильм, позже сделаем чтобы уже по списку на каждый фильм заходило и парсило, пока разбираемся с одним
-        // как пример открой еще какой-нибудь фильм и сравнивай какие у них одинаковые названия классов есть
-        // (каждый класс отделен пробелом, один не совпадает, другой совпадает)
-        const url = 'https://www.kinopoisk.ru/film/535341/';
-        // Запускаю браузер, headless: false = будет запускаться с хедерами и все будет ок
+        const actors = [];
+        const directors = [];
+        const producers = [];
+        const operators = [];
+        const writers = [];
+        const urls = [];
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
         });
+        // перехожу на страницу со списком фильмов, 2 страницы для теста делал, в идеале 15-20 спарсить
+        for (let i = 1; i < 2; i++) {
+            let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
+            let page = await browser.newPage();
+            await page.goto(pageUrl, {
+                waitUntil: 'domcontentloaded'
+            });
+            // пушу ссылки фильмов в массив
+            const movies = await page.$$('.styles_root__ti07r');
+            for (const movie of movies) {
+                const linkEl = await movie.$('.styles_root__wgbNq');
+                const link = await linkEl.evaluate(el => el.getAttribute('href'));
+                const url = 'https://www.kinopoisk.ru/' + link;
+                urls.push(url);
+            }
+            // по каждой ссылке все тяну с фильма
+            for (const url of urls) {
+                await page.goto(url, {
+                    waitUntil: 'domcontentloaded',
+                });
 
-        // Открываю новую страницу
-        const page = await browser.newPage();
+                // Выдает не то, что на сайте
+                const imgEl = await page.$('img')
+                const img = await imgEl.evaluate(el => el.getAttribute('srcset'));
+                console.log(img);
 
-        // Перехожу по ссылке, жду пока фулл контент загрузится
-        await page.goto(url, {
-            waitUntil: 'domcontentloaded',
-        });
-        // Ищу все элементы через $$ на странице, у которых сначала есть класс который в [] (в [] потому что там data-test-id=,
-        // а так перед классом всегда точка) и потом row__da_RK который внутри первого класса
-        // потом цикл который тянет тайтл, а потом проверка что тайтл = год производства и тянем сам год
-        const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
-        for (const element of elements) {
-            const titleEl = await element.$('.styles_title__b1HVo');
-            const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
 
-            if (title === 'Год производства') {
-                const valueEl = await element.$('.styles_value__g6yP4');
-                const value = await page.evaluate((el: HTMLElement) => el.innerText.trim(), valueEl);
+                const titleEl = await page.$('.styles_title__65Zwx');
+                const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+                const title = titleText.split(' ');
+                console.log(title[0]);
 
-                console.log(value);
-                break;
+                const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');
+                const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
+                console.log(originalTitle);
+
+                const ageRateEl = await page.$('.styles_ageRate__340KC');
+                const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                console.log(ageRate);
+
+                const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
+                for (const element of elements) {
+                    const titleEl = await element.$('.styles_title__b1HVo');
+                    const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    switch (title) {
+                        case 'Год производства':
+                            const yearEl = await element.$('.styles_value__g6yP4');
+                            const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
+                            console.log(year);
+                            break;
+                        case 'Жанр':
+                            const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
+                            const genre = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
+                            const genres = genre.split(',');
+                            console.log(genres);
+                            break;
+                        case 'Страна':
+                            const countryEl = await element.$('.styles_value__g6yP4');
+                            const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
+                            console.log(country);
+                            break;
+                        case 'Премьера в России':
+                            const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
+                            const premierRussia = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
+                            console.log(premierRussia);
+                            break;
+                        case 'Премьера в мире':
+                            const premierEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
+                            const premier = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
+                            console.log(premier);
+                            break;
+                    }
+
+
+                }
+                const descriptionEl = await page.$('.styles_paragraph__wEGPz');
+                const description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
+                console.log(description);
+
+
+                await page.goto(url + 'cast/who_is/actor/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                const actorsEl = await page.$$('.dub .info .name');
+                for (const actor of actorsEl) {
+                    const nameEl = await actor.$('a')
+                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+                    actors.push(name);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                await page.goto(url + 'cast/who_is/director/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                const directorEl = await page.$$('.dub .info .name');
+                for (const director of directorEl) {
+                    const nameEl = await director.$('a')
+                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+                    directors.push(name);
+                }
+
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                await page.goto(url + 'cast/who_is/producer/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                const producerEl = await page.$$('.dub .info .name');
+                for (const producer of producerEl) {
+                    const nameEl = await producer.$('a')
+                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+                    producers.push(name);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                await page.goto(url + 'cast/who_is/writer/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                const writerEl = await page.$$('.dub .info .name');
+                for (const writer of writerEl) {
+                    const nameEl = await writer.$('a')
+                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+                    writers.push(name);
+                }
+
+
+
+                await page.goto(url + 'cast/who_is/operator/', {
+                    waitUntil: 'domcontentloaded',
+                });
+
+                const operatorEl = await page.$$('.dub .info .name');
+                for (const operator of operatorEl) {
+                    const nameEl = await operator.$('a')
+                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+                    operators.push(name);
+                }
+
+                console.log(operators);
+                console.log(writers);
+                console.log(producers);
+                console.log(actors);
+                console.log(directors);
+                // Обнуляю массивы
+                operators.length = 0;
+                writers.length = 0;
+                producers.length = 0;
+                actors.length = 0;
+                directors.length = 0;
+            }
+            urls.length = 0;
+
+            // закрываю страницу
+            await page.close();
+
             }
         }
-        // Закрываем браузер в конце (пока что, потом просто будем закрывать страницу) дальше см. комменты под функцией
-        await browser.close();
 
     }
 
@@ -64,4 +213,4 @@ export class ParseService {
 
 
 
-}
+
