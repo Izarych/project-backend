@@ -21,8 +21,8 @@ export class ParseService {
         const operators = [];
         const writers = [];
         const urls = [];
-        const tmpImgsLinks = [];
-        const rightImgsLink = [];
+        const posters = [];
+        
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
@@ -182,35 +182,24 @@ export class ParseService {
                     waitUntil: 'domcontentloaded',
                 });
 
-
                 const tmpImgs = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
                 for (const img of tmpImgs) {
-                    const cutLinkEl = await img.$('.styles_link__HN8dS');
+                    const cutLinkEl = await img.$('.styles_root__OQv_q');
                     const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
-                    const link = 'https://www.kinopoisk.ru' + cutLink;
-                    tmpImgsLinks.push(link);
+                    posters.push('https:' + cutLink);
+                    
                 }
 
-                for (const imgLink of tmpImgsLinks) {
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    await page.goto(imgLink, {
-                        waitUntil: 'domcontentloaded',
-                    });
-                    const imgLinkEl = await page.$('.styles_root__SJO0R .styles_root__OQv_q');
-                    const rightLink = await imgLinkEl.evaluate(el => el.getAttribute('href'));
-                    rightImgsLink.push('https:' + rightLink);
-                }
-
-                console.log(rightImgsLink);
-
+                console.log(posters);
+        
                 console.log(operators);
                 console.log(writers);
                 console.log(producers);
                 console.log(actors);
                 console.log(directors);
                 // Обнуляю массивы
-                tmpImgsLinks.length = 0;
-                rightImgsLink.length = 0;
+                posters.length = 0;
+                posters.length = 0;
                 operators.length = 0;
                 writers.length = 0;
                 producers.length = 0;
