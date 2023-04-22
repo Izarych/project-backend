@@ -88,7 +88,7 @@ export class ParseService {
                         case 'Страна':
                             const countryEl = await element.$('.styles_value__g6yP4');
                             const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
-                            console.log(country);
+                            console.log(country.split(','));
                             break;
                         case 'Премьера в России':
                             const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
