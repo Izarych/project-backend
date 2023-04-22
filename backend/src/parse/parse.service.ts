@@ -15,11 +15,11 @@ export class ParseService {
 
 
     async parse() {
-        const actors = [];
-        const directors = [];
-        const producers = [];
-        const operators = [];
-        const writers = [];
+        let actors = [];
+        let directors = [];
+        let producers = [];
+        let operators = [];
+        let writers = [];
         const urls = [];
         let posters = [];
         let covers = [];
@@ -106,74 +106,29 @@ export class ParseService {
                 }
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
                 const description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
+
                 console.log(description);
 
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/actor/', {
-                    waitUntil: 'domcontentloaded',
-                });
+                actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                const actorsEl = await page.$$('.dub .info .name');
-                for (const actor of actorsEl) {
-                    const nameEl = await actor.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    actors.push(name);
-                }
+                directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/director/', {
-                    waitUntil: 'domcontentloaded',
-                });
 
-                const directorEl = await page.$$('.dub .info .name');
-                for (const director of directorEl) {
-                    const nameEl = await director.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    directors.push(name);
-                }
-
+                producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/producer/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const producerEl = await page.$$('.dub .info .name');
-                for (const producer of producerEl) {
-                    const nameEl = await producer.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    producers.push(name);
-                }
+                writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                await page.goto(url + 'cast/who_is/writer/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const writerEl = await page.$$('.dub .info .name');
-                for (const writer of writerEl) {
-                    const nameEl = await writer.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    writers.push(name);
-                }
-
-
-
-                await page.goto(url + 'cast/who_is/operator/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const operatorEl = await page.$$('.dub .info .name');
-                for (const operator of operatorEl) {
-                    const nameEl = await operator.$('a')
-                    const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-                    operators.push(name);
-                }
+                operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -212,13 +167,32 @@ export class ParseService {
         }
     }
 
+    private async stealNamesOfCreators(page, url) {
+        const array = [];
+
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        const itemsEl = await page.$$('.dub .info .name');
+
+        for (const items of itemsEl) {
+            const nameEl = await items.$('a')
+            const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
+            array.push(name);
+        }
+        return array;
+    }
+
     private async stealImgs(page, url) {
         const array = [];
+
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
         });
 
         const imgEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+
         for (const img of imgEl) {
             const cutLinkEl = await img.$('.styles_root__OQv_q');
             const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
@@ -243,7 +217,3 @@ export class ParseService {
     // Таймауты пока не пишем, будем писать только когда надо будет постоянно страницы менять, пока работаем с одной
     // Комменты из функции можешь удалить, я их оставил чтобы тебе проще было влиться в puppeteer
     // Эти комменты не удаляй пусть будут, будем еще добавлять сюда инфу/способы, потом удалим их
-
-
-
-
