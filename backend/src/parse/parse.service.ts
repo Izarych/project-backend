@@ -21,8 +21,8 @@ export class ParseService {
         const operators = [];
         const writers = [];
         const urls = [];
-        const posters = [];
-        const covers = [];
+        let posters = [];
+        let covers = [];
 
         const browser = await puppeteer.launch({
             headless: false,
@@ -177,35 +177,13 @@ export class ParseService {
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
+                posters = await this.stealImgs(page, `${url}posters/`);
 
-
-                await page.goto(url + 'posters/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const postersEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
-                for (const img of postersEl) {
-                    const cutLinkEl = await img.$('.styles_root__OQv_q');
-                    const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
-                    posters.push('https:' + cutLink);
-
-                }
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
+                covers = await this.stealImgs(page, `${url}covers/`);
 
-
-                await page.goto(url + 'covers/', {
-                    waitUntil: 'domcontentloaded',
-                });
-
-                const coversEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
-                for (const img of coversEl) {
-                    const cutLinkEl = await img.$('.styles_root__OQv_q');
-                    const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
-                    covers.push('https:' + cutLink);
-
-                }
 
                 console.log("Постеры");
                 console.log(posters);
@@ -232,6 +210,21 @@ export class ParseService {
             await page.close();
 
         }
+    }
+
+    private async stealImgs(page, url) {
+        const array = [];
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        const imgEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
+        for (const img of imgEl) {
+            const cutLinkEl = await img.$('.styles_root__OQv_q');
+            const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
+            array.push('https:' + cutLink);
+        }
+        return array;
     }
 
 }
