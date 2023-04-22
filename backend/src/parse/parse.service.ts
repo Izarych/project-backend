@@ -14,7 +14,7 @@ export class ParseService {
     }
 
     //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
-    async parse() {          
+    async parse() {
         let actors = [];    //актеры
         let directors = []; //Режисеры
         let producers = []; //Проды
@@ -146,7 +146,7 @@ export class ParseService {
 
                 translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
 
-                
+
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
@@ -159,7 +159,7 @@ export class ParseService {
 
                 artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
 
-                
+
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
@@ -172,6 +172,40 @@ export class ParseService {
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 covers = await this.stealImgs(page, `${url}covers/`);
+                
+                /*    @Column({type: DataType.STRING, allowNull: false})
+    title: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    originalTitle: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    ageRate: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    description: string;
+
+    @Column({type: DataType.INTEGER, allowNull: false})
+    year: number;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    country: string;
+
+    @Column({type: DataType.STRING})
+    premierRussia: string;
+
+    @Column({type: DataType.STRING})
+    premier: string;
+
+    @Column({type: DataType.TEXT})
+    img: string;
+
+        @BelongsToMany(() => People, () => MoviePeople)
+    people: People[]
+
+    @BelongsToMany(() => Genres, () => MovieGenres)
+    genres: Genres[]
+    */
 
                 console.log("Постеры");
                 console.log(posters);
@@ -199,7 +233,7 @@ export class ParseService {
                 console.log(editors);
                 console.log("Художники");
                 console.log(artists);
-                
+
                 // Обнуляю массивы
                 covers.length = 0;
                 posters.length = 0;
