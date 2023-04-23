@@ -54,6 +54,8 @@ export class ParseService {
                 let operators = []; //Оперы
                 let writers = [];   //Писатели
                 let genres = [];
+                let isSeries = false;
+                let seasons: number = null;
 
                 // let posters = [];
                 let covers = [];
@@ -72,14 +74,16 @@ export class ParseService {
 
                 let titleEl = await page.$('.styles_title__65Zwx');
                 if (!titleEl) {
-                    titleEl = await page.$('.styles_title___itJ6');
+                    titleEl = await page.$('[data-tid="2da92aed"]');
                     const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
-                    movieDto.title = titleText;
+                    movieDto.title = titleText
+                    isSeries = true;
                 } else {
                     const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
                     const title = titleText.split(' ');
                     title.pop();
                     movieDto.title = title.join(' ');
+
                 }
 
                 // console.log(title[0]);
@@ -104,10 +108,21 @@ export class ParseService {
 
                     switch (title) {
                         case 'Год производства':
+                            if (isSeries) {
+                                const yearEl = await page.$('.styles_title___itJ6');
+                                const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
+                                let year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
+                                movieDto.year = year;
+                                const seasonsEl = await element.$('.styles_value__g6yP4');
+                                const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
+                                let season = seasonRaw.split('(')[1].replace(/\D/g, "");
+                                seasons = Number(season);
+                                break;
+                            }
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
                             movieDto.year = year;
-                            // console.log(year);
+                            //console.log(year);
                             break;
                         case 'Жанр':
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
@@ -295,7 +310,8 @@ export class ParseService {
 
     async test() {
 
-        const url = 'https://www.kinopoisk.ru/series/685246/';
+        const url2 = 'https://www.kinopoisk.ru/series/685246/';
+        const url = 'https://www.kinopoisk.ru/series/77044/';
 
         const browser = await puppeteer.launch({
             headless: false,
@@ -316,13 +332,14 @@ export class ParseService {
             premier: null,
             img: null
         }
-
+        let isSeries = false;
         let actors = [];    //актеры
         let directors = []; //Режисеры
         let producers = []; //Проды
         let operators = []; //Оперы
         let writers = [];   //Писатели
         let genres = [];
+        let seasons: number = null;
 
         // let posters = [];
         let covers = [];
@@ -344,12 +361,13 @@ export class ParseService {
             titleEl = await page.$('[data-tid="2da92aed"]');
             const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
             movieDto.title = titleText
+            isSeries = true;
         } else {
             const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
             const title = titleText.split(' ');
             title.pop();
             movieDto.title = title.join(' ');
-                       
+
         }
 
         const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
@@ -372,6 +390,17 @@ export class ParseService {
 
             switch (title) {
                 case 'Год производства':
+                    if (isSeries) {
+                        const yearEl = await page.$('.styles_title___itJ6');
+                        const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
+                        let year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
+                        movieDto.year = year;
+                        const seasonsEl = await element.$('.styles_value__g6yP4');
+                        const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
+                        let season = seasonRaw.split('(')[1].replace(/\D/g, "");
+                        seasons = Number(season);
+                        break;
+                    }
                     const yearEl = await element.$('.styles_value__g6yP4');
                     const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
                     movieDto.year = year;
@@ -475,6 +504,8 @@ export class ParseService {
 
         movieDto.img = covers[0];
         console.log(movieDto);
+        console.log(seasons);
+
 
 
         // const movie = await this.movieService.createMovie(movieDto);
