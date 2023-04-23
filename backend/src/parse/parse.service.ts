@@ -206,7 +206,7 @@ export class ParseService {
                 covers = await this.stealImgs(page, `${url}covers/`);
 
                 movieDto.img = covers[0];
-                
+
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
 
@@ -341,12 +341,16 @@ export class ParseService {
 
         let titleEl = await page.$('.styles_title__65Zwx');
         if (!titleEl) {
-            titleEl = await page.$('.styles_title___itJ6');
+            titleEl = await page.$('[data-tid="2da92aed"]');
+            const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+            movieDto.title = titleText
+        } else {
+            const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+            const title = titleText.split(' ');
+            title.pop();
+            movieDto.title = title.join(' ');
+                       
         }
-        const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
-        const title = titleText.split(' ');
-        movieDto.title = title[0];
-        // console.log(title[0]);
 
         const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
         if (originalTitleEl) {
@@ -371,7 +375,7 @@ export class ParseService {
                     const yearEl = await element.$('.styles_value__g6yP4');
                     const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
                     movieDto.year = year;
-                    // console.log(year);
+                    //console.log(year);
                     break;
                 case 'Жанр':
                     const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
@@ -412,26 +416,26 @@ export class ParseService {
 
         // console.log(description);
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // await new Promise(resolve => setTimeout(resolve, 1500));
 
-        actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
+        // actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // await new Promise(resolve => setTimeout(resolve, 1500));
 
-        directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
+        // directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // await new Promise(resolve => setTimeout(resolve, 1500));
 
 
-        producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
+        // producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // await new Promise(resolve => setTimeout(resolve, 1500));
 
-        writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
+        // writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // await new Promise(resolve => setTimeout(resolve, 1500));
 
-        operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
+        // operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
 
 
         // await new Promise(resolve => setTimeout(resolve, 1500));
@@ -473,14 +477,14 @@ export class ParseService {
         console.log(movieDto);
 
 
-        const movie = await this.movieService.createMovie(movieDto);
-        await this.genreService.createGenres(movie.id, genres);
+        // const movie = await this.movieService.createMovie(movieDto);
+        // await this.genreService.createGenres(movie.id, genres);
 
-        await this.peopleService.createPeoples(movie.id, directors, 'Режиссёр');
-        await this.peopleService.createPeoples(movie.id, actors, 'Актёр');
-        await this.peopleService.createPeoples(movie.id, producers, 'Продюсер');
-        await this.peopleService.createPeoples(movie.id, writers, 'Сценарист');
-        await this.peopleService.createPeoples(movie.id, operators, 'Оператор');
+        // await this.peopleService.createPeoples(movie.id, directors, 'Режиссёр');
+        // await this.peopleService.createPeoples(movie.id, actors, 'Актёр');
+        // await this.peopleService.createPeoples(movie.id, producers, 'Продюсер');
+        // await this.peopleService.createPeoples(movie.id, writers, 'Сценарист');
+        // await this.peopleService.createPeoples(movie.id, operators, 'Оператор');
 
         // console.log("Постеры");
         // console.log(posters);
@@ -509,6 +513,7 @@ export class ParseService {
         // console.log("Художники");
         // console.log(artists);
         await page.close();
+        await browser.close();
     }
     // закрываю страницу
 
