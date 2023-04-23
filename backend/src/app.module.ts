@@ -10,6 +10,8 @@ import { MoviePeople } from "./people/moviepeople.model";
 import { GenresModule } from './genres/genres.module';
 import { Genres } from "./genres/genres.model";
 import { MovieGenres } from "./genres/moviegenres.model";
+import { Images } from './imgs/imgs.model';
+import { ImagesModule } from './imgs/imgs.module';
 
 
 @Module({
@@ -26,13 +28,14 @@ import { MovieGenres } from "./genres/moviegenres.model";
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [Movie, People, MoviePeople, Genres, MovieGenres],
+      models: [Movie, People, MoviePeople, Genres, MovieGenres, Images],
       autoLoadModels: true
     }),
     ParseModule,
     MovieModule,
     PeopleModule,
-    GenresModule
+    GenresModule,
+    ImagesModule
   ]
 })
 export class AppModule { }

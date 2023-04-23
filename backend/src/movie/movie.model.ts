@@ -1,8 +1,9 @@
-import { BelongsToMany, Column, DataType, Model, Table } from "sequelize-typescript";
+import { BelongsToMany, Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
 import { People } from "../people/people.model";
 import { MoviePeople } from "../people/moviepeople.model";
 import { Genres } from "../genres/genres.model";
 import { MovieGenres } from "../genres/moviegenres.model";
+import { Images } from "src/imgs/imgs.model";
 
 @Table({ tableName: 'movies' })
 export class Movie extends Model<Movie> {
@@ -43,4 +44,7 @@ export class Movie extends Model<Movie> {
 
     @BelongsToMany(() => Genres, () => MovieGenres)
     genres: Genres[]
+
+    @HasMany(() => Images)
+    images: Images[]
 }

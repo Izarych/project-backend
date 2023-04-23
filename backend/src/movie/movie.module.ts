@@ -9,12 +9,13 @@ import { PeopleModule } from "../people/people.module";
 import { Genres } from "../genres/genres.model";
 import { MovieGenres } from "../genres/moviegenres.model";
 import { GenresModule } from "../genres/genres.module";
+import { Images } from 'src/imgs/imgs.model';
 
 @Module({
   controllers: [MovieController],
   providers: [MovieService],
   imports: [
-    SequelizeModule.forFeature([Movie, People, MoviePeople, Genres, MovieGenres]),
+    SequelizeModule.forFeature([Movie, People, MoviePeople, Genres, MovieGenres, Images]),
     PeopleModule,
     GenresModule
   ],

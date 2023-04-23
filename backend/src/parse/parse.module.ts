@@ -5,6 +5,7 @@ import { Axios } from "axios";
 import { MovieModule } from "../movie/movie.module";
 import { PeopleModule } from "../people/people.module";
 import { GenresModule } from "../genres/genres.module";
+import { ImagesModule } from 'src/imgs/imgs.module';
 
 
 @Module({
@@ -13,7 +14,8 @@ import { GenresModule } from "../genres/genres.module";
   imports: [
     MovieModule,
     PeopleModule,
-    GenresModule
+    GenresModule,
+    ImagesModule
   ],
   exports: [
     ParseService,

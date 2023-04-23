@@ -10,9 +10,4 @@ export class ParseController {
     parseFilms() {
         return this.parseService.parse();
     }
-
-    @Get('/test')
-    testParse(){
-        return this.parseService.test();
-    }
 }
