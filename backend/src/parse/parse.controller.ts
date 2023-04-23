@@ -1,5 +1,5 @@
-import {Controller, Get} from '@nestjs/common';
-import {ParseService} from "./parse.service";
+import { Controller, Get } from '@nestjs/common';
+import { ParseService } from "./parse.service";
 
 @Controller('parse')
 export class ParseController {
