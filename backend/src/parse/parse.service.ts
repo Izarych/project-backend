@@ -69,10 +69,19 @@ export class ParseService {
                 });
 
 
-                const titleEl = await page.$('.styles_title__65Zwx');
-                const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
-                const title = titleText.split(' ');
-                movieDto.title = title[0];
+
+                let titleEl = await page.$('.styles_title__65Zwx');
+                if (!titleEl) {
+                    titleEl = await page.$('.styles_title___itJ6');
+                    const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+                    movieDto.title = titleText;
+                } else {
+                    const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+                    const title = titleText.split(' ');
+                    title.pop();
+                    movieDto.title = title.join(' ');
+                }
+
                 // console.log(title[0]);
 
                 const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
@@ -97,7 +106,7 @@ export class ParseService {
                         case 'Год производства':
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
-                            movieDto.year = Number(year);
+                            movieDto.year = year;
                             // console.log(year);
                             break;
                         case 'Жанр':
@@ -197,7 +206,7 @@ export class ParseService {
                 covers = await this.stealImgs(page, `${url}covers/`);
 
                 movieDto.img = covers[0];
-
+                
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
 
@@ -245,6 +254,8 @@ export class ParseService {
     private async stealNamesOfCreators(page, url) {
         const array = [];
 
+        url = url.replace('series', "film");
+
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
         });
@@ -266,6 +277,8 @@ export class ParseService {
     private async stealImgs(page, url) {
         const array = [];
 
+        url = url.replace('series', "film");
+
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
         });
@@ -279,6 +292,231 @@ export class ParseService {
         }
         return array;
     }
+
+    async test() {
+
+        const url = 'https://www.kinopoisk.ru/series/685246/';
+
+        const browser = await puppeteer.launch({
+            headless: false,
+            defaultViewport: null,
+        });
+
+        let page = await browser.newPage();
+
+
+        let movieDto = {
+            title: null,
+            originalTitle: null,
+            ageRate: null,
+            description: null,
+            year: null,
+            country: null,
+            premierRussia: null,
+            premier: null,
+            img: null
+        }
+
+        let actors = [];    //актеры
+        let directors = []; //Режисеры
+        let producers = []; //Проды
+        let operators = []; //Оперы
+        let writers = [];   //Писатели
+        let genres = [];
+
+        // let posters = [];
+        let covers = [];
+        // let translators = [];   //переводчик
+        // let dubbingActors = []; //дубляж
+        // let dubbingDirectors = [];  //реж дубля
+        // let composers = [];     //композиторы
+        // let editors = [];       //монтажеры
+        // let artists = [];       //художники
+
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+
+
+        let titleEl = await page.$('.styles_title__65Zwx');
+        if (!titleEl) {
+            titleEl = await page.$('.styles_title___itJ6');
+        }
+        const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+        const title = titleText.split(' ');
+        movieDto.title = title[0];
+        // console.log(title[0]);
+
+        const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
+        if (originalTitleEl) {
+            movieDto.originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
+            // console.log(originalTitle);
+        }
+
+
+        const ageRateEl = await page.$('.styles_ageRate__340KC');
+        movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+        // console.log(ageRate);
+
+        const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
+        for (const element of elements) {
+            const titleEl = await element.$('.styles_title__b1HVo');
+            const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            switch (title) {
+                case 'Год производства':
+                    const yearEl = await element.$('.styles_value__g6yP4');
+                    const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
+                    movieDto.year = year;
+                    // console.log(year);
+                    break;
+                case 'Жанр':
+                    const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
+                    const genre = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
+                    genres = genre.split(',');
+                    for (let index = 0; index < genres.length; index++) {
+                        if (genres[index][0] == " ") {
+                            genres[index] = genres[index].slice(1);
+                        }
+
+                    }
+                    //console.log(genres);
+                    break;
+                case 'Страна':
+                    const countryEl = await element.$('.styles_value__g6yP4');
+                    const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
+                    movieDto.country = country;
+                    // console.log(country.split(','));
+                    break;
+                case 'Премьера в России':
+                    const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
+                    const premierRussia = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
+                    movieDto.premierRussia = premierRussia;
+                    // console.log(premierRussia);
+                    break;
+                case 'Премьера в мире':
+                    const premierEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
+                    const premier = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
+                    movieDto.premier = premier;
+                    // console.log(premier);
+                    break;
+            }
+
+
+        }
+        const descriptionEl = await page.$('.styles_paragraph__wEGPz');
+        movieDto.description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
+
+        // console.log(description);
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+
+        producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
+
+
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
+        //
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
+        //
+        //
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
+        //
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
+        //
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
+
+
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
+
+        // await new Promise(resolve => setTimeout(resolve, 1500));
+        //
+        // posters = await this.stealImgs(page, `${url}posters/`);
+
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        covers = await this.stealImgs(page, `${url}covers/`);
+
+        movieDto.img = covers[0];
+        console.log(movieDto);
+
+
+        const movie = await this.movieService.createMovie(movieDto);
+        await this.genreService.createGenres(movie.id, genres);
+
+        await this.peopleService.createPeoples(movie.id, directors, 'Режиссёр');
+        await this.peopleService.createPeoples(movie.id, actors, 'Актёр');
+        await this.peopleService.createPeoples(movie.id, producers, 'Продюсер');
+        await this.peopleService.createPeoples(movie.id, writers, 'Сценарист');
+        await this.peopleService.createPeoples(movie.id, operators, 'Оператор');
+
+        // console.log("Постеры");
+        // console.log(posters);
+        // console.log("Коверсы");
+        // console.log(covers);
+        // console.log("Операторы");
+        // console.log(operators);
+        // console.log("Врайтеры");
+        // console.log(writers);
+        // console.log("Продюсеры");
+        // console.log(producers);
+        // console.log("Актеры");
+        // console.log(actors);
+        // console.log("Режисеры");
+        // console.log(directors);
+        // console.log("Пердевочики");
+        // console.log(translators);
+        // console.log("Актепы дуплежа");
+        // console.log(dubbingActors);
+        // console.log("Режисеры дуплежа");
+        // console.log(dubbingDirectors);
+        // console.log("Композиторы");
+        // console.log(composers);
+        // console.log("Монтожеры");
+        // console.log(editors);
+        // console.log("Художники");
+        // console.log(artists);
+        await page.close();
+    }
+    // закрываю страницу
+
+
+
+
+
+
 
 }
 

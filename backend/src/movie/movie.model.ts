@@ -21,7 +21,7 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.TEXT, allowNull: false })
     description: string;
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: false })
     year: number;
 
     @Column({ type: DataType.STRING, allowNull: false })
