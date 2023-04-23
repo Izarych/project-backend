@@ -12,13 +12,13 @@ export class Movie extends Model<Movie> {
     @Column({type: DataType.STRING, allowNull: false})
     title: string;
 
-    @Column({type: DataType.STRING, allowNull: false})
+    @Column({type: DataType.STRING, allowNull: true})
     originalTitle: string;
 
     @Column({type: DataType.STRING, allowNull: false})
     ageRate: string;
 
-    @Column({type: DataType.STRING, allowNull: false})
+    @Column({type: DataType.TEXT, allowNull: false})
     description: string;
 
     @Column({type: DataType.INTEGER, allowNull: false})
