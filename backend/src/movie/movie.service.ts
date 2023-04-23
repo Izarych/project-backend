@@ -28,18 +28,3 @@ export class MovieService {
         return this.movieRepository.findByPk(id, { include: { all: true } });
     }
 }
-/*    async createPeoples(movie_id: number, peopleArr: string[], profession: string) {
-        const movie = await this.movieRepository.findByPk(movie_id);
-        for (const element of peopleArr) {
-            const [people] = await this.peopleRepository.findOrCreate(
-                {
-                    where: {
-                        fullName: element,
-                        profession: profession
-                    }
-                })
-            const currentPeople = await movie.$get('people');
-            const updatedPeople = currentPeople.concat(people);
-            await movie.$set('people', updatedPeople);
-        }
-    }*/

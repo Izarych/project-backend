@@ -14,35 +14,7 @@ export class ParseService {
 
     //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
     async parse() {
-        let movieDto = {
-            title: null,
-            originalTitle: null,
-            ageRate: null,
-            description: null,
-            year: null,
-            country: null,
-            premierRussia: null,
-            premier: null,
-            img: null
-        }
-
-        let actors = [];    //актеры
-        let directors = []; //Режисеры
-        let producers = []; //Проды
-        let operators = []; //Оперы
-        let writers = [];   //Писатели
-        let genres = [];
         const urls = [];
-        // let posters = [];
-        let covers = [];
-        // let translators = [];   //переводчик
-        // let dubbingActors = []; //дубляж
-        // let dubbingDirectors = [];  //реж дубля
-        // let composers = [];     //композиторы
-        // let editors = [];       //монтажеры
-        // let artists = [];       //художники
-
-
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
@@ -64,6 +36,34 @@ export class ParseService {
             }
             // по каждой ссылке все тяну с фильма
             for (const url of urls) {
+                let movieDto = {
+                    title: null,
+                    originalTitle: null,
+                    ageRate: null,
+                    description: null,
+                    year: null,
+                    country: null,
+                    premierRussia: null,
+                    premier: null,
+                    img: null
+                }
+
+                let actors = [];    //актеры
+                let directors = []; //Режисеры
+                let producers = []; //Проды
+                let operators = []; //Оперы
+                let writers = [];   //Писатели
+                let genres = [];
+
+                // let posters = [];
+                let covers = [];
+                // let translators = [];   //переводчик
+                // let dubbingActors = []; //дубляж
+                // let dubbingDirectors = [];  //реж дубля
+                // let composers = [];     //композиторы
+                // let editors = [];       //монтажеры
+                // let artists = [];       //художники
+
                 await page.goto(url, {
                     waitUntil: 'domcontentloaded',
                 });
@@ -105,10 +105,10 @@ export class ParseService {
                             const genre = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
                             genres = genre.split(',');
                             for (let index = 0; index < genres.length; index++) {
-                                if(genres[index][0] == " "){
+                                if (genres[index][0] == " ") {
                                     genres[index] = genres[index].slice(1);
                                 }
-                                
+
                             }
                             //console.log(genres);
                             break;
@@ -233,22 +233,6 @@ export class ParseService {
                 // console.log(editors);
                 // console.log("Художники");
                 // console.log(artists);
-
-                // Обнуляю массивы
-                covers.length = 0;
-                // posters.length = 0;
-                operators.length = 0;
-                writers.length = 0;
-                genres.length = 0;
-                producers.length = 0;
-                actors.length = 0;
-                directors.length = 0;
-                // translators.length = 0;
-                // dubbingActors.length = 0;
-                // dubbingDirectors.length = 0;
-                // composers.length = 0;
-                // editors.length = 0;
-                // artists.length = 0;
             }
             urls.length = 0;
 
