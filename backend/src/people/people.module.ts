@@ -4,7 +4,6 @@ import { SequelizeModule } from "@nestjs/sequelize";
 import { Movie } from "../movie/movie.model";
 import { People } from "./people.model";
 import { MoviePeople } from "./moviepeople.model";
-import { MovieModule } from "../movie/movie.module";
 
 @Module({
   providers: [PeopleService],

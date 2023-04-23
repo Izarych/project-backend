@@ -10,7 +10,6 @@ export class Images extends Model<Images> {
     @Column({ type: DataType.TEXT, unique: true })
     image: string;
 
-
     @ForeignKey(() => Movie)
     @Column({type: DataType.INTEGER})
     movieId: number;

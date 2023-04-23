@@ -50,6 +50,8 @@ export class ParseService {
                     seasons: null
                 }
 
+
+
                 let actors = [];    //актеры
                 let directors = []; //Режисеры
                 let producers = []; //Проды
@@ -57,9 +59,9 @@ export class ParseService {
                 let writers = [];   //Писатели
                 let genres = [];
                 let isSeries = false;
-
                 let posters = [];
                 let covers = [];
+
                 // let translators = [];   //переводчик
                 // let dubbingActors = []; //дубляж
                 // let dubbingDirectors = [];  //реж дубля
@@ -168,24 +170,24 @@ export class ParseService {
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                actors = await this.stealNamesOfCreators(page, `${url}cast/who_is/actor/`)
+                actors = await this.stealCreators(page, `${url}cast/who_is/actor/`, 'Актёр')
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                directors = await this.stealNamesOfCreators(page, `${url}cast/who_is/director/`);
+                directors = await this.stealCreators(page, `${url}cast/who_is/director/`, 'Режиссёр');
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
 
-                producers = await this.stealNamesOfCreators(page, `${url}cast/who_is/producer/`);
+                producers = await this.stealCreators(page, `${url}cast/who_is/producer/`, 'Продюсер');
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                writers = await this.stealNamesOfCreators(page, `${url}cast/who_is/writer/`);
+                writers = await this.stealCreators(page, `${url}cast/who_is/writer/`, 'Сценарист');
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
+                operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
 
 
                 // await new Promise(resolve => setTimeout(resolve, 1500));
@@ -216,12 +218,12 @@ export class ParseService {
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                posters = await this.stealImgs(page, `${url}posters/`);
+                posters = await this.stealFilmImgs(page, `${url}posters/`);
 
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                covers = await this.stealImgs(page, `${url}covers/`);
+                covers = await this.stealFilmImgs(page, `${url}covers/`);
 
                 posters.push(...covers);
 
@@ -229,50 +231,22 @@ export class ParseService {
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
 
-                await this.peopleService.createPeoples(movie.id, directors, 'Режиссёр');
-                await this.peopleService.createPeoples(movie.id, actors, 'Актёр');
-                await this.peopleService.createPeoples(movie.id, producers, 'Продюсер');
-                await this.peopleService.createPeoples(movie.id, writers, 'Сценарист');
-                await this.peopleService.createPeoples(movie.id, operators, 'Оператор');
+                await this.peopleService.createPeoples(movie.id, directors);
+                await this.peopleService.createPeoples(movie.id, actors);
+                await this.peopleService.createPeoples(movie.id, producers);
+                await this.peopleService.createPeoples(movie.id, writers);
+                await this.peopleService.createPeoples(movie.id, operators);
                 await this.imagesService.createImages(movie.id, posters);
-
-                // console.log("Постеры");
-                // console.log(posters);
-                // console.log("Коверсы");
-                // console.log(covers);
-                // console.log("Операторы");
-                // console.log(operators);
-                // console.log("Врайтеры");
-                // console.log(writers);
-                // console.log("Продюсеры");
-                // console.log(producers);
-                // console.log("Актеры");
-                // console.log(actors);
-                // console.log("Режисеры");
-                // console.log(directors);
-                // console.log("Пердевочики");
-                // console.log(translators);
-                // console.log("Актепы дуплежа");
-                // console.log(dubbingActors);
-                // console.log("Режисеры дуплежа");
-                // console.log(dubbingDirectors);
-                // console.log("Композиторы");
-                // console.log(composers);
-                // console.log("Монтожеры");
-                // console.log(editors);
-                // console.log("Художники");
-                // console.log(artists);
             }
             urls.length = 0;
-
-            // закрываю страницу
             await page.close();
 
         }
     }
 
-    private async stealNamesOfCreators(page, url) {
+    private async stealCreators(page, url, profession: string) {
         const array = [];
+
 
         url = url.replace('series', "film");
 
@@ -280,21 +254,49 @@ export class ParseService {
             waitUntil: 'domcontentloaded',
         });
 
-        const itemsEl = await page.$$('.dub .info .name');
+        const itemsEl = await page.$$('.dub .actorInfo');
 
         if (!itemsEl) {
             return [];
         }
 
         for (const items of itemsEl) {
-            const nameEl = await items.$('a')
+            let humanDto = {
+                fullName: null,
+                fullNameOrig: null,
+                profession: null,
+                photo: null
+            }
+            const nameEl = await items.$('.info .name a')
             const name = await page.evaluate((el: HTMLElement) => el.innerText.trim(), nameEl);
-            array.push(name);
+            const origNameEl = await items.$('.info .name span');
+            const origNameRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), origNameEl);
+            const picEl = await items.$('.photo a')
+            let picLink = await picEl.evaluate(el => el.getAttribute('href'));
+            picLink = 'https://www.kinopoisk.ru/' + picLink;
+
+
+            if (origNameRaw != " ") {
+                let origName = origNameRaw.split("(")[0];
+                if (origName[origName.length - 1] == " ") {
+                    origName = origName.slice(0, (origName.length - 1));
+                }
+                humanDto.fullNameOrig = origName;
+            }
+            humanDto.fullName = name;
+            humanDto.profession = profession;
+
+            // await new Promise(resolve => setTimeout(resolve, 1500));
+            // humanDto.photo = await this.stealPplImg(picLink);
+            
+            array.push(humanDto);
+
+
         }
         return array;
     }
 
-    private async stealImgs(page, url) {
+    private async stealFilmImgs(page, url) {
         const array = [];
 
         url = url.replace('series', "film");
@@ -312,6 +314,34 @@ export class ParseService {
         }
         return array;
     }
+
+    // private async stealPplImg(url) {
+    //     const browser = await puppeteer.launch({
+    //         headless: false,
+    //         defaultViewport: null,
+    //     });
+    //     let page = await browser.newPage();
+
+    //     await page.goto(url, {
+    //         waitUntil: 'domcontentloaded'
+    //     });
+    //     let link;
+
+    //     await page.goto(url, {
+    //         waitUntil: 'domcontentloaded',
+    //     });
+
+    //     const imgEl = await page.$$('.styles_photoWrapper__zJrQf');
+    //     for (const img of imgEl) {
+    //         const cutLinkEl = await img.$('.styles_image__lSxoD')
+    //         link = await cutLinkEl.evaluate(el => el.getAttribute('src'));
+
+    //     }
+    //     await browser.close();
+    //     return link;
+    // }
+
+
 }
 
     // Надо вытянуть всю подобную инфу типо страна, слоган и т д

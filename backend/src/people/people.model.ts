@@ -11,8 +11,14 @@ export class People extends Model<People> {
     @Column({ type: DataType.STRING, allowNull: false })
     fullName: string;
 
+    @Column({ type: DataType.STRING })
+    fullNameOrig: string;
+
     @Column({ type: DataType.STRING, allowNull: false })
     profession: string;
+
+    @Column({ type: DataType.TEXT })
+    photo: string;
 
     @BelongsToMany(() => Movie, () => MoviePeople)
     movies: Movie[]
