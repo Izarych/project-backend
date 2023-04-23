@@ -1,8 +1,8 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {MovieService} from "../movie/movie.service";
-import {GenresService} from "../genres/genres.service";
-import {PeopleService} from "../people/people.service";
+import { MovieService } from "../movie/movie.service";
+import { GenresService } from "../genres/genres.service";
+import { PeopleService } from "../people/people.service";
 
 
 @Injectable()
