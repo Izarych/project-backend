@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { MovieService } from "../movie/movie.service";
-import { GenresService } from "../genres/genres.service";
-import { PeopleService } from "../people/people.service";
-
+import {MovieService} from "../movie/movie.service";
+import {GenresService} from "../genres/genres.service";
+import {PeopleService} from "../people/people.service";
 
 
 @Injectable()
@@ -15,20 +14,33 @@ export class ParseService {
 
     //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
     async parse() {
+        let movieDto = {
+            title: null,
+            originalTitle: null,
+            ageRate: null,
+            description: null,
+            year: null,
+            country: null,
+            premierRussia: null,
+            premier: null,
+            img: null
+        }
+
         let actors = [];    //актеры
         let directors = []; //Режисеры
         let producers = []; //Проды
         let operators = []; //Оперы
         let writers = [];   //Писатели
+        let genres = [];
         const urls = [];
-        let posters = [];
+        // let posters = [];
         let covers = [];
-        let translators = [];   //переводчик
-        let dubbingActors = []; //дубляж
-        let dubbingDirectors = [];  //реж дубля
-        let composers = [];     //композиторы
-        let editors = [];       //монтажеры
-        let artists = [];       //художники
+        // let translators = [];   //переводчик
+        // let dubbingActors = []; //дубляж
+        // let dubbingDirectors = [];  //реж дубля
+        // let composers = [];     //композиторы
+        // let editors = [];       //монтажеры
+        // let artists = [];       //художники
 
 
         const browser = await puppeteer.launch({
@@ -60,18 +72,19 @@ export class ParseService {
                 const titleEl = await page.$('.styles_title__65Zwx');
                 const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
                 const title = titleText.split(' ');
-                console.log(title[0]);
+                movieDto.title = title[0];
+                // console.log(title[0]);
 
                 const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
                 if (originalTitleEl) {
-                    const originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
-                    console.log(originalTitle);
+                    movieDto.originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
+                    // console.log(originalTitle);
                 }
 
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
-                const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
-                console.log(ageRate);
+                movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                // console.log(ageRate);
 
                 const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
                 for (const element of elements) {
@@ -84,37 +97,41 @@ export class ParseService {
                         case 'Год производства':
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
-                            console.log(year);
+                            movieDto.year = Number(year);
+                            // console.log(year);
                             break;
                         case 'Жанр':
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
                             const genre = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
-                            const genres = genre.split(',');
-                            console.log(genres);
+                            genres = genre.split(',');
+                            // console.log(genres);
                             break;
                         case 'Страна':
                             const countryEl = await element.$('.styles_value__g6yP4');
                             const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
-                            console.log(country.split(','));
+                            movieDto.country = country;
+                            // console.log(country.split(','));
                             break;
                         case 'Премьера в России':
                             const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
                             const premierRussia = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
-                            console.log(premierRussia);
+                            movieDto.premierRussia = premierRussia;
+                            // console.log(premierRussia);
                             break;
                         case 'Премьера в мире':
                             const premierEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
                             const premier = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
-                            console.log(premier);
+                            movieDto.premier = premier;
+                            // console.log(premier);
                             break;
                     }
 
 
                 }
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
-                const description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
+                movieDto.description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
 
-                console.log(description);
+                // console.log(description);
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -138,116 +155,94 @@ export class ParseService {
                 operators = await this.stealNamesOfCreators(page, `${url}cast/who_is/operator/`);
 
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
+                //
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
+                //
+                //
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
+                //
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
+                //
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
 
-                dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
 
-                translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
-
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
-
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                posters = await this.stealImgs(page, `${url}posters/`);
+                // await new Promise(resolve => setTimeout(resolve, 1500));
+                //
+                // posters = await this.stealImgs(page, `${url}posters/`);
 
 
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 covers = await this.stealImgs(page, `${url}covers/`);
-                
-                /*    @Column({type: DataType.STRING, allowNull: false})
-    title: string;
 
-    @Column({type: DataType.STRING, allowNull: false})
-    originalTitle: string;
+                movieDto.img = covers[0];
 
-    @Column({type: DataType.STRING, allowNull: false})
-    ageRate: string;
+                const movie = await this.movieService.createMovie(movieDto);
+                await this.genreService.createGenres(movie.id, genres);
 
-    @Column({type: DataType.STRING, allowNull: false})
-    description: string;
+                await this.peopleService.createPeoples(movie.id, directors, 'Режиссёр');
+                await this.peopleService.createPeoples(movie.id, actors, 'Актёр');
+                await this.peopleService.createPeoples(movie.id, producers, 'Продюсер');
+                await this.peopleService.createPeoples(movie.id, writers, 'Сценарист');
+                await this.peopleService.createPeoples(movie.id, operators, 'Оператор');
 
-    @Column({type: DataType.INTEGER, allowNull: false})
-    year: number;
-
-    @Column({type: DataType.STRING, allowNull: false})
-    country: string;
-
-    @Column({type: DataType.STRING})
-    premierRussia: string;
-
-    @Column({type: DataType.STRING})
-    premier: string;
-
-    @Column({type: DataType.TEXT})
-    img: string;
-
-        @BelongsToMany(() => People, () => MoviePeople)
-    people: People[]
-
-    @BelongsToMany(() => Genres, () => MovieGenres)
-    genres: Genres[]
-    */
-
-                console.log("Постеры");
-                console.log(posters);
-                console.log("Коверсы");
-                console.log(covers);
-                console.log("Операторы");
-                console.log(operators);
-                console.log("Врайтеры");
-                console.log(writers);
-                console.log("Продюсеры");
-                console.log(producers);
-                console.log("Актеры");
-                console.log(actors);
-                console.log("Режисеры");
-                console.log(directors);
-                console.log("Пердевочики");
-                console.log(translators);
-                console.log("Актепы дуплежа");
-                console.log(dubbingActors);
-                console.log("Режисеры дуплежа");
-                console.log(dubbingDirectors);
-                console.log("Композиторы");
-                console.log(composers);
-                console.log("Монтожеры");
-                console.log(editors);
-                console.log("Художники");
-                console.log(artists);
+                // console.log("Постеры");
+                // console.log(posters);
+                // console.log("Коверсы");
+                // console.log(covers);
+                // console.log("Операторы");
+                // console.log(operators);
+                // console.log("Врайтеры");
+                // console.log(writers);
+                // console.log("Продюсеры");
+                // console.log(producers);
+                // console.log("Актеры");
+                // console.log(actors);
+                // console.log("Режисеры");
+                // console.log(directors);
+                // console.log("Пердевочики");
+                // console.log(translators);
+                // console.log("Актепы дуплежа");
+                // console.log(dubbingActors);
+                // console.log("Режисеры дуплежа");
+                // console.log(dubbingDirectors);
+                // console.log("Композиторы");
+                // console.log(composers);
+                // console.log("Монтожеры");
+                // console.log(editors);
+                // console.log("Художники");
+                // console.log(artists);
 
                 // Обнуляю массивы
                 covers.length = 0;
-                posters.length = 0;
+                // posters.length = 0;
                 operators.length = 0;
                 writers.length = 0;
+                genres.length = 0;
                 producers.length = 0;
                 actors.length = 0;
                 directors.length = 0;
-                translators.length = 0;
-                dubbingActors.length = 0;
-                dubbingDirectors.length = 0;
-                composers.length = 0;
-                editors.length = 0;
-                artists.length = 0;
+                // translators.length = 0;
+                // dubbingActors.length = 0;
+                // dubbingDirectors.length = 0;
+                // composers.length = 0;
+                // editors.length = 0;
+                // artists.length = 0;
             }
             urls.length = 0;
 
