@@ -104,7 +104,13 @@ export class ParseService {
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
                             const genre = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
                             genres = genre.split(',');
-                            // console.log(genres);
+                            for (let index = 0; index < genres.length; index++) {
+                                if(genres[index][0] == " "){
+                                    genres[index] = genres[index].slice(1);
+                                }
+                                
+                            }
+                            //console.log(genres);
                             break;
                         case 'Страна':
                             const countryEl = await element.$('.styles_value__g6yP4');
