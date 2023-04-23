@@ -7,5 +7,5 @@ export class CreateMovieDto {
     readonly country: string;
     readonly premierRussia: string;
     readonly premier: string;
-    readonly img: string;
+    readonly seasons: string;
 }

@@ -45,7 +45,7 @@ export class ParseService {
                     country: null,
                     premierRussia: null,
                     premier: null,
-                    img: null
+                    seasons: null
                 }
 
                 let actors = [];    //актеры
@@ -55,7 +55,6 @@ export class ParseService {
                 let writers = [];   //Писатели
                 let genres = [];
                 let isSeries = false;
-                let seasons: number = null;
 
                 // let posters = [];
                 let covers = [];
@@ -99,12 +98,14 @@ export class ParseService {
                 movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
                 // console.log(ageRate);
 
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
                 for (const element of elements) {
                     const titleEl = await element.$('.styles_title__b1HVo');
                     const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
 
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
 
                     switch (title) {
                         case 'Год производства':
@@ -116,7 +117,7 @@ export class ParseService {
                                 const seasonsEl = await element.$('.styles_value__g6yP4');
                                 const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
                                 let season = seasonRaw.split('(')[1].replace(/\D/g, "");
-                                seasons = Number(season);
+                                movieDto.seasons = season;
                                 break;
                             }
                             const yearEl = await element.$('.styles_value__g6yP4');
@@ -220,7 +221,7 @@ export class ParseService {
 
                 covers = await this.stealImgs(page, `${url}covers/`);
 
-                movieDto.img = covers[0];
+                
 
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
@@ -330,7 +331,7 @@ export class ParseService {
             country: null,
             premierRussia: null,
             premier: null,
-            img: null
+            seasons: null
         }
         let isSeries = false;
         let actors = [];    //актеры
@@ -339,7 +340,6 @@ export class ParseService {
         let operators = []; //Оперы
         let writers = [];   //Писатели
         let genres = [];
-        let seasons: number = null;
 
         // let posters = [];
         let covers = [];
@@ -398,7 +398,7 @@ export class ParseService {
                         const seasonsEl = await element.$('.styles_value__g6yP4');
                         const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
                         let season = seasonRaw.split('(')[1].replace(/\D/g, "");
-                        seasons = Number(season);
+                        movieDto.seasons = season;
                         break;
                     }
                     const yearEl = await element.$('.styles_value__g6yP4');
@@ -502,9 +502,8 @@ export class ParseService {
 
         covers = await this.stealImgs(page, `${url}covers/`);
 
-        movieDto.img = covers[0];
+        
         console.log(movieDto);
-        console.log(seasons);
 
 
 

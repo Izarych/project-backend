@@ -33,8 +33,8 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.STRING })
     premier: string;
 
-    @Column({ type: DataType.TEXT })
-    img: string;
+    @Column({ type: DataType.STRING })
+    seasons: string;
 
     //Награды?
 
