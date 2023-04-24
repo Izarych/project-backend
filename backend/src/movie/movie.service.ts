@@ -87,19 +87,26 @@ export class MovieService {
         throw new NotFoundException('Фильм не найден')
     }
 
-    async test() {
-        const movie = await this.movieRepository.findAll({
+    async getMovieByAgeRate(ageRate: number) {
+        const movies = await this.movieRepository.findAll({
             where: {
-                //id: [1,2,3]     in []
+                ageRate: { [Op.lte]: ageRate }
+            },
+            include: [
+                {
+                    model: Genres,
+                    attributes: ['id', 'genre'],
+                    through: { attributes: [] }
+                },
+                {
+                    model: People,
+                    attributes: ['id', 'fullName', 'profession'],
+                    through: { attributes: [] }
+                }
+            ]
+        });
+        return movies;
 
-                // seasons: null,   AND
-                // id: 1 
-
-                //title: {[Op.like]: '%Брат%'}
-                seasons: {[Op.gte]: 1}
-            }
-        })
-        return movie;
     }
 }
 

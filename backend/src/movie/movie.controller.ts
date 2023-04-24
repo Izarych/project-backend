@@ -10,13 +10,13 @@ export class MovieController {
     async getMovies() {
         return this.movieService.getAllMovies();
     }
-    
-    @Get('test')
-    async test(){
-        return this.movieService.test();
+
+    @Get('/rate/:ageRate')
+    async getMovieByAgeRate(@Param('ageRate') ageRate: number) {
+        return this.movieService.getMovieByAgeRate(ageRate);
     }
 
-    @Get(':id')
+    @Get('/:id')
     async getMovie(@Param('id') id: number) {
         return this.movieService.getMovie(id);
     }
