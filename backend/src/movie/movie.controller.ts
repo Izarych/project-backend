@@ -15,4 +15,19 @@ export class MovieController {
     async getMovie(@Param('id') id: number) {
         return this.movieService.getMovie(id);
     }
+
+    @Get('/:id/people')
+    async getMoviePeople(@Param('id') film_id: number) {
+        return this.movieService.getMoviePeople(film_id);
+    }
+
+    @Get('/:id/genres')
+    async getMovieGenres(@Param('id') film_id: number) {
+        return this.movieService.getMovieGenres(film_id);
+    }
+
+    @Get('/:id/images')
+    async getMovieImages(@Param('id') film_id: number) {
+        return this.movieService.getMovieImages(film_id);
+    }
 }
