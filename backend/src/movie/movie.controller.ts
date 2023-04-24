@@ -10,6 +10,11 @@ export class MovieController {
     async getMovies() {
         return this.movieService.getAllMovies();
     }
+    
+    @Get('test')
+    async test(){
+        return this.movieService.test();
+    }
 
     @Get(':id')
     async getMovie(@Param('id') id: number) {
@@ -30,4 +35,6 @@ export class MovieController {
     async getMovieImages(@Param('id') film_id: number) {
         return this.movieService.getMovieImages(film_id);
     }
+
+
 }

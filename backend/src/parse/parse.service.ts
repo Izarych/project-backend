@@ -43,7 +43,8 @@ export class ParseService {
                     originalTitle: null,
                     ageRate: null,
                     description: null,
-                    year: null,
+                    yearSince: null,
+                    yearTill: null,
                     country: null,
                     premierRussia: null,
                     premier: null,
@@ -95,7 +96,8 @@ export class ParseService {
 
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
-                movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                movieDto.ageRate = parseInt(ageRate);
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -103,23 +105,29 @@ export class ParseService {
                 for (const element of elements) {
                     const titleEl = await element.$('.styles_title__b1HVo');
                     const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
-
-
-
                     switch (title) {
                         case 'Год производства':
                             if (isSeries) {
                                 const yearEl = await page.$('.styles_title___itJ6');
                                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
-                                movieDto.year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
+                                let years = yearRaw.split("сериал")[1].match(/\d{4}/g);
+                                movieDto.yearSince = years[0];
+
+                                if (years[1]) {
+                                    movieDto.yearTill = years[1];
+                                } else {
+                                    movieDto.yearTill = new Date().getFullYear();
+                                }
+
                                 const seasonsEl = await element.$('.styles_value__g6yP4');
                                 const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
-                                movieDto.seasons = seasonRaw.split('(')[1].replace(/\D/g, "");
+                                movieDto.seasons = Number(seasonRaw.split('(')[1].replace(/\D/g, ""));
                                 break;
                             }
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
-                            movieDto.year = year;
+                            movieDto.yearSince = Number(year);
+                            movieDto.yearTill = Number(year);
                             break;
                         case 'Жанр':
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
@@ -157,7 +165,8 @@ export class ParseService {
                 const rateEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .film-rating-value')
 
                 if (rateEl) {
-                    movieDto.rate = await page.evaluate((el: HTMLElement) => el.innerText, rateEl);
+                    const rate = await page.evaluate((el: HTMLElement) => el.innerText, rateEl)
+                    movieDto.rate = Number(rate);
                 }
 
                 const rateQuantityEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .styles_countBlock__jxRDI')
@@ -166,7 +175,8 @@ export class ParseService {
                     const rateQuantityRaw = await page.evaluate((el: HTMLElement) => el.innerText, rateQuantityEl);
                     let rateQuantity = rateQuantityRaw.split(' ');
                     rateQuantity.pop();
-                    movieDto.rateQuantity = rateQuantity.join('');
+                    let rateQuantityCorrect = rateQuantity.join('')
+                    movieDto.rateQuantity = Number(rateQuantityCorrect);
                 }
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
@@ -357,4 +367,44 @@ export class ParseService {
         }
         return newArr;
     }
+
+    // async test() {
+    //     const browser = await puppeteer.launch({
+    //         headless: false,
+    //         defaultViewport: null,
+    //     });
+
+    //     let pageUrl = `https://www.kinopoisk.ru/series/464963/`
+    //     let page = await browser.newPage();
+    //     await page.goto(pageUrl, {
+    //         waitUntil: 'domcontentloaded'
+    //     });
+
+    //     const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
+    //     for (const element of elements) {
+    //         const titleEl = await element.$('.styles_title__b1HVo');
+    //         const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
+    //         switch (title) {
+    //             case 'Год производства':
+    //                 const yearEl = await page.$('.styles_title___itJ6');
+    //                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
+    //                 let tmp = yearRaw.split("сериал")[1].match(/\d{4}/g);
+    //                 let tmp1 = tmp[0];
+    //                 let tmp2 = tmp[1];
+    //                 //let tmp = yearRaw.replace(/\D+/g, "");
+    //                 // .replace(")", "").replace("сериал", "").slice(1);
+    //                 //console.log(tmp);
+    //                 console.log(tmp);
+    //                 console.log(tmp1);
+    //                 console.log(tmp2);
+
+
+    //                 break;
+    //         }
+
+
+    //     }
+    //     browser.close();
+    // }
 }
+

@@ -1,9 +1,10 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Movie } from "./movie.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { People } from "../people/people.model";
 import { Genres } from "../genres/genres.model";
 import { CreateMovieDto } from "./dto/create-movie.dto";
+import { Op } from 'sequelize';
 
 @Injectable()
 export class MovieService {
@@ -12,7 +13,16 @@ export class MovieService {
         @InjectModel(Genres) private genreRepository: typeof Genres) { }
 
     async createMovie(dto: CreateMovieDto) {
-        const movie = await this.movieRepository.findOne({ where: { ...dto } })
+        const movie = await this.movieRepository.findOne({
+            where: {
+                title: dto.title,
+                originalTitle: dto.originalTitle,
+                ageRate: dto.ageRate,
+                yearSince: dto.yearSince,
+                yearTill: dto.yearTill,
+                country: dto.country
+            }
+        })
         if (!movie) {
             return await this.movieRepository.create(dto);
         }
@@ -25,13 +35,13 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id','genre'],
-                    through: {attributes: []}
+                    attributes: ['id', 'genre'],
+                    through: { attributes: [] }
                 },
                 {
                     model: People,
-                    attributes: ['id','fullName', 'profession'],
-                    through: {attributes: []}
+                    attributes: ['id', 'fullName', 'profession'],
+                    through: { attributes: [] }
                 }
             ]
         });
@@ -46,7 +56,7 @@ export class MovieService {
             include: [{
                 model: People,
                 attributes: ['id', 'fullName', 'fullNameOrig', 'profession', 'photo'],
-                through: {attributes: []}
+                through: { attributes: [] }
             }]
         })
         if (movie) {
@@ -60,7 +70,7 @@ export class MovieService {
             include: [{
                 model: Genres,
                 attributes: ['id', 'genre'],
-                through: {attributes: []}
+                through: { attributes: [] }
             }]
         })
         if (movie) {
@@ -75,5 +85,20 @@ export class MovieService {
             return await movie.$get('images');
         }
         throw new NotFoundException('Фильм не найден')
+    }
+
+    async test() {
+        const movie = await this.movieRepository.findAll({
+            where: {
+                //id: [1,2,3]     in []
+
+                // seasons: null,   AND
+                // id: 1 
+
+                //year: { [Op.gt]: 1 }
+
+            }
+        })
+        return movie;
     }
 }

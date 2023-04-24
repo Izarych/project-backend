@@ -10,4 +10,9 @@ export class ParseController {
     parseFilms() {
         return this.parseService.parse();
     }
+
+    // @Get('test')
+    // async test(){
+    //     return this.parseService.test()
+    // }
 }
