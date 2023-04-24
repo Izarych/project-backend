@@ -47,7 +47,9 @@ export class ParseService {
                     country: null,
                     premierRussia: null,
                     premier: null,
-                    seasons: null
+                    seasons: null,
+                    rate: null,
+                    rateQuantity: null
                 }
 
                 let actors = [];    //Актеры
@@ -152,6 +154,20 @@ export class ParseService {
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
                 movieDto.description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
 
+                const rateEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .film-rating-value')
+
+                if (rateEl) {
+                    movieDto.rate = await page.evaluate((el: HTMLElement) => el.innerText, rateEl);
+                }
+
+                const rateQuantityEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .styles_countBlock__jxRDI')
+
+                if (rateQuantityEl) {
+                    const rateQuantityRaw = await page.evaluate((el: HTMLElement) => el.innerText, rateQuantityEl);
+                    let rateQuantity = rateQuantityRaw.split(' ');
+                    rateQuantity.pop();
+                    movieDto.rateQuantity = rateQuantity.join('');
+                }
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 

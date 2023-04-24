@@ -23,7 +23,7 @@ export class Movie extends Model<Movie> {
     description: string;
 
     @Column({ type: DataType.STRING, allowNull: false })
-    year: number;
+    year: string;
 
     @Column({ type: DataType.STRING, allowNull: false })
     country: string;
@@ -37,7 +37,11 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.STRING })
     seasons: string;
 
-    //Награды?
+    @Column({ type: DataType.STRING})
+    rate: string
+
+    @Column({ type: DataType.STRING})
+    rateQuantity: string
 
     @BelongsToMany(() => People, () => MoviePeople)
     people: People[]

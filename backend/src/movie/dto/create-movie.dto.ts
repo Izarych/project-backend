@@ -3,9 +3,11 @@ export class CreateMovieDto {
     readonly originalTitle?: string;
     readonly ageRate: string;
     readonly description: string;
-    readonly year: number;
+    readonly year: string;
     readonly country: string;
     readonly premierRussia: string;
     readonly premier: string;
     readonly seasons: string;
+    readonly rate: string;
+    readonly rateQuantity: string;
 }
