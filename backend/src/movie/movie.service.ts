@@ -72,8 +72,7 @@ export class MovieService {
     async getMovieImages(id: number) {
         const movie = await this.movieRepository.findByPk(id);
         if (movie) {
-            await movie.$get('images');
-            return movie.images;
+            return await movie.$get('images');
         }
         throw new NotFoundException('Фильм не найден')
     }

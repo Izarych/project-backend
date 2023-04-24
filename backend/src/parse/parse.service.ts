@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {MovieService} from "../movie/movie.service";
-import {GenresService} from "../genres/genres.service";
-import {PeopleService} from "../people/people.service";
-import {ImagesService} from 'src/imgs/imgs.service';
+import { MovieService } from "../movie/movie.service";
+import { GenresService } from "../genres/genres.service";
+import { PeopleService } from "../people/people.service";
+import { ImagesService } from 'src/imgs/imgs.service';
 
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ParseService {
             defaultViewport: null,
         });
 
-        for (let i = 2; i < 15; i++) {
+        for (let i = 1; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
@@ -66,6 +66,7 @@ export class ParseService {
                 // let composers = [];     //композиторы
                 // let editors = [];       //монтажеры
                 // let artists = [];       //художники
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 await page.goto(url, {
                     waitUntil: 'domcontentloaded',
@@ -174,33 +175,6 @@ export class ParseService {
 
                 operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
 
-
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
-                //
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
-
-
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
-
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 posters = await this.stealFilmImgs(page, `${url}posters/`);
@@ -222,6 +196,10 @@ export class ParseService {
                 await this.peopleService.createPeoples(movie.id, writers);
                 await this.peopleService.createPeoples(movie.id, operators);
                 await this.imagesService.createImages(movie.id, posters);
+                console.log();
+                console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!Parse ${movie.title} is complited!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+                console.log();
+
             }
             urls.length = 0;
             await page.close();
@@ -270,14 +248,12 @@ export class ParseService {
             }
             humanDto.fullName = name;
             humanDto.profession = profession;
-
             humanDto.photo = picLink;
-            
+
             array.push(humanDto);
-
-
         }
-        array = await this.stealPplImg(page, array);
+
+        //array = await this.stealPplImg(page, array);
         return array;
     }
 
@@ -301,6 +277,7 @@ export class ParseService {
     }
 
     private async stealPplImg(page, array) {
+        const noImgLink = 'https://yastatic.net/s3/kinopoisk-frontend/common-static/img/projector-logo/placeholder.svg';
         const randomDelay = Math.floor(Math.random() * 1500) + 1000;
         let newArr = [];
         for (const element of array) {
@@ -310,25 +287,15 @@ export class ParseService {
                 waitUntil: 'domcontentloaded',
             });
 
-            const linkEl = await page.$('.styles_photo__Is7OJ a')
-            if (linkEl) {
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-                await page.goto(element.photo + 'photos/', {
-                    waitUntil: 'domcontentloaded'
-                })
-
-                const imgEl = await page.$('.styles_root__iY1K3 .styles_root__oV7Oq');
-                const img = await imgEl.$('.styles_root__OQv_q');
-                const photo = element.photo = await img.evaluate(el => el.getAttribute('href'))
-                newArr.push({...element, photo: photo})
+            const linkEl = await page.$('.styles_photo__Is7OJ .styles_root__DZigd');
+            const cutLink = await linkEl.evaluate(el => el.getAttribute('src'));
+            if (cutLink != noImgLink) {
+                const img = 'https:' + cutLink;
+                newArr.push({ ...element, photo: img });
+            } else {
+                newArr.push({ ...element, photo: null });
             }
-            else newArr.push({...element, photo: null})
         }
         return newArr;
-
     }
-
-
 }
-
-
