@@ -126,6 +126,27 @@ export class MovieService {
 
     }
 
+    async getMovieByHuman(fullName: string){
+        const array = [];
+        const movies = await this.movieRepository.findAll({
+            include: [{
+                model: People,
+                attributes: ['fullName'],
+                through: { attributes: [] }
+            }]
+        });
+        for (const movie of movies) {
+            for (const item of movie.people) {
+                if(item.fullName == fullName){
+                    if(!array.includes(movie)){
+                        array.push(movie)
+                    }
+                }
+            }
+        }
+        return array
+    }
+
     async getMovieByGenre(genre: string) {
         const array = [];
         const movies = await this.movieRepository.findAll({

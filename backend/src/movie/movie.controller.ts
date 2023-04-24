@@ -36,6 +36,11 @@ export class MovieController {
         return this.movieService.getMovieByRateQuantity(rateQuantity)
     }
 
+    @Get('/human/:fullName')
+    async getMovieByHuman(@Param('fullName') fullName: string){
+        return this.movieService.getMovieByHuman(fullName)
+    }
+
     @Get('/:id')
     async getMovie(@Param('id') id: number) {
         return this.movieService.getMovie(id);
