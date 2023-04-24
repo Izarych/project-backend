@@ -4,7 +4,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { People } from "../people/people.model";
 import { Genres } from "../genres/genres.model";
 import { CreateMovieDto } from "./dto/create-movie.dto";
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 
 @Injectable()
 export class MovieService {
@@ -107,6 +107,62 @@ export class MovieService {
         });
         return movies;
 
+    }
+
+    async getMovieByCountry(countries: string) {
+        let country = countries.split('+');
+        const array = [];
+        const movies = await this.movieRepository.findAll();
+        for (const item of country) {
+            for (const movie of movies) {
+                if (movie.country.includes(item)) {
+                    if (!array.includes(movie)) {
+                        array.push(movie)
+                    }
+                }
+            }
+        }
+        return array;
+
+    }
+
+    async getMovieByGenre(genre: string) {
+        const array = [];
+        const movies = await this.movieRepository.findAll({
+            include: [{
+                model: Genres,
+                attributes: ['genre'],
+                through: { attributes: [] }
+            }]
+        })
+        if (movies) {
+            for (const movie of movies) {
+                for (const item of movie.genres) {
+                    if (item.genre == genre) {
+                        array.push(movie);
+                    }
+                }
+            }
+        }
+        return array;
+    }
+
+    async getMovieByRate(rate: number) {
+        const movies = await this.movieRepository.findAll({
+            where: {
+                rate: { [Op.gte]: rate }
+            }
+        })
+        return movies;
+    }
+
+    async getMovieByRateQuantity(rateQuantity: number) {
+        const movies = await this.movieRepository.findAll({
+            where: {
+                rateQuantity: { [Op.gte]: rateQuantity }
+            }
+        })
+        return movies;
     }
 }
 
