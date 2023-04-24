@@ -59,13 +59,12 @@ export class ParseService {
                 let isSeries = false;
                 let posters = [];
                 let covers = [];
-
-                // let translators = [];   //переводчик
-                // let dubbingActors = []; //дубляж
-                // let dubbingDirectors = [];  //реж дубля
-                // let composers = [];     //композиторы
-                // let editors = [];       //монтажеры
-                // let artists = [];       //художники
+                let translators = [];   //переводчик
+                let dubbingActors = []; //дубляж
+                let dubbingDirectors = [];  //реж дубля
+                let composers = [];     //композиторы
+                let editors = [];       //монтажеры
+                let artists = [];       //художники
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 await page.goto(url, {
@@ -179,6 +178,29 @@ export class ParseService {
 
                 posters = await this.stealFilmImgs(page, `${url}posters/`);
 
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                translators = await this.stealCreators(page, `${url}cast/who_is/translator/`, 'Переводчик');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                dubbingActors = await this.stealCreators(page, `${url}cast/who_is/voice/`, 'Актёр дубляжа');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                dubbingDirectors = await this.stealCreators(page, `${url}cast/who_is/voice_director/`, 'Режиссёр дубляжа');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                composers = await this.stealCreators(page, `${url}cast/who_is/composer/`, 'Композитор');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                editors = await this.stealCreators(page, `${url}cast/who_is/editor/`, 'Монтажёр');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                artists = await this.stealCreators(page, `${url}cast/who_is/design/`, 'Художник');
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -186,20 +208,41 @@ export class ParseService {
 
                 posters.push(...covers);
 
-
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
-
                 await this.peopleService.createPeoples(movie.id, directors);
                 await this.peopleService.createPeoples(movie.id, actors);
                 await this.peopleService.createPeoples(movie.id, producers);
                 await this.peopleService.createPeoples(movie.id, writers);
                 await this.peopleService.createPeoples(movie.id, operators);
-                await this.imagesService.createImages(movie.id, posters);
-                console.log();
-                console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!Parse ${movie.title} is complited!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
-                console.log();
 
+                if (translators.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, translators);
+                }
+
+                if (dubbingActors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, dubbingActors);
+                }
+
+                if (dubbingDirectors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, dubbingDirectors);
+                }
+
+                if (composers.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, composers);
+                }
+
+                if (editors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, editors);
+                }
+
+                if (artists.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, artists);
+                }
+
+                if (posters.length > 0) {
+                    await this.imagesService.createImages(movie.id, posters);
+                }
             }
             urls.length = 0;
             await page.close();
@@ -220,7 +263,7 @@ export class ParseService {
         const itemsEl = await page.$$('.dub .actorInfo');
 
         if (!itemsEl) {
-            return [];
+            return array;
         }
 
         for (const items of itemsEl) {
