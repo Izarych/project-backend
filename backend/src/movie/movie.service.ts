@@ -95,10 +95,12 @@ export class MovieService {
                 // seasons: null,   AND
                 // id: 1 
 
-                //year: { [Op.gt]: 1 }
-
+                //title: {[Op.like]: '%Брат%'}
+                seasons: {[Op.gte]: 1}
             }
         })
         return movie;
     }
 }
+
+//  Для фильтров  https://sequelize.org/docs/v6/core-concepts/model-querying-basics/
