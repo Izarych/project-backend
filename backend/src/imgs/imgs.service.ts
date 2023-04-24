@@ -15,9 +15,9 @@ export class ImagesService {
             const [image] = await this.imagesRepository.findOrCreate(
                 { where: { image: element } }
             )
-            const currentGenre = await movie.$get('images');
-            const updatedGenre = currentGenre.concat(image);
-            await movie.$set('images', updatedGenre);
+            const currentImage = await movie.$get('images');
+            const updatedImage = currentImage.concat(image);
+            await movie.$set('images', updatedImage);
         }
     }
 }
