@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { MovieService } from "../movie/movie.service";
-import { GenresService } from "../genres/genres.service";
-import { PeopleService } from "../people/people.service";
-import { ImagesService } from 'src/imgs/imgs.service';
+import {MovieService} from "../movie/movie.service";
+import {GenresService} from "../genres/genres.service";
+import {PeopleService} from "../people/people.service";
+import {ImagesService} from 'src/imgs/imgs.service';
 
 
 @Injectable()
@@ -14,21 +14,20 @@ export class ParseService {
         private imagesService: ImagesService) {
     }
 
-    //Данные: Рейтинг MPAA?, Награды?, Рейтинги?
     async parse() {
         const urls = [];
         const browser = await puppeteer.launch({
             headless: false,
             defaultViewport: null,
         });
-        // перехожу на страницу со списком фильмов, 2 страницы для теста делал, в идеале 15-20 спарсить
-        for (let i = 1; i < 2; i++) {
+
+        for (let i = 2; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
                 waitUntil: 'domcontentloaded'
             });
-            // пушу ссылки фильмов в массив
+
             const movies = await page.$$('.styles_root__ti07r');
             for (const movie of movies) {
                 const linkEl = await movie.$('.styles_root__wgbNq');
@@ -36,8 +35,9 @@ export class ParseService {
                 const url = 'https://www.kinopoisk.ru/' + link;
                 urls.push(url);
             }
-            // по каждой ссылке все тяну с фильма
+
             for (const url of urls) {
+                const randomDelay = Math.floor(Math.random() * 1500) + 1000;
                 let movieDto = {
                     title: null,
                     originalTitle: null,
@@ -50,11 +50,9 @@ export class ParseService {
                     seasons: null
                 }
 
-
-
-                let actors = [];    //актеры
-                let directors = []; //Режисеры
-                let producers = []; //Проды
+                let actors = [];    //Актеры
+                let directors = []; //Режиссеры
+                let producers = []; //Продюсеры
                 let operators = []; //Оперы
                 let writers = [];   //Писатели
                 let genres = [];
@@ -78,8 +76,7 @@ export class ParseService {
                 let titleEl = await page.$('.styles_title__65Zwx');
                 if (!titleEl) {
                     titleEl = await page.$('[data-tid="2da92aed"]');
-                    const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
-                    movieDto.title = titleText
+                    movieDto.title = await page.evaluate((el: HTMLElement) => el.innerText, titleEl)
                     isSeries = true;
                 } else {
                     const titleText = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
@@ -89,20 +86,16 @@ export class ParseService {
 
                 }
 
-                // console.log(title[0]);
-
                 const originalTitleEl = await page.$('.styles_originalTitle__JaNKM');                                   //второе название
                 if (originalTitleEl) {
                     movieDto.originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
-                    // console.log(originalTitle);
                 }
 
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
                 movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
-                // console.log(ageRate);
 
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
                 for (const element of elements) {
@@ -116,18 +109,15 @@ export class ParseService {
                             if (isSeries) {
                                 const yearEl = await page.$('.styles_title___itJ6');
                                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
-                                let year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
-                                movieDto.year = year;
+                                movieDto.year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
                                 const seasonsEl = await element.$('.styles_value__g6yP4');
                                 const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
-                                let season = seasonRaw.split('(')[1].replace(/\D/g, "");
-                                movieDto.seasons = season;
+                                movieDto.seasons = seasonRaw.split('(')[1].replace(/\D/g, "");
                                 break;
                             }
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
                             movieDto.year = year;
-                            //console.log(year);
                             break;
                         case 'Жанр':
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
@@ -139,25 +129,21 @@ export class ParseService {
                                 }
 
                             }
-                            //console.log(genres);
                             break;
                         case 'Страна':
                             const countryEl = await element.$('.styles_value__g6yP4');
                             const country = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
                             movieDto.country = country;
-                            // console.log(country.split(','));
                             break;
                         case 'Премьера в России':
                             const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
                             const premierRussia = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
                             movieDto.premierRussia = premierRussia;
-                            // console.log(premierRussia);
                             break;
                         case 'Премьера в мире':
                             const premierEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
                             const premier = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
                             movieDto.premier = premier;
-                            // console.log(premier);
                             break;
                     }
 
@@ -166,26 +152,25 @@ export class ParseService {
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
                 movieDto.description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
 
-                // console.log(description);
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 actors = await this.stealCreators(page, `${url}cast/who_is/actor/`, 'Актёр')
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 directors = await this.stealCreators(page, `${url}cast/who_is/director/`, 'Режиссёр');
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
 
                 producers = await this.stealCreators(page, `${url}cast/who_is/producer/`, 'Продюсер');
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 writers = await this.stealCreators(page, `${url}cast/who_is/writer/`, 'Сценарист');
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
 
@@ -216,12 +201,12 @@ export class ParseService {
                 //
                 // editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 posters = await this.stealFilmImgs(page, `${url}posters/`);
 
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 covers = await this.stealFilmImgs(page, `${url}covers/`);
 
@@ -245,7 +230,7 @@ export class ParseService {
     }
 
     private async stealCreators(page, url, profession: string) {
-        const array = [];
+        let array = [];
 
 
         url = url.replace('series', "film");
@@ -273,7 +258,7 @@ export class ParseService {
             const origNameRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), origNameEl);
             const picEl = await items.$('.photo a')
             let picLink = await picEl.evaluate(el => el.getAttribute('href'));
-            picLink = 'https://www.kinopoisk.ru/' + picLink;
+            picLink = 'https://www.kinopoisk.ru' + picLink;
 
 
             if (origNameRaw != " ") {
@@ -286,13 +271,13 @@ export class ParseService {
             humanDto.fullName = name;
             humanDto.profession = profession;
 
-            // await new Promise(resolve => setTimeout(resolve, 1500));
-            // humanDto.photo = await this.stealPplImg(picLink);
+            humanDto.photo = picLink;
             
             array.push(humanDto);
 
 
         }
+        array = await this.stealPplImg(page, array);
         return array;
     }
 
@@ -315,47 +300,35 @@ export class ParseService {
         return array;
     }
 
-    // private async stealPplImg(url) {
-    //     const browser = await puppeteer.launch({
-    //         headless: false,
-    //         defaultViewport: null,
-    //     });
-    //     let page = await browser.newPage();
+    private async stealPplImg(page, array) {
+        const randomDelay = Math.floor(Math.random() * 1500) + 1000;
+        let newArr = [];
+        for (const element of array) {
+            await new Promise(resolve => setTimeout(resolve, randomDelay));
 
-    //     await page.goto(url, {
-    //         waitUntil: 'domcontentloaded'
-    //     });
-    //     let link;
+            await page.goto(element.photo, {
+                waitUntil: 'domcontentloaded',
+            });
 
-    //     await page.goto(url, {
-    //         waitUntil: 'domcontentloaded',
-    //     });
+            const linkEl = await page.$('.styles_photo__Is7OJ a')
+            if (linkEl) {
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+                await page.goto(element.photo + 'photos/', {
+                    waitUntil: 'domcontentloaded'
+                })
 
-    //     const imgEl = await page.$$('.styles_photoWrapper__zJrQf');
-    //     for (const img of imgEl) {
-    //         const cutLinkEl = await img.$('.styles_image__lSxoD')
-    //         link = await cutLinkEl.evaluate(el => el.getAttribute('src'));
+                const imgEl = await page.$('.styles_root__iY1K3 .styles_root__oV7Oq');
+                const img = await imgEl.$('.styles_root__OQv_q');
+                const photo = element.photo = await img.evaluate(el => el.getAttribute('href'))
+                newArr.push({...element, photo: photo})
+            }
+            else newArr.push({...element, photo: null})
+        }
+        return newArr;
 
-    //     }
-    //     await browser.close();
-    //     return link;
-    // }
+    }
 
 
 }
 
-    // Надо вытянуть всю подобную инфу типо страна, слоган и т д
-    // Но миллион ифов не варик писать, нужно будет с сайта много что тянуть
-    // Пока что такие варианты (придумал на сонную голову, если что придет в голову пиши в тг или если с каким-то согласен):
-    // 1. Сделать через switch/case (все равно много кода, но не так плохо выглядит)
-    // 2. Создать массив с тайтлами которые нужно вытянуть, потом сделать цикл по массиву и как только тайтл совпадет
-    // с названием в массиве тянуть его и переходить на следующий элемент цикла (слишком много кода и будет не особо читаемо)
-    // 3. Не придумывать велосипед, вытянуть все тайтлы и дернуть с каждого инфу, так то нам все равно
-    // нужна инфа со всех тайтлов в "О фильме" (как по мне норм варик, надо будет попробовать)
-    // Если будешь что-то менять/делать и пушить файл, коммить тогда что изменил, будем привыкать потиху
-    // Пока работаем с "О фильме", как только сделаем это по красоте, остальные колонки спарсим по аналогии
-    // и перейдем уже к тому, что сделаем цикл который будет на каждый фильм переходить и все парсить
-    // Таймауты пока не пишем, будем писать только когда надо будет постоянно страницы менять, пока работаем с одной
-    // Комменты из функции можешь удалить, я их оставил чтобы тебе проще было влиться в puppeteer
-    // Эти комменты не удаляй пусть будут, будем еще добавлять сюда инфу/способы, потом удалим их
 
