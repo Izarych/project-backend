@@ -11,7 +11,37 @@ export class MovieController {
         return this.movieService.getAllMovies();
     }
 
-    @Get(':id')
+    @Get('/age/:ageRate')
+    async getMovieByAgeRate(@Param('ageRate') ageRate: number) {
+        return this.movieService.getMovieByAgeRate(ageRate);
+    }
+
+    @Get('/country/:countries')
+    async getMovieByCountry(@Param('countries') countries: string) {
+        return this.movieService.getMovieByCountry(countries);
+    }
+
+    @Get('/genre/:genre')
+    async getMovieByGenre(@Param('genre') genre: string){
+        return this.movieService.getMovieByGenre(genre);
+    }
+
+    @Get('/rate/:rate')
+    async getMovieByRate(@Param('rate') rate: number){
+        return this.movieService.getMovieByRate(rate)
+    }
+
+    @Get('/ratequan/:ratequan')
+    async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number){
+        return this.movieService.getMovieByRateQuantity(rateQuantity)
+    }
+
+    @Get('/human/:fullName')
+    async getMovieByHuman(@Param('fullName') fullName: string){
+        return this.movieService.getMovieByHuman(fullName)
+    }
+
+    @Get('/:id')
     async getMovie(@Param('id') id: number) {
         return this.movieService.getMovie(id);
     }
@@ -30,4 +60,6 @@ export class MovieController {
     async getMovieImages(@Param('id') film_id: number) {
         return this.movieService.getMovieImages(film_id);
     }
+
+
 }

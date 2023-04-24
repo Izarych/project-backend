@@ -16,14 +16,17 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.STRING, allowNull: true })
     originalTitle: string;
 
-    @Column({ type: DataType.STRING, allowNull: false })
-    ageRate: string;
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    ageRate: number;
 
     @Column({ type: DataType.TEXT, allowNull: false })
     description: string;
 
-    @Column({ type: DataType.STRING, allowNull: false })
-    year: number;
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    yearSince: number;
+
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    yearTill: number;
 
     @Column({ type: DataType.STRING, allowNull: false })
     country: string;
@@ -34,10 +37,14 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.STRING })
     premier: string;
 
-    @Column({ type: DataType.STRING })
-    seasons: string;
+    @Column({ type: DataType.INTEGER })
+    seasons: number;
 
-    //Награды?
+    @Column({ type: DataType.REAL})
+    rate: number
+
+    @Column({ type: DataType.INTEGER})
+    rateQuantity: number
 
     @BelongsToMany(() => People, () => MoviePeople)
     people: People[]

@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {MovieService} from "../movie/movie.service";
-import {GenresService} from "../genres/genres.service";
-import {PeopleService} from "../people/people.service";
-import {ImagesService} from 'src/imgs/imgs.service';
+import { MovieService } from "../movie/movie.service";
+import { GenresService } from "../genres/genres.service";
+import { PeopleService } from "../people/people.service";
+import { ImagesService } from 'src/imgs/imgs.service';
 
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ParseService {
             defaultViewport: null,
         });
 
-        for (let i = 2; i < 15; i++) {
+        for (let i = 1; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
@@ -43,11 +43,14 @@ export class ParseService {
                     originalTitle: null,
                     ageRate: null,
                     description: null,
-                    year: null,
+                    yearSince: null,
+                    yearTill: null,
                     country: null,
                     premierRussia: null,
                     premier: null,
-                    seasons: null
+                    seasons: null,
+                    rate: null,
+                    rateQuantity: null
                 }
 
                 let actors = [];    //Актеры
@@ -59,13 +62,13 @@ export class ParseService {
                 let isSeries = false;
                 let posters = [];
                 let covers = [];
-
-                // let translators = [];   //переводчик
-                // let dubbingActors = []; //дубляж
-                // let dubbingDirectors = [];  //реж дубля
-                // let composers = [];     //композиторы
-                // let editors = [];       //монтажеры
-                // let artists = [];       //художники
+                let translators = [];   //переводчик
+                let dubbingActors = []; //дубляж
+                let dubbingDirectors = [];  //реж дубля
+                let composers = [];     //композиторы
+                let editors = [];       //монтажеры
+                let artists = [];       //художники
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 await page.goto(url, {
                     waitUntil: 'domcontentloaded',
@@ -93,7 +96,8 @@ export class ParseService {
 
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
-                movieDto.ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
+                movieDto.ageRate = parseInt(ageRate);
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -101,23 +105,29 @@ export class ParseService {
                 for (const element of elements) {
                     const titleEl = await element.$('.styles_title__b1HVo');
                     const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
-
-
-
                     switch (title) {
                         case 'Год производства':
                             if (isSeries) {
                                 const yearEl = await page.$('.styles_title___itJ6');
                                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
-                                movieDto.year = yearRaw.split('(')[1].replace(")", "").replace("сериал", "").slice(1);
+                                let years = yearRaw.split("сериал")[1].match(/\d{4}/g);
+                                movieDto.yearSince = years[0];
+
+                                if (years[1]) {
+                                    movieDto.yearTill = years[1];
+                                } else {
+                                    movieDto.yearTill = new Date().getFullYear();
+                                }
+
                                 const seasonsEl = await element.$('.styles_value__g6yP4');
                                 const seasonRaw = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
-                                movieDto.seasons = seasonRaw.split('(')[1].replace(/\D/g, "");
+                                movieDto.seasons = Number(seasonRaw.split('(')[1].replace(/\D/g, ""));
                                 break;
                             }
                             const yearEl = await element.$('.styles_value__g6yP4');
                             const year = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
-                            movieDto.year = year;
+                            movieDto.yearSince = Number(year);
+                            movieDto.yearTill = Number(year);
                             break;
                         case 'Жанр':
                             const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
@@ -152,6 +162,22 @@ export class ParseService {
                 const descriptionEl = await page.$('.styles_paragraph__wEGPz');
                 movieDto.description = await page.evaluate((el: HTMLElement) => el.innerText, descriptionEl);
 
+                const rateEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .film-rating-value')
+
+                if (rateEl) {
+                    const rate = await page.evaluate((el: HTMLElement) => el.innerText, rateEl)
+                    movieDto.rate = Number(rate);
+                }
+
+                const rateQuantityEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .styles_countBlock__jxRDI')
+
+                if (rateQuantityEl) {
+                    const rateQuantityRaw = await page.evaluate((el: HTMLElement) => el.innerText, rateQuantityEl);
+                    let rateQuantity = rateQuantityRaw.split(' ');
+                    rateQuantity.pop();
+                    let rateQuantityCorrect = rateQuantity.join('')
+                    movieDto.rateQuantity = Number(rateQuantityCorrect);
+                }
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -174,37 +200,33 @@ export class ParseService {
 
                 operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
 
-
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // dubbingDirectors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice_director/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // translators = await this.stealNamesOfCreators(page, `${url}cast/who_is/translator/`);
-                //
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // dubbingActors = await this.stealNamesOfCreators(page, `${url}cast/who_is/voice/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // composers = await this.stealNamesOfCreators(page, `${url}cast/who_is/composer/`);
-                //
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // artists = await this.stealNamesOfCreators(page, `${url}cast/who_is/design/`);
-
-
-                // await new Promise(resolve => setTimeout(resolve, 1500));
-                //
-                // editors = await this.stealNamesOfCreators(page, `${url}cast/who_is/editor/`);
-
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 posters = await this.stealFilmImgs(page, `${url}posters/`);
 
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                translators = await this.stealCreators(page, `${url}cast/who_is/translator/`, 'Переводчик');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                dubbingActors = await this.stealCreators(page, `${url}cast/who_is/voice/`, 'Актёр дубляжа');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                dubbingDirectors = await this.stealCreators(page, `${url}cast/who_is/voice_director/`, 'Режиссёр дубляжа');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                composers = await this.stealCreators(page, `${url}cast/who_is/composer/`, 'Композитор');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                editors = await this.stealCreators(page, `${url}cast/who_is/editor/`, 'Монтажёр');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                artists = await this.stealCreators(page, `${url}cast/who_is/design/`, 'Художник');
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -212,16 +234,41 @@ export class ParseService {
 
                 posters.push(...covers);
 
-
                 const movie = await this.movieService.createMovie(movieDto);
                 await this.genreService.createGenres(movie.id, genres);
-
                 await this.peopleService.createPeoples(movie.id, directors);
                 await this.peopleService.createPeoples(movie.id, actors);
                 await this.peopleService.createPeoples(movie.id, producers);
                 await this.peopleService.createPeoples(movie.id, writers);
                 await this.peopleService.createPeoples(movie.id, operators);
-                await this.imagesService.createImages(movie.id, posters);
+
+                if (translators.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, translators);
+                }
+
+                if (dubbingActors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, dubbingActors);
+                }
+
+                if (dubbingDirectors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, dubbingDirectors);
+                }
+
+                if (composers.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, composers);
+                }
+
+                if (editors.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, editors);
+                }
+
+                if (artists.length > 0) {
+                    await this.peopleService.createPeoples(movie.id, artists);
+                }
+
+                if (posters.length > 0) {
+                    await this.imagesService.createImages(movie.id, posters);
+                }
             }
             urls.length = 0;
             await page.close();
@@ -242,7 +289,7 @@ export class ParseService {
         const itemsEl = await page.$$('.dub .actorInfo');
 
         if (!itemsEl) {
-            return [];
+            return array;
         }
 
         for (const items of itemsEl) {
@@ -270,14 +317,12 @@ export class ParseService {
             }
             humanDto.fullName = name;
             humanDto.profession = profession;
-
             humanDto.photo = picLink;
-            
+
             array.push(humanDto);
-
-
         }
-        array = await this.stealPplImg(page, array);
+
+        //array = await this.stealPplImg(page, array);
         return array;
     }
 
@@ -301,6 +346,7 @@ export class ParseService {
     }
 
     private async stealPplImg(page, array) {
+        const noImgLink = 'https://yastatic.net/s3/kinopoisk-frontend/common-static/img/projector-logo/placeholder.svg';
         const randomDelay = Math.floor(Math.random() * 1500) + 1000;
         let newArr = [];
         for (const element of array) {
@@ -310,25 +356,55 @@ export class ParseService {
                 waitUntil: 'domcontentloaded',
             });
 
-            const linkEl = await page.$('.styles_photo__Is7OJ a')
-            if (linkEl) {
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-                await page.goto(element.photo + 'photos/', {
-                    waitUntil: 'domcontentloaded'
-                })
-
-                const imgEl = await page.$('.styles_root__iY1K3 .styles_root__oV7Oq');
-                const img = await imgEl.$('.styles_root__OQv_q');
-                const photo = element.photo = await img.evaluate(el => el.getAttribute('href'))
-                newArr.push({...element, photo: photo})
+            const linkEl = await page.$('.styles_photo__Is7OJ .styles_root__DZigd');
+            const cutLink = await linkEl.evaluate(el => el.getAttribute('src'));
+            if (cutLink != noImgLink) {
+                const img = 'https:' + cutLink;
+                newArr.push({ ...element, photo: img });
+            } else {
+                newArr.push({ ...element, photo: null });
             }
-            else newArr.push({...element, photo: null})
         }
         return newArr;
-
     }
 
+    // async test() {
+    //     const browser = await puppeteer.launch({
+    //         headless: false,
+    //         defaultViewport: null,
+    //     });
 
+    //     let pageUrl = `https://www.kinopoisk.ru/series/464963/`
+    //     let page = await browser.newPage();
+    //     await page.goto(pageUrl, {
+    //         waitUntil: 'domcontentloaded'
+    //     });
+
+    //     const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
+    //     for (const element of elements) {
+    //         const titleEl = await element.$('.styles_title__b1HVo');
+    //         const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
+    //         switch (title) {
+    //             case 'Год производства':
+    //                 const yearEl = await page.$('.styles_title___itJ6');
+    //                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
+    //                 let tmp = yearRaw.split("сериал")[1].match(/\d{4}/g);
+    //                 let tmp1 = tmp[0];
+    //                 let tmp2 = tmp[1];
+    //                 //let tmp = yearRaw.replace(/\D+/g, "");
+    //                 // .replace(")", "").replace("сериал", "").slice(1);
+    //                 //console.log(tmp);
+    //                 console.log(tmp);
+    //                 console.log(tmp1);
+    //                 console.log(tmp2);
+
+
+    //                 break;
+    //         }
+
+
+    //     }
+    //     browser.close();
+    // }
 }
-
 
