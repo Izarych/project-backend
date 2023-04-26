@@ -1,0 +1,1 @@
+pg_restore -d kinopoisk-test-base dump.sql
