@@ -318,7 +318,7 @@ export class ParseService {
             array.push(humanDto);
         }
 
-        //array = await this.stealPplImg(page, array);
+        array = await this.stealPplImg(page, array);
         return array;
     }
 
