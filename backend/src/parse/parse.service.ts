@@ -1,17 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { MovieService } from "../movie/movie.service";
-import { GenresService } from "../genres/genres.service";
-import { PeopleService } from "../people/people.service";
-import { ImagesService } from 'src/imgs/imgs.service';
+import {ClientProxy} from "@nestjs/microservices";
+import {firstValueFrom} from "rxjs";
+
 
 
 @Injectable()
 export class ParseService {
-    constructor(private movieService: MovieService,
-        private genreService: GenresService,
-        private peopleService: PeopleService,
-        private imagesService: ImagesService) {
+    constructor(@Inject('DB_SERVICE') private dbClient: ClientProxy) {
     }
 
     async parse() {
@@ -233,41 +229,41 @@ export class ParseService {
                 covers = await this.stealFilmImgs(page, `${url}covers/`);
 
                 posters.push(...covers);
+                const movie = await firstValueFrom(this.dbClient.send('create_movie', movieDto));
+                await this.dbClient.emit('create_genres', {id: movie.id, arr: genres});
+                await this.dbClient.emit('create_peoples', {id: movie.id, arr: directors});
+                await this.dbClient.emit('create_peoples', {id: movie.id, arr: actors});
+                await this.dbClient.emit('create_peoples', {id: movie.id, arr: producers});
+                await this.dbClient.emit('create_peoples', {id: movie.id, arr: writers});
+                await this.dbClient.emit('create_peoples', {id: movie.id, arr: operators});
 
-                const movie = await this.movieService.createMovie(movieDto);
-                await this.genreService.createGenres(movie.id, genres);
-                await this.peopleService.createPeoples(movie.id, directors);
-                await this.peopleService.createPeoples(movie.id, actors);
-                await this.peopleService.createPeoples(movie.id, producers);
-                await this.peopleService.createPeoples(movie.id, writers);
-                await this.peopleService.createPeoples(movie.id, operators);
 
                 if (translators.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, translators);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: translators});
                 }
 
                 if (dubbingActors.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, dubbingActors);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: dubbingActors});
                 }
 
                 if (dubbingDirectors.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, dubbingDirectors);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: dubbingDirectors});
                 }
 
                 if (composers.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, composers);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: composers});
                 }
 
                 if (editors.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, editors);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: editors});
                 }
 
                 if (artists.length > 0) {
-                    await this.peopleService.createPeoples(movie.id, artists);
+                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: artists});
                 }
 
                 if (posters.length > 0) {
-                    await this.imagesService.createImages(movie.id, posters);
+                    await this.dbClient.emit('create_images', {id: movie.id, arr: posters});
                 }
             }
             urls.length = 0;

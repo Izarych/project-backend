@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ParseController } from './parse.controller';
 import { ParseService } from './parse.service';
-import { Axios } from "axios";
-import { MovieModule } from "../movie/movie.module";
-import { PeopleModule } from "../people/people.module";
-import { GenresModule } from "../genres/genres.module";
-import { ImagesModule } from 'src/imgs/imgs.module';
+import {ClientsModule, Transport} from "@nestjs/microservices";
+
 
 
 @Module({
   controllers: [ParseController],
   providers: [ParseService],
-  imports: [
-    MovieModule,
-    PeopleModule,
-    GenresModule,
-    ImagesModule
-  ],
+  imports: [ClientsModule.register([{
+    name: 'DB_SERVICE',
+    transport: Transport.RMQ,
+    options: {
+      urls: [`amqp://localhost:5672`],
+      queue: 'db_queue',
+      queueOptions: {
+        durable: true
+      }
+    }
+  }]),],
   exports: [
     ParseService,
   ]
