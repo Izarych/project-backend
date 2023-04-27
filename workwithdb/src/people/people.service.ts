@@ -24,4 +24,8 @@ export class PeopleService {
             await movie.$set('people', updatedPeople);
         }
     }
+
+    async getPeople() {
+        return this.peopleRepository.findAll({include: {all: true}})
+    }
 }

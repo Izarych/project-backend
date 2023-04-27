@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import {Controller, Get} from '@nestjs/common';
 import {PeopleService} from "./people.service";
 import {EventPattern} from "@nestjs/microservices";
 
@@ -10,5 +10,10 @@ export class PeopleController {
     @EventPattern('create_peoples')
     async createPeoples({id, arr}) {
         return this.peopleService.createPeoples(id,arr);
+    }
+
+    @Get()
+    async getPeople() {
+        return this.peopleService.getPeople();
     }
 }
