@@ -17,7 +17,7 @@ export class ParseService {
             defaultViewport: null,
         });
 
-        for (let i = 1; i < 15; i++) {
+        for (let i = 5; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
@@ -344,9 +344,10 @@ export class ParseService {
     private async stealPplImg(page, array) {
         const noImgLink = 'https://yastatic.net/s3/kinopoisk-frontend/common-static/img/projector-logo/placeholder.svg';
         const randomDelay = Math.floor(Math.random() * 1500) + 1000;
+        await new Promise(resolve => setTimeout(resolve, randomDelay));
         let newArr = [];
         for (const element of array) {
-            await new Promise(resolve => setTimeout(resolve, randomDelay));
+            // await new Promise(resolve => setTimeout(resolve, randomDelay));
 
             await page.goto(element.photo, {
                 waitUntil: 'domcontentloaded',
