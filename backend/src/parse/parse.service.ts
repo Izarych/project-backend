@@ -364,44 +364,5 @@ export class ParseService {
         }
         return newArr;
     }
-
-    // async test() {
-    //     const browser = await puppeteer.launch({
-    //         headless: false,
-    //         defaultViewport: null,
-    //     });
-
-    //     let pageUrl = `https://www.kinopoisk.ru/series/464963/`
-    //     let page = await browser.newPage();
-    //     await page.goto(pageUrl, {
-    //         waitUntil: 'domcontentloaded'
-    //     });
-
-    //     const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
-    //     for (const element of elements) {
-    //         const titleEl = await element.$('.styles_title__b1HVo');
-    //         const title = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
-    //         switch (title) {
-    //             case 'Год производства':
-    //                 const yearEl = await page.$('.styles_title___itJ6');
-    //                 const yearRaw = await page.evaluate((el: HTMLElement) => el.innerText, yearEl);
-    //                 let tmp = yearRaw.split("сериал")[1].match(/\d{4}/g);
-    //                 let tmp1 = tmp[0];
-    //                 let tmp2 = tmp[1];
-    //                 //let tmp = yearRaw.replace(/\D+/g, "");
-    //                 // .replace(")", "").replace("сериал", "").slice(1);
-    //                 //console.log(tmp);
-    //                 console.log(tmp);
-    //                 console.log(tmp1);
-    //                 console.log(tmp2);
-
-
-    //                 break;
-    //         }
-
-
-    //     }
-    //     browser.close();
-    // }
 }
 

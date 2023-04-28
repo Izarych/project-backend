@@ -11,7 +11,8 @@ import { Images } from 'src/imgs/imgs.model';
 export class MovieService {
     constructor(@InjectModel(Movie) private movieRepository: typeof Movie,
                 @InjectModel(People) private peopleRepository: typeof People,
-                @InjectModel(Genres) private genreRepository: typeof Genres) { }
+                @InjectModel(Genres) private genreRepository: typeof Genres,
+                @InjectModel(Images) private imageRepository: typeof Images) { }
 
     async createMovie(dto: CreateMovieDto) {
         const movie = await this.movieRepository.findOne({
@@ -44,11 +45,6 @@ export class MovieService {
                     attributes: ['id', 'fullName', 'profession'],
                     through: { attributes: [] }
                 },
-                {
-                    model: Images,
-                    attributes: ['id', 'image'],
-                    through: { attributes: [] }
-                }
             ]
         });
     }
@@ -88,7 +84,7 @@ export class MovieService {
     async getMovieImages(id: number) {
         const movie = await this.movieRepository.findByPk(id);
         if (movie) {
-            return await movie.$get('images');
+            return await movie.$get('images', {attributes: ['id', 'image', 'movieId']});
         }
         throw new NotFoundException('Фильм не найден')
     }

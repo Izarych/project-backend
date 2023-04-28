@@ -1,6 +1,5 @@
 import {Module} from '@nestjs/common';
 import {ConfigModule} from "@nestjs/config";
-import {SequelizeModule} from "@nestjs/sequelize";
 import {ParseModule} from './parse/parse.module';
 import {ClientsModule, Transport} from "@nestjs/microservices";
 
@@ -16,7 +15,7 @@ import {ClientsModule, Transport} from "@nestjs/microservices";
       name: 'DB_SERVICE',
       transport: Transport.RMQ,
       options: {
-        urls: [`amqp://localhost:5672`],
+        urls: [`amqp://rabbitmq:5672`],
         queue: 'db_queue',
         queueOptions: {
           durable: true
