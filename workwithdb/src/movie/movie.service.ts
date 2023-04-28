@@ -5,6 +5,7 @@ import {People} from "../people/people.model";
 import {Genres} from "../genres/genres.model";
 import {CreateMovieDto} from "./dto/create-movie.dto";
 import {Op} from "sequelize";
+import { Images } from 'src/imgs/imgs.model';
 
 @Injectable()
 export class MovieService {
@@ -41,6 +42,11 @@ export class MovieService {
                 {
                     model: People,
                     attributes: ['id', 'fullName', 'profession'],
+                    through: { attributes: [] }
+                },
+                {
+                    model: Images,
+                    attributes: ['id', 'image'],
                     through: { attributes: [] }
                 }
             ]
