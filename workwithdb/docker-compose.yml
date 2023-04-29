@@ -25,11 +25,11 @@ services:
       - '5432:5432'
     volumes:
       - ./dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
-      - pgdata:/var/lib/postgresql/data/
+      - newpgdata:/var/lib/postgresql/data/
     restart: on-failure
 
 volumes:
-  pgdata:
+  newpgdata:
 
 
 
