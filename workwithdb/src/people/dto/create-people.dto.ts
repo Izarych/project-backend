@@ -3,4 +3,5 @@ export class CreatePeopleDto {
     readonly fullNameOrig?: string;
     readonly profession: string;
     readonly photo: string;
+
 }

@@ -1,7 +1,6 @@
 import {BelongsToMany, Column, DataType, HasMany, Model, Table} from "sequelize-typescript";
 import {People} from "../people/people.model";
 import {MoviePeople} from "../people/moviepeople.model";
-import {Images} from "../imgs/imgs.model";
 import {Genres} from "../genres/genres.model";
 import {MovieGenres} from "../genres/moviegenres.model";
 
@@ -46,12 +45,16 @@ export class Movie extends Model<Movie> {
     @Column({ type: DataType.INTEGER})
     rateQuantity: number
 
+    @Column({type: DataType.TEXT})
+    photo: string;
+
+    @Column({type: DataType.TEXT})
+    trailer: string;
+
     @BelongsToMany(() => People, () => MoviePeople)
     people: People[]
 
     @BelongsToMany(() => Genres, () => MovieGenres)
     genres: Genres[]
 
-    @HasMany(() => Images)
-    images: Images[]
 }

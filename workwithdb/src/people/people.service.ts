@@ -26,6 +26,14 @@ export class PeopleService {
     }
 
     async getPeople() {
-        return this.peopleRepository.findAll({include: {all: true}})
+        return this.peopleRepository.findAll({
+            include: [
+                {
+                    model: Movie,
+                    attributes: ['id', 'title'],
+                    through: {attributes: []}
+                }
+            ]
+        })
     }
 }

@@ -8,14 +8,13 @@ import {People} from "../people/people.model";
 import {MoviePeople} from "../people/moviepeople.model";
 import {Genres} from "../genres/genres.model";
 import {MovieGenres} from "../genres/moviegenres.model";
-import {Images} from "../imgs/imgs.model";
 import {PeopleModule} from "../people/people.module";
 
 @Module({
   controllers: [MovieController],
   providers: [MovieService],
   imports: [
-    SequelizeModule.forFeature([Movie, People, MoviePeople, Genres, MovieGenres, Images]),
+    SequelizeModule.forFeature([Movie, People, MoviePeople, Genres, MovieGenres]),
     PeopleModule,
     GenresModule
   ],
