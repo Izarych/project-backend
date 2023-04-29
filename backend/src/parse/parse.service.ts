@@ -2,7 +2,7 @@ import {Inject, Injectable} from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import {ClientProxy} from "@nestjs/microservices";
 import {firstValueFrom} from "rxjs";
-
+import {Page} from "puppeteer";
 
 
 @Injectable()
@@ -17,7 +17,7 @@ export class ParseService {
             defaultViewport: null,
         });
 
-        for (let i = 5; i < 15; i++) {
+        for (let i = 6; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
@@ -41,6 +41,8 @@ export class ParseService {
                     description: null,
                     yearSince: null,
                     yearTill: null,
+                    photo: null,
+                    trailer: null,
                     country: null,
                     premierRussia: null,
                     premier: null,
@@ -54,23 +56,14 @@ export class ParseService {
                 let producers = []; //Продюсеры
                 let operators = []; //Оперы
                 let writers = [];   //Писатели
-                let genres = [];
+                let genres = []; // Жанры
                 let isSeries = false;
-                let posters = [];
-                let covers = [];
-                let translators = [];   //переводчик
-                let dubbingActors = []; //дубляж
-                let dubbingDirectors = [];  //реж дубля
-                let composers = [];     //композиторы
-                let editors = [];       //монтажеры
-                let artists = [];       //художники
+
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 await page.goto(url, {
                     waitUntil: 'domcontentloaded',
                 });
-
-
 
                 let titleEl = await page.$('.styles_title__65Zwx');
                 if (!titleEl) {
@@ -89,6 +82,9 @@ export class ParseService {
                 if (originalTitleEl) {
                     movieDto.originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
                 }
+
+                const moviePhotoEl = await page.$('.film-poster');
+                movieDto.photo = await moviePhotoEl.evaluate(el => el.getAttribute('src'));
 
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
@@ -177,6 +173,10 @@ export class ParseService {
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
+                movieDto.trailer = await this.stealTrailers(page, `${url}video/`);
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
                 actors = await this.stealCreators(page, `${url}cast/who_is/actor/`, 'Актёр')
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
@@ -196,39 +196,6 @@ export class ParseService {
 
                 operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
 
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                posters = await this.stealFilmImgs(page, `${url}posters/`);
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                translators = await this.stealCreators(page, `${url}cast/who_is/translator/`, 'Переводчик');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                dubbingActors = await this.stealCreators(page, `${url}cast/who_is/voice/`, 'Актёр дубляжа');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                dubbingDirectors = await this.stealCreators(page, `${url}cast/who_is/voice_director/`, 'Режиссёр дубляжа');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                composers = await this.stealCreators(page, `${url}cast/who_is/composer/`, 'Композитор');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                editors = await this.stealCreators(page, `${url}cast/who_is/editor/`, 'Монтажёр');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                artists = await this.stealCreators(page, `${url}cast/who_is/design/`, 'Художник');
-
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                covers = await this.stealFilmImgs(page, `${url}covers/`);
-
-                posters.push(...covers);
                 const movie = await firstValueFrom(this.dbClient.send('create_movie', movieDto));
                 await this.dbClient.emit('create_genres', {id: movie.id, arr: genres});
                 await this.dbClient.emit('create_peoples', {id: movie.id, arr: directors});
@@ -237,34 +204,6 @@ export class ParseService {
                 await this.dbClient.emit('create_peoples', {id: movie.id, arr: writers});
                 await this.dbClient.emit('create_peoples', {id: movie.id, arr: operators});
 
-
-                if (translators.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: translators});
-                }
-
-                if (dubbingActors.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: dubbingActors});
-                }
-
-                if (dubbingDirectors.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: dubbingDirectors});
-                }
-
-                if (composers.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: composers});
-                }
-
-                if (editors.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: editors});
-                }
-
-                if (artists.length > 0) {
-                    await this.dbClient.emit('create_peoples', {id: movie.id, arr: artists});
-                }
-
-                if (posters.length > 0) {
-                    await this.dbClient.emit('create_images', {id: movie.id, arr: posters});
-                }
             }
             urls.length = 0;
             await page.close();
@@ -322,33 +261,12 @@ export class ParseService {
         return array;
     }
 
-    private async stealFilmImgs(page, url) {
-        const array = [];
-
-        url = url.replace('series', "film");
-
-        await page.goto(url, {
-            waitUntil: 'domcontentloaded',
-        });
-
-        const imgEl = await page.$$('.styles_content__MF1k9 .styles_root__iY1K3 .styles_root__oV7Oq');
-
-        for (const img of imgEl) {
-            const cutLinkEl = await img.$('.styles_root__OQv_q');
-            const cutLink = await cutLinkEl.evaluate(el => el.getAttribute('href'));
-            array.push('https:' + cutLink);
-        }
-        return array;
-    }
-
     private async stealPplImg(page, array) {
         const noImgLink = 'https://yastatic.net/s3/kinopoisk-frontend/common-static/img/projector-logo/placeholder.svg';
         const randomDelay = Math.floor(Math.random() * 1500) + 1000;
         await new Promise(resolve => setTimeout(resolve, randomDelay));
         let newArr = [];
         for (const element of array) {
-            // await new Promise(resolve => setTimeout(resolve, randomDelay));
-
             await page.goto(element.photo, {
                 waitUntil: 'domcontentloaded',
             });
@@ -363,6 +281,24 @@ export class ParseService {
             }
         }
         return newArr;
+    }
+
+    private async stealTrailers(page: Page, url: string) {
+        url = url.replace('series', "film");
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        const videoEl = await page.$('.js-discovery-trailer');
+        if (videoEl) {
+            await videoEl.click();
+
+            await videoEl.waitForSelector('.discovery-trailers-embed-iframe');
+
+            const iframe = await videoEl.$('.discovery-trailers-embed-iframe');
+            return await iframe.evaluate(el => el.getAttribute('src'));
+        }
+        return null;
     }
 }
 
