@@ -58,9 +58,9 @@ export class MovieController {
         return this.movieService.getMovieGenres(film_id);
     }
 
-    @Get('/:id/images')
-    async getMovieImages(@Param('id') film_id: number) {
-        return this.movieService.getMovieImages(film_id);
+    @Get('/title/:title')
+    async getMovieByTitle(@Param('title') title: string) {
+        return this.movieService.getMovieByTitle(title);
     }
 
     @EventPattern('create_movie')
