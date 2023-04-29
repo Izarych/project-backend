@@ -4,11 +4,9 @@ import {SequelizeModule} from "@nestjs/sequelize";
 import { MovieModule } from './movie/movie.module';
 import { PeopleModule } from './people/people.module';
 import { GenresModule } from './genres/genres.module';
-import { ImgsModule } from './imgs/imgs.module';
 import {Movie} from "./movie/movie.model";
 import {Genres} from "./genres/genres.model";
 import {People} from "./people/people.model";
-import {Images} from "./imgs/imgs.model";
 import {MoviePeople} from "./people/moviepeople.model";
 import {MovieGenres} from "./genres/moviegenres.model";
 
@@ -25,13 +23,12 @@ import {MovieGenres} from "./genres/moviegenres.model";
           username: process.env.POSTGRES_USER,
           password: process.env.POSTGRES_PASSWORD,
           database: process.env.POSTGRES_DB,
-          models: [Movie, Genres, People, Images, MoviePeople, MovieGenres],
+          models: [Movie, Genres, People, MoviePeople, MovieGenres],
           autoLoadModels: true
       }),
       MovieModule,
       PeopleModule,
       GenresModule,
-      ImgsModule
   ],
   controllers: [],
   providers: [],

@@ -2,7 +2,7 @@ import {BelongsToMany, Column, DataType, Model, Table} from "sequelize-typescrip
 import {Movie} from "../movie/movie.model";
 import {MovieGenres} from "./moviegenres.model";
 
-@Table({ tableName: 'genres' })
+@Table({ tableName: 'genres', createdAt: false, updatedAt: false })
 export class Genres extends Model<Genres> {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number;
