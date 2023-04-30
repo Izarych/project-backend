@@ -25,11 +25,11 @@ services:
       - '5432:5432'
     volumes:
       - ./dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
-      - newpgdata:/var/lib/postgresql/data/
+      - kinopoisk-parse-db:/var/lib/postgresql/data/
     restart: on-failure
 
 volumes:
-  newpgdata:
+  kinopoisk-parse-db:
 
 
 
