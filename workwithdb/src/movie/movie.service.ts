@@ -176,7 +176,17 @@ export class MovieService {
     }
 
     getMovieByTitle(title: string) {
-        const movie = this.movieRepository.findOne({where: {title: title}})
+        const movie = this.movieRepository.findOne({where: {title: title},
+            include: [
+                {
+                    model: People,
+                    through: {attributes: []}
+                },
+                {
+                    model: Genres,
+                    through: {attributes: []}
+                }
+            ]})
         if (!movie) {
             throw new NotFoundException('Фильм не найден');
         }

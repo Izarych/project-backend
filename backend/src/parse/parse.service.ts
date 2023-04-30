@@ -5,6 +5,7 @@ import {firstValueFrom} from "rxjs";
 import {Page} from "puppeteer";
 
 
+
 @Injectable()
 export class ParseService {
     constructor(@Inject('DB_SERVICE') private dbClient: ClientProxy) {
@@ -17,7 +18,7 @@ export class ParseService {
             defaultViewport: null,
         });
 
-        for (let i = 6; i < 15; i++) {
+        for (let i = 1; i < 15; i++) {
             let pageUrl = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
             let page = await browser.newPage();
             await page.goto(pageUrl, {
@@ -41,7 +42,8 @@ export class ParseService {
                     description: null,
                     yearSince: null,
                     yearTill: null,
-                    photo: null,
+                    verticalPhoto: null,
+                    horizontalPhoto: null,
                     trailer: null,
                     country: null,
                     premierRussia: null,
@@ -82,10 +84,6 @@ export class ParseService {
                 if (originalTitleEl) {
                     movieDto.originalTitle = await page.evaluate((el: HTMLElement) => el.innerText.trim(), originalTitleEl);
                 }
-
-                const moviePhotoEl = await page.$('.film-poster');
-                movieDto.photo = await moviePhotoEl.evaluate(el => el.getAttribute('src'));
-
 
                 const ageRateEl = await page.$('.styles_ageRate__340KC');
                 const ageRate = await page.evaluate((el: HTMLElement) => el.innerText.trim(), ageRateEl);
@@ -171,9 +169,9 @@ export class ParseService {
                     movieDto.rateQuantity = Number(rateQuantityCorrect);
                 }
 
-                await new Promise(resolve => setTimeout(resolve, randomDelay));
-
-                movieDto.trailer = await this.stealTrailers(page, `${url}video/`);
+                // await new Promise(resolve => setTimeout(resolve, randomDelay));
+                //
+                // movieDto.trailer = await this.stealTrailers(page, `${url}video/`);
 
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -195,6 +193,15 @@ export class ParseService {
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 operators = await this.stealCreators(page, `${url}cast/who_is/operator/`, 'Оператор');
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                movieDto.verticalPhoto = await this.stealVerticalPhoto(page, `${url}covers/`);
+
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
+                movieDto.horizontalPhoto = await this.stealHorizontalPhoto(page, `${url}wall/`)
+
 
                 const movie = await firstValueFrom(this.dbClient.send('create_movie', movieDto));
                 await this.dbClient.emit('create_genres', {id: movie.id, arr: genres});
@@ -291,6 +298,7 @@ export class ParseService {
 
         const videoEl = await page.$('.js-discovery-trailer');
         if (videoEl) {
+            await videoEl.waitForSelector('.js-kinopoisk-widget-embed');
             await videoEl.click();
 
             await videoEl.waitForSelector('.discovery-trailers-embed-iframe');
@@ -298,7 +306,40 @@ export class ParseService {
             const iframe = await videoEl.$('.discovery-trailers-embed-iframe');
             return await iframe.evaluate(el => el.getAttribute('src'));
         }
-        return null;
+    }
+
+    private async stealVerticalPhoto(page: Page, url: string) {
+        url = url.replace('series', "film");
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded'
+        })
+        const elements = await page.$$('.styles_root__iY1K3 .styles_root__oV7Oq')
+        for (const element of elements) {
+            const imgEl = await element.$('.styles_root__OQv_q')
+            const img = await imgEl.evaluate(el => el.getAttribute('href'));
+            const resolutionEl = await element.$('.styles_root__zVSCC')
+            const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
+            if (Number(width) >= 1000 && Number(height) > 1000) {
+                return 'https:' + img;
+            }
+        }
+    }
+
+    private async stealHorizontalPhoto(page: Page, url: string) {
+        url = url.replace('series', "film");
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded'
+        })
+        const elements = await page.$$('.styles_root__iY1K3 .styles_root__oV7Oq')
+        for (const element of elements) {
+            const imgEl = await element.$('.styles_root__OQv_q')
+            const img = await imgEl.evaluate(el => el.getAttribute('href'));
+            const resolutionEl = await element.$('.styles_root__zVSCC')
+            const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
+            if (Number(width) >= 1600 && Number(height) >= 1200) {
+                return 'https:' + img;
+            }
+        }
     }
 }
 

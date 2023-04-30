@@ -11,6 +11,7 @@ export class CreateMovieDto {
     readonly seasons: number;
     readonly rate: number;
     readonly rateQuantity: number;
-    readonly photo: string;
+    readonly verticalPhoto: string;
+    readonly horizontalPhoto: string;
     readonly trailer: string;
 }

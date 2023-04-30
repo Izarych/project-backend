@@ -46,7 +46,10 @@ export class Movie extends Model<Movie> {
     rateQuantity: number
 
     @Column({type: DataType.TEXT})
-    photo: string;
+    verticalPhoto: string;
+
+    @Column({type: DataType.TEXT})
+    horizontalPhoto: string;
 
     @Column({type: DataType.TEXT})
     trailer: string;
