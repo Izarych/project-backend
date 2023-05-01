@@ -22,8 +22,8 @@ export class UsersController {
   }
 
   @MessagePattern('get.user')
-  getUserByEmail(@Payload() email: string) {
-    return this.userService.getUserByEmail(email);
+  getUserById(@Payload() id: number) {
+    return this.userService.getUserById(id);
   }
 
   @MessagePattern('add.role')
@@ -41,7 +41,7 @@ export class UsersController {
     return this.userService.updateUser(userDto);
   }
 
-  @EventPattern('update.user')
+  @EventPattern('update.user.phone')
   updatePhone(@Payload() dto: UpdateUserPhoneDto) {
     return this.userService.updateUserPhone(dto);
   }

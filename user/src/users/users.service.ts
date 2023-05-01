@@ -16,14 +16,16 @@ export class UsersService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    const user = await this.userRepository.create(userDto);
-    let role = await this.roleService.getRoleByValue("USER");
-    if (!role) {
-      role = await this.roleService.createRole({ value: "USER", description: "Пользователь" });
+    try {
+      const user = await this.userRepository.create(userDto);
+      let role = await this.roleService.getRoleByValue("USER");
+      await user.$set('roles', [role.id]);
+      user.roles = [role];
+      return user;
+    } catch (error) {
+      return new HttpException('User exists', HttpStatus.BAD_REQUEST);
     }
-    await user.$set('roles', [role.id]);
-    user.roles = [role];
-    return user;
+
   }
 
   async getAllUsers() {
@@ -36,13 +38,23 @@ export class UsersService {
     return user;
   }
 
+  async getUserById(id: number) {
+    const user = await this.userRepository.findByPk(id);
+    if (!user) {
+      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+    }
+    return user;
+
+  }
+
   async addRole(dto: AddRoleDto) {
     return await this.addOrRemoveRole(dto, 'add');
   }
 
   async deleteUser(id: number) {
+    const user = await this.getUserById(id);
     await this.userRepository.destroy({ where: { id } });
-    return HttpStatus.OK;
+    return user;
   }
 
   async updateUser(userDto: UpdateUserDto) {
@@ -64,15 +76,15 @@ export class UsersService {
     const role = await this.roleService.getRoleByValue(dto.value);
 
     if (dto.value == 'USER') {
-      throw new HttpException('Role "USER" is protected', HttpStatus.BAD_REQUEST);
+      return new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
     }
 
     if (!role) {
-      throw new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
+      return new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
     }
 
     if (!user) {
-      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
 
     if (operation == 'add') {
