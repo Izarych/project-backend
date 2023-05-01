@@ -5,6 +5,7 @@ import { UserRoles } from "src/roles/user-roles.model";
 interface UserCreationAttr {
   email: string;
   password: string;
+  phoneNumber: number;
 }
 
 @Table({tableName: 'users'})
@@ -18,6 +19,9 @@ export class User extends Model<User, UserCreationAttr> {
 
   @Column({type: DataType.STRING, allowNull: false})
   password: string;
+
+  @Column({type: DataType.STRING, defaultValue: null})
+  phoneNumber: number;
 
   @BelongsToMany(() => Role, () => UserRoles)
   roles: Role[];

@@ -6,7 +6,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 @Controller()
 export class RolesController {
 
-  constructor(private roleService: RolesService) {}
+  constructor(private roleService: RolesService) { }
 
   @MessagePattern('create.role')
   create(@Payload() roleDto: CreateRoleDto) {
@@ -17,5 +17,4 @@ export class RolesController {
   getByValue(@Payload() value: string) {
     return this.roleService.getRoleByValue(value);
   }
-
 }
