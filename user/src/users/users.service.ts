@@ -58,8 +58,7 @@ export class UsersService {
   }
 
   async updateUser(userDto: UpdateUserDto) {
-    const hashPassword = await bcrypt.hash(userDto.password, 5);
-    return await this.userRepository.update({ ...userDto, password: hashPassword }, { where: { id: userDto.id } });
+    return await this.userRepository.update(userDto, { where: { id: userDto.id } });
   }
 
   async updateUserPhone(dto: UpdateUserPhoneDto) {
