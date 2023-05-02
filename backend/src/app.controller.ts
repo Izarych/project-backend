@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put } from "@nestjs/common";
-import { ClientProxy } from "@nestjs/microservices";
+import { ClientProxy, MessagePattern, Payload } from "@nestjs/microservices";
 import { AddRoleDto } from "./dto/add-user-role.dto";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -20,20 +20,14 @@ export class AppController {
         return this.userService.send('get.role.by.value', role);
     }
 
-    @Post('/user')
-    createUser(@Body() dto: CreateUserDto) {
-        return this.userService.send('create.user', dto);
-
-    }
-
     @Get('/user')
     getAll() {
         return this.userService.send('get.all.users', '');
     }
 
     @Get('/user/:id')
-    getOne(@Param('id') id: number) {
-        return this.userService.send('get.user', id);
+    getOneById(@Param('id') id: number) {
+        return this.userService.send('get.user.id', id);
     }
 
     @Post('/user/addrole')
@@ -60,7 +54,4 @@ export class AppController {
     delete(@Param('id') id: number) {
         return this.userService.send('delete.user', id);
     }
-
-
-
 }

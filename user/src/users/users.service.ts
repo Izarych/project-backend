@@ -25,7 +25,6 @@ export class UsersService {
     } catch (error) {
       return new HttpException('User exists', HttpStatus.BAD_REQUEST);
     }
-
   }
 
   async getAllUsers() {
