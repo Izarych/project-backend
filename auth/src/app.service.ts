@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { AuthDto } from './dto/auth.dto';
 import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AppService {
@@ -30,8 +30,6 @@ export class AppService {
 
   async checkEmail(email: string) {
     const user = await firstValueFrom(this.userService.send('get.user.email', email));
-    console.log(user);
-    
     return user;
   }
 
@@ -57,13 +55,11 @@ export class AppService {
     }
     const hashPassword = await bcrypt.hash(dto.password, 5);
     const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword }));
-    console.log(user);
-    
     return this.generateAndSaveTokenAndPayload(user);
   }
 
   private async generateToken(user) {
-    const payload = { userId: user.id, email: user.email,roles: user.roles, isActivated: user.isActivated };
+    const payload = { userId: user.id, email: user.email, isActivated: user.isActivated };
     const [accesToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
         ...payload
@@ -123,8 +119,7 @@ export class AppService {
       user: {
         id: user.id,
         email: user.email,
-        isActivated: user.isActivated,
-        roles: user.roles
+        isActivated: user.isActivated
       }
     };
   }

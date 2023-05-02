@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Inject, Param, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AppService } from './app.service';
 import { AuthDto } from './dto/auth.dto';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller()
 export class AppController {
@@ -35,6 +36,7 @@ export class AppController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {
