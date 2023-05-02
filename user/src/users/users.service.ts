@@ -21,11 +21,12 @@ export class UsersService {
       let role = await this.roleService.getRoleByValue("USER");
       await user.$set('roles', [role.id]);
       user.roles = [role];
+      console.log(user);
+      
       return user;
     } catch (error) {
       return new HttpException('User exists', HttpStatus.BAD_REQUEST);
     }
-
   }
 
   async getAllUsers() {

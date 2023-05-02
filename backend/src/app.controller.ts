@@ -20,16 +20,6 @@ export class AppController {
         return this.userService.send('get.role.by.value', role);
     }
 
-    @Post('/user')
-    createUser(@Body() dto: CreateUserDto) {
-        return this.userService.send('create.user', dto);
-    }
-
-    // @Get('/users/:email')
-    // getOneByEmail(@Param('email') email: string) {
-    //     return this.userService.send('get.user.email', email);
-    // }
-
     @Get('/user')
     getAll() {
         return this.userService.send('get.all.users', '');
@@ -63,10 +53,5 @@ export class AppController {
     @Delete('/user/:id')
     delete(@Param('id') id: number) {
         return this.userService.send('delete.user', id);
-    }
-
-    @MessagePattern('get.user.email')
-    getUserByEmail(@Payload() email: string) {
-        return this.userService.send('get.user.email', email);
     }
 }

@@ -36,18 +36,6 @@ import { AppController } from './app.controller';
         }
       }
     }]),
-    ClientsModule.register([{
-      name: 'AUTH_SERVICE',
-      transport: Transport.RMQ,
-      options: {
-        //urls: [`amqp://rabbitmq:5672`],
-        urls: [`amqp://localhost:5672`],
-        queue: 'to_auth_queue',
-        queueOptions: {
-          durable: true
-        }
-      }
-    }]),
     ParseModule
   ]
 })
