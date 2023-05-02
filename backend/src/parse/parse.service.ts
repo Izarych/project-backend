@@ -169,10 +169,6 @@ export class ParseService {
                     movieDto.rateQuantity = Number(rateQuantityCorrect);
                 }
 
-                // await new Promise(resolve => setTimeout(resolve, randomDelay));
-                //
-                // movieDto.trailer = await this.stealTrailers(page, `${url}video/`);
-
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
 
                 actors = await this.stealCreators(page, `${url}cast/who_is/actor/`, 'Актёр')
@@ -202,7 +198,9 @@ export class ParseService {
 
                 movieDto.horizontalPhoto = await this.stealHorizontalPhoto(page, `${url}wall/`)
 
-
+                if (!movieDto.horizontalPhoto) {
+                    movieDto.horizontalPhoto = movieDto.verticalPhoto;
+                }
                 const movie = await firstValueFrom(this.dbClient.send('create_movie', movieDto));
                 await this.dbClient.emit('create_genres', {id: movie.id, arr: genres});
                 await this.dbClient.emit('create_peoples', {id: movie.id, arr: directors});
@@ -290,24 +288,6 @@ export class ParseService {
         return newArr;
     }
 
-    private async stealTrailers(page: Page, url: string) {
-        url = url.replace('series', "film");
-        await page.goto(url, {
-            waitUntil: 'domcontentloaded',
-        });
-
-        const videoEl = await page.$('.js-discovery-trailer');
-        if (videoEl) {
-            await videoEl.waitForSelector('.js-kinopoisk-widget-embed');
-            await videoEl.click();
-
-            await videoEl.waitForSelector('.discovery-trailers-embed-iframe');
-
-            const iframe = await videoEl.$('.discovery-trailers-embed-iframe');
-            return await iframe.evaluate(el => el.getAttribute('src'));
-        }
-    }
-
     private async stealVerticalPhoto(page: Page, url: string) {
         url = url.replace('series', "film");
         await page.goto(url, {
@@ -336,7 +316,7 @@ export class ParseService {
             const img = await imgEl.evaluate(el => el.getAttribute('href'));
             const resolutionEl = await element.$('.styles_root__zVSCC')
             const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
-            if (Number(width) >= 1600 && Number(height) >= 1200) {
+            if (Number(width) >= 1600 && Number(height) >= 900) {
                 return 'https:' + img;
             }
         }

@@ -1,15 +1,18 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ClientProxy } from '@nestjs/microservices';
-import { InjectModel } from '@nestjs/sequelize';
-import { AuthDto } from './dto/auth.dto';
-import { Token } from './token/token.model';
+import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
+import {JwtService} from '@nestjs/jwt';
+import {ClientProxy} from '@nestjs/microservices';
+import {InjectModel} from '@nestjs/sequelize';
+import {AuthDto} from './dto/auth.dto';
+import {Token} from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import {firstValueFrom} from 'rxjs';
+import {Model} from "sequelize-typescript";
 
 @Injectable()
 export class AppService {
-  constructor(private jwtService: JwtService, @InjectModel(Token) private tokenRepository: typeof Token, @Inject('AUTH_SERVICE') private userService: ClientProxy) { }
+  constructor(private jwtService: JwtService,
+              @InjectModel(Token) private tokenRepository: typeof Token,
+              @Inject('AUTH_SERVICE') private userService: ClientProxy) { }
 
   async login(dto: AuthDto) {
 
@@ -29,8 +32,7 @@ export class AppService {
   }
 
   async checkEmail(email: string) {
-    const user = await firstValueFrom(this.userService.send('get.user.email', email));
-    return user;
+    return await firstValueFrom(this.userService.send('get.user.email', email));
   }
 
   async logout(refreshToken: string) {
@@ -55,12 +57,13 @@ export class AppService {
     }
     const hashPassword = await bcrypt.hash(dto.password, 5);
     const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword }));
+    console.log(user);
     return this.generateAndSaveTokenAndPayload(user);
   }
 
   private async generateToken(user) {
     const payload = { userId: user.id, email: user.email, isActivated: user.isActivated };
-    const [accesToken, refreshToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
         ...payload
       },
@@ -78,7 +81,7 @@ export class AppService {
       )
     ]);
     return {
-      accesToken,
+      accessToken,
       refreshToken
     };
 
@@ -90,28 +93,25 @@ export class AppService {
       tokenData.refreshToken = refreshToken;
       return tokenData.save();
     }
-    const token = await this.tokenRepository.create({ userId, refreshToken })
-    return token;
+    return await this.tokenRepository.create({userId, refreshToken});
   }
 
   private async validateAccessToken(token: string) {
     try {
-      const userData = await this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
-      return userData;
+      return await this.jwtService.verify(token, {secret: process.env.JWT_ACCESS_SECRET});
     } catch (error) {
       return null;
     }
   }
   private async validateRefreshToken(token: string) {
     try {
-      const userData = await this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_SECRET });
-      return userData;
+      return await this.jwtService.verify(token, {secret: process.env.JWT_REFRESH_SECRET});
     } catch (error) {
       return null;
     }
   }
 
-  private async generateAndSaveTokenAndPayload(user) {
+  private async generateAndSaveTokenAndPayload(user: any) {
     const tokens = await this.generateToken(user);
     await this.saveToken(user.id, tokens.refreshToken);
     return {

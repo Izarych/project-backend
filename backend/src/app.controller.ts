@@ -1,8 +1,7 @@
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put } from "@nestjs/common";
-import { ClientProxy, MessagePattern, Payload } from "@nestjs/microservices";
+import { ClientProxy } from "@nestjs/microservices";
 import { AddRoleDto } from "./dto/add-user-role.dto";
 import { CreateRoleDto } from "./dto/create-role.dto";
-import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserPhoneDto } from "./dto/update-user-phone.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 
