@@ -16,8 +16,8 @@ import { AppController } from './app.controller';
       name: 'DB_SERVICE',
       transport: Transport.RMQ,
       options: {
-        urls: [`amqp://rabbitmq:5672`],
-        //urls: [`amqp://localhost:5672`],
+        //urls: [`amqp://rabbitmq:5672`],
+        urls: [`amqp://localhost:5672`],
         queue: 'db_queue',
         queueOptions: {
           durable: true
@@ -28,8 +28,8 @@ import { AppController } from './app.controller';
       name: 'USER_SERVICE',
       transport: Transport.RMQ,
       options: {
-        urls: [`amqp://rabbitmq:5672`],
-        //urls: [`amqp://localhost:5672`],
+        //urls: [`amqp://rabbitmq:5672`],
+        urls: [`amqp://localhost:5672`],
         queue: 'user_queue',
         queueOptions: {
           durable: true

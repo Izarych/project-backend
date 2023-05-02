@@ -21,9 +21,14 @@ export class UsersController {
     return this.userService.getAllUsers();
   }
 
-  @MessagePattern('get.user')
+  @MessagePattern('get.user.id')
   getUserById(@Payload() id: number) {
     return this.userService.getUserById(id);
+  }
+
+  @MessagePattern('get.user.email')
+  getUserByEmail(@Payload() email: string) {
+    return this.userService.getUserByEmail(email);
   }
 
   @MessagePattern('add.role')

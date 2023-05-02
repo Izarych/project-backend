@@ -23,7 +23,11 @@ export class AppController {
     @Post('/user')
     createUser(@Body() dto: CreateUserDto) {
         return this.userService.send('create.user', dto);
+    }
 
+    @Get('/users/:email')
+    getOneByEmail(@Param('email') email: string) {
+       return this.userService.send('get.user.email', email);
     }
 
     @Get('/user')
@@ -32,8 +36,8 @@ export class AppController {
     }
 
     @Get('/user/:id')
-    getOne(@Param('id') id: number) {
-        return this.userService.send('get.user', id);
+    getOneById(@Param('id') id: number) {
+        return this.userService.send('get.user.id', id);
     }
 
     @Post('/user/addrole')
