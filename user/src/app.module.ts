@@ -6,7 +6,6 @@ import { RolesModule } from './roles/roles.module';
 import { Role } from './roles/roles.model';
 import { User } from './users/users.model';
 import { UserRoles } from './roles/user-roles.model';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
