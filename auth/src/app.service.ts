@@ -5,19 +5,16 @@ import { InjectModel } from '@nestjs/sequelize';
 import { AuthDto } from './dto/auth.dto';
 import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import { firstValueFrom, ObservedValueOf } from 'rxjs';
+
 @Injectable()
 export class AppService {
-  constructor(private jwtService: JwtService, @InjectModel(Token) private tokenRepository: typeof Token, @Inject('AUTH_SERVICE') private userService: ClientProxy
-  ) {
-    //this.userService.connect();
-  }
+  constructor(private jwtService: JwtService, @InjectModel(Token) private tokenRepository: typeof Token, @Inject('AUTH_SERVICE') private userService: ClientProxy) { }
 
   async login(dto: AuthDto) {
 
     //const user = this.userService.send('get.user.email', dto.email);
-    const createTokenResponse = firstValueFrom(this.userService.send('get.user.email', dto.email));
-    console.log(createTokenResponse);
+    //return this.userService.send('get.user.email', dto.email);
+    //console.log(createTokenResponse);
 
 
 

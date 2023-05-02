@@ -69,6 +69,4 @@ export class AppController {
     getUserByEmail(@Payload() email: string) {
         return this.userService.send('get.user.email', email);
     }
-
-
 }

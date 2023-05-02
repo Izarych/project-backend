@@ -18,7 +18,7 @@ async function start() {
       },
     },
   });
-  //
+  await app.startAllMicroservices();
   await app.listen(PORT, () => console.log(`Server started on port = ${PORT}`));
 }
 start();
