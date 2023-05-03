@@ -11,8 +11,4 @@ export class ParseController {
         return this.parseService.parse();
     }
 
-    // @Get('test')
-    // async test(){
-    //     return this.parseService.test()
-    // }
 }

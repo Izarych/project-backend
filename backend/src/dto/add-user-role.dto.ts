@@ -1,10 +1,12 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class AddRoleDto {
 
-  @IsNumber({}, {message: 'Должно быть числом'})
+  @IsNotEmpty({ message: "Id should not be empty" })
+  @IsNumber({}, { message: 'Id must be number' })
   readonly id: number;
 
-  @IsString({message: 'Должно быть строкой'})
+  @IsNotEmpty({ message: "Value should not be empty" })
+  @IsString({ message: 'Value must be string' })
   readonly value: string;
 }
