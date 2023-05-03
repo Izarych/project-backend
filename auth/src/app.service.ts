@@ -7,10 +7,12 @@ import {Token} from './token/token.model';
 import * as bcrypt from 'bcryptjs';
 import {firstValueFrom} from 'rxjs';
 import {Model} from "sequelize-typescript";
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AppService {
   constructor(private jwtService: JwtService,
+              private readonly httpService: HttpService,
               @InjectModel(Token) private tokenRepository: typeof Token,
               @Inject('AUTH_SERVICE') private userService: ClientProxy) { }
 
@@ -123,6 +125,32 @@ export class AppService {
       }
     };
   }
+
+  async getVkToken(code: string): Promise<any> {
+    const VKDATA = {
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+    };
+
+    const host =
+    process.env.NODE_ENV === 'prod'
+      ? process.env.APP_HOST
+      : process.env.APP_LOCAL;
+
+    const res = await firstValueFrom(this.httpService
+      .get(
+        `https://oauth.vk.com/token?grant_type=authorization_code&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
+      )); 
+
+    return res.data;
+  }
+
+  // async loginVk(userIdVk: string) {
+
+  //   const user = await firstValueFrom(this.userService.send('get.user.id.vk', userIdVk));
+
+  // }
+  
 
 }
 
