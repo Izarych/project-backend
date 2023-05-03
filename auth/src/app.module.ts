@@ -6,9 +6,11 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Token } from './token/token.model';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     SequelizeModule.forFeature([Token]),
     JwtModule.register({}),
     ConfigModule.forRoot({
