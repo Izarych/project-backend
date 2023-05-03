@@ -7,11 +7,17 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Controller()
 export class AppController {
-    constructor(@Inject('USER_SERVICE') private userService: ClientProxy) { }
+    constructor(@Inject('USER_SERVICE') private userService: ClientProxy,
+                @Inject('PARSE_SERVICE') private parseService: ClientProxy) { }
 
     @Post('/role')
     create(@Body() dto: CreateRoleDto) {
         return this.userService.send('create.role', dto);
+    }
+
+    @Get('/parse')
+    async parseFilms() {
+        return this.parseService.emit('parse', '');
     }
 
     @Get('/role/:role')

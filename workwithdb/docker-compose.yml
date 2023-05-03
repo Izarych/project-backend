@@ -1,36 +1,36 @@
-version: '3'
-services:
-  app:
-    build: .
-    ports:
-      - "5001:5001"
-    depends_on:
-      - postgres
-      - rabbitmq
-    env_file:
-      - .development.env
-
-  rabbitmq:
-    image: rabbitmq
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    restart: always
-
-  postgres:
-    image: postgres
-    env_file:
-      - .development.env
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
-      - kinopoisk-parse-db:/var/lib/postgresql/data/
-    restart: on-failure
-
-volumes:
-  kinopoisk-parse-db:
-
-
-
-
+#version: '3'
+#services:
+#  app:
+#    build: .
+#    ports:
+#      - "5001:5001"
+#    depends_on:
+#      - postgres
+#      - rabbitmq
+#    env_file:
+#      - .development.env
+#
+#  rabbitmq:
+#    image: rabbitmq
+#    ports:
+#      - '5672:5672'
+#      - '15672:15672'
+#    restart: always
+#
+#  postgres:
+#    image: postgres
+#    env_file:
+#      - .development.env
+#    ports:
+#      - '5432:5432'
+#    volumes:
+#      - ./dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
+#      - kinopoisk-parse-db:/var/lib/postgresql/data/
+#    restart: on-failure
+#
+#volumes:
+#  kinopoisk-parse-db:
+#
+#
+#
+#

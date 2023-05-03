@@ -1,0 +1,99 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    depends_on:
+      - auth-postgres
+      - rabbitmq
+    env_file:
+      - ./auth/.development.env
+
+  parse:
+    build:
+      context: ./parse
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+
+  user:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - user-postgres
+    env_file:
+      - ./user/.development.env
+
+  workwithdb:
+    build:
+      context: ./workwithdb
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    depends_on:
+      - postgres
+      - rabbitmq
+    env_file:
+      - ./workwithdb/.development.env
+    restart: always
+
+  user-postgres:
+    image: postgres
+    env_file:
+      - ./user/.development.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - userdata:/var/lib/postgresql/data/
+    restart: always
+
+  auth-postgres:
+    image: postgres
+    env_file:
+      - ./auth/.development.env
+    ports:
+      - "5434:5432"
+    volumes:
+      - authdata:/var/lib/postgresql/data/
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    restart: always
+
+  postgres:
+    image: postgres
+    env_file:
+      - ./workwithdb/.development.env
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./workwithdb/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
+      - kinopoisknew-parse-db:/var/lib/postgresql/data/
+    restart: on-failure
+
+
+
+volumes:
+  authdata:
+  userdata:
+  kinopoisknew-parse-db:
+
+

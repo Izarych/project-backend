@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
-import { ParseModule } from './parse/parse.module';
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { AppController } from './app.controller';
 
@@ -13,12 +12,12 @@ import { AppController } from './app.controller';
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),
     ClientsModule.register([{
-      name: 'DB_SERVICE',
+      name: 'PARSE_SERVICE',
       transport: Transport.RMQ,
       options: {
         urls: [`amqp://rabbitmq:5672`],
-        //urls: [`amqp://localhost:5672`],
-        queue: 'db_queue',
+        // urls: [`amqp://localhost:5672`],
+        queue: 'parse_queue',
         queueOptions: {
           durable: true
         }
@@ -29,14 +28,13 @@ import { AppController } from './app.controller';
       transport: Transport.RMQ,
       options: {
         urls: [`amqp://rabbitmq:5672`],
-        //urls: [`amqp://localhost:5672`],
+        // urls: [`amqp://localhost:5672`],
         queue: 'user_queue',
         queueOptions: {
           durable: true
         }
       }
     }]),
-    ParseModule
   ]
 })
 export class AppModule { }
