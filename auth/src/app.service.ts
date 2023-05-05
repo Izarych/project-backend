@@ -139,18 +139,11 @@ export class AppService {
 
     const res = await firstValueFrom(this.httpService
       .get(
-        `https://oauth.vk.com/token?grant_type=authorization_code&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
+        `https://oauth.vk.com/access_token?&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
       )); 
 
     return res.data;
   }
-
-  // async loginVk(userIdVk: string) {
-
-  //   const user = await firstValueFrom(this.userService.send('get.user.id.vk', userIdVk));
-
-  // }
-  
 
 }
 
