@@ -43,7 +43,6 @@ export class AppController {
 
   @Post('/login/vk')
   async loginVk(@Body() body: {code: string}) {
-    console.log(body);
     let authData;
 
     try {
