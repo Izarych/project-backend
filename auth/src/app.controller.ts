@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Post, Query, Redirect, Req, Res, UnauthorizedException, UnprocessableEntityException, UseGuards } from '@nestjs/common';
-import { Request, Response, query } from 'express';
+import { Body, Controller, Get, Param, Post, Query, Req, Res, UnauthorizedException, UnprocessableEntityException, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AppService } from './app.service';
 import { AuthDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
