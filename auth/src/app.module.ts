@@ -7,7 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Token } from './token/token.model';
 import { HttpModule } from '@nestjs/axios';
-
+import { MailerModule } from '@nestjs-modules/mailer';
 @Module({
   imports: [
     HttpModule,
@@ -31,13 +31,24 @@ import { HttpModule } from '@nestjs/axios';
       transport: Transport.RMQ,
       options: {
         urls: [`amqp://rabbitmq:5672`],
-        // urls: [`amqp://localhost:5672`],
+        //urls: [`amqp://localhost:5672`],
         queue: 'from_auth_queue',
         queueOptions: {
           durable: true
         }
       }
     }]),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.MAIL_HOST,
+        port: Number(process.env.MAIL_PORT),
+        secure: false,
+        auth: {
+          user: process.env.MAIL_ACC,
+          pass: process.env.MAIL_PASS_SPEC,
+        },
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

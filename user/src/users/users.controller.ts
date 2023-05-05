@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { UpdateUserPhoneDto } from './dto/update-user-phone.dto';
+import { UpdateUserLinkDto } from './dto/update-user-link.dto';
 
 @Controller()
 export class UsersController {
@@ -14,6 +15,11 @@ export class UsersController {
   @MessagePattern('create.user')
   create(@Payload() userDto: CreateUserDto) {
     return this.userService.createUser(userDto);
+  }
+
+  @MessagePattern('activate.user')
+  activateUser(@Payload() link: string) {
+    return this.userService.activateUser(link);
   }
 
   @MessagePattern('get.all.users')
@@ -31,6 +37,11 @@ export class UsersController {
     return this.userService.getUserByEmail(email);
   }
 
+  @MessagePattern('get.user.link')
+  getUserByLink(@Payload() link: string) {
+    return this.userService.getUserByLink(link);
+  }
+
   @MessagePattern('add.role')
   addRole(@Payload() dto: AddRoleDto) {
     return this.userService.addRole(dto);
@@ -44,6 +55,11 @@ export class UsersController {
   @EventPattern('update.user')
   update(@Payload() userDto: UpdateUserDto) {
     return this.userService.updateUser(userDto);
+  }
+
+  @EventPattern('update.user.link')
+  updateActivationLink(@Payload() dto: UpdateUserLinkDto) {
+    return this.userService.updateActivationLink(dto);
   }
 
   @EventPattern('update.user.phone')
