@@ -1,20 +1,23 @@
-import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
-import {ClientProxy} from '@nestjs/microservices';
-import {InjectModel} from '@nestjs/sequelize';
-import {AuthDto} from './dto/auth.dto';
-import {Token} from './token/token.model';
+import { BadRequestException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
+import { InjectModel } from '@nestjs/sequelize';
+import { AuthDto } from './dto/auth.dto';
+import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import {firstValueFrom} from 'rxjs';
-import {Model} from "sequelize-typescript";
+import { firstValueFrom } from 'rxjs';
+import { Model } from "sequelize-typescript";
 import { HttpService } from '@nestjs/axios';
+import * as uuid from 'uuid';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AppService {
   constructor(private jwtService: JwtService,
-              private readonly httpService: HttpService,
-              @InjectModel(Token) private tokenRepository: typeof Token,
-              @Inject('AUTH_SERVICE') private userService: ClientProxy) { }
+    private readonly httpService: HttpService,
+    @InjectModel(Token) private tokenRepository: typeof Token,
+    @Inject('AUTH_SERVICE') private userService: ClientProxy,
+    private readonly mailerService: MailerService) { }
 
   async login(dto: AuthDto) {
 
@@ -35,6 +38,10 @@ export class AppService {
 
   async checkEmail(email: string) {
     return await firstValueFrom(this.userService.send('get.user.email', email));
+  }
+
+  async checkLink(link: string) {
+    return await firstValueFrom(this.userService.send('get.user.link', link));
   }
 
   async logout(refreshToken: string) {
@@ -58,9 +65,33 @@ export class AppService {
       throw new BadRequestException('User with such email exists');
     }
     const hashPassword = await bcrypt.hash(dto.password, 5);
-    const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword }));
-    console.log(user);
+    const link = uuid.v4();
+    const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
+    await this.sendActivationLink(dto.email, link);
     return this.generateAndSaveTokenAndPayload(user);
+  }
+
+
+  async activate(link: string) {
+    return await firstValueFrom(this.userService.send('activate.user', link));
+  }
+
+  async reSendActivationLink(email: string) {
+    const link = uuid.v4();
+    await this.sendActivationLink(email, link);
+    return await firstValueFrom(this.userService.send('update.user.link', { email, link }));
+  }
+
+  async sendActivationLink(to: string, link: string,) {
+    this.mailerService
+      .sendMail({
+        to: `${to}`,
+        from: process.env.MAIL_ACC,
+        subject: `Activation link for ${process.env.APP_LOCAL}`, // ЗАГЛУШКА
+        html: `<h1>This is your activation link</h1><a href="${process.env.APP_LOCAL}/activate/${link}">CLICK HERE</a>`,  //Заглушка
+      })
+      .then(() => { })
+      .catch((error) => console.log(error));
   }
 
   private async generateToken(user) {
@@ -95,19 +126,19 @@ export class AppService {
       tokenData.refreshToken = refreshToken;
       return tokenData.save();
     }
-    return await this.tokenRepository.create({userId, refreshToken});
+    return await this.tokenRepository.create({ userId, refreshToken });
   }
 
   private async validateAccessToken(token: string) {
     try {
-      return await this.jwtService.verify(token, {secret: process.env.JWT_ACCESS_SECRET});
+      return await this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
     } catch (error) {
       return null;
     }
   }
   private async validateRefreshToken(token: string) {
     try {
-      return await this.jwtService.verify(token, {secret: process.env.JWT_REFRESH_SECRET});
+      return await this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_SECRET });
     } catch (error) {
       return null;
     }
@@ -133,14 +164,14 @@ export class AppService {
     };
 
     const host =
-    process.env.NODE_ENV === 'prod'
-      ? process.env.APP_HOST
-      : process.env.APP_LOCAL;
+      process.env.NODE_ENV === 'prod'
+        ? process.env.APP_HOST
+        : process.env.APP_LOCAL;
 
     const res = await firstValueFrom(this.httpService
       .get(
         `https://oauth.vk.com/token?grant_type=authorization_code&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
-      )); 
+      ));
 
     return res.data;
   }
@@ -150,7 +181,7 @@ export class AppService {
   //   const user = await firstValueFrom(this.userService.send('get.user.id.vk', userIdVk));
 
   // }
-  
+
 
 }
 

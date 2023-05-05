@@ -1,12 +1,13 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/sequelize';
-import {RolesService} from 'src/roles/roles.service';
-import {AddRoleDto} from './dto/add-user-role.dto';
-import {CreateUserDto} from './dto/create-user.dto';
-import {UpdateUserDto} from './dto/update-user.dto';
-import {User} from './users.model';
-import * as bcrypt from 'bcryptjs';
-import {UpdateUserPhoneDto} from './dto/update-user-phone.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { RolesService } from 'src/roles/roles.service';
+import { AddRoleDto } from './dto/add-user-role.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './users.model';
+import { UpdateUserPhoneDto } from './dto/update-user-phone.dto';
+import { UpdateUserLinkDto } from './dto/update-user-link.dto';
+
 
 @Injectable()
 export class UsersService {
@@ -16,19 +17,27 @@ export class UsersService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    const user = await this.userRepository.create(userDto);
     let role = await this.roleService.getRoleByValue("USER");
+    const user = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
     return user;
-    }
+  }
+
+  async activateUser(link: string) {
+    return await this.userRepository.update({ isActivated: true }, { where: { activationLink: link } });
+  }
+
+  async updateActivationLink(dto: UpdateUserLinkDto) {
+    return await this.userRepository.update({ activationLink: dto.link }, { where: { email: dto.email } });
+  }
 
   async getAllUsers() {
-    return await this.userRepository.findAll({include: {all: true}});
+    return await this.userRepository.findAll({ include: { all: true } });
   }
 
   async getUserByEmail(email: string) {
-    return await this.userRepository.findOne({where: {email}, include: {all: true}});
+    return await this.userRepository.findOne({ where: { email }, include: { all: true } });
   }
 
   async getUserById(id: number) {
@@ -60,6 +69,14 @@ export class UsersService {
 
   async removeRole(dto: AddRoleDto) {
     return await this.addOrRemoveRole(dto, 'remove');
+  }
+
+  async getUserByLink(link: string) {
+    const user = await this.userRepository.findOne({ where: { activationLink: link } });
+    if (!user) {
+      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
 

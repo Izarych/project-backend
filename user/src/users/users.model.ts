@@ -7,6 +7,7 @@ interface UserCreationAttr {
   password: string;
   phoneNumber: number;
   isActivated: boolean;
+  activationLink: string;
 }
 
 @Table({ tableName: 'users' })
@@ -26,6 +27,9 @@ export class User extends Model<User, UserCreationAttr> {
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   isActivated: boolean;
+
+  @Column({ type: DataType.STRING})
+  activationLink: string;
 
   @BelongsToMany(() => Role, () => UserRoles)
   roles: Role[];

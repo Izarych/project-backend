@@ -19,12 +19,22 @@ export class AppController {
     }
   }
 
+  @Get('/sendlink/:email')
+  async resendLink(@Param('email') email: string) {
+    return this.appService.reSendActivationLink(email);
+  }
+
+  @Get('/activate/:link')
+  async test(@Param('link') link: string) {
+    return this.appService.activate(link);
+  }
+
   @Get('/login_vk')
   async auth(@Res() res: Response) {
     const host =
-    process.env.NODE_ENV === 'prod'
-      ? process.env.APP_HOST
-      : process.env.APP_LOCAL;
+      process.env.NODE_ENV === 'prod'
+        ? process.env.APP_HOST
+        : process.env.APP_LOCAL;
 
     return res.redirect(`https://oauth.vk.com/authorize?client_id=${process.env.CLIENT_ID}&display=page&redirect_uri=${host}/login_vk_success&scope=offline&response_type=code&v=5.92`);
   }
