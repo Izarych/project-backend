@@ -157,32 +157,24 @@ export class AppService {
     };
   }
 
-  async getVkToken(code: string): Promise<any> {
+ async getVkToken(code: string): Promise<any> {
     const VKDATA = {
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
     };
 
     const host =
-      process.env.NODE_ENV === 'prod'
-        ? process.env.APP_HOST
-        : process.env.APP_LOCAL;
+    process.env.NODE_ENV === 'prod'
+      ? process.env.APP_HOST
+      : process.env.APP_LOCAL;
 
     const res = await firstValueFrom(this.httpService
       .get(
-        `https://oauth.vk.com/token?grant_type=authorization_code&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
-      ));
+        `https://oauth.vk.com/access_token?&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
+      )); 
 
     return res.data;
   }
-
-  // async loginVk(userIdVk: string) {
-
-  //   const user = await firstValueFrom(this.userService.send('get.user.id.vk', userIdVk));
-
-  // }
-
-
 }
 
 
