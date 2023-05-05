@@ -1,12 +1,15 @@
 import { Body, Controller, Get, Param, Post, Query, Redirect, Req, Res, UnauthorizedException, UnprocessableEntityException, UseGuards } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request, Response, query } from 'express';
 import { AppService } from './app.service';
 import { AuthDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService,
+              private readonly httpService: HttpService) { }
 
   @Post('/login')
   async login(@Body() dto: AuthDto, @Res() res: Response) {
@@ -31,11 +34,16 @@ export class AppController {
 
   @Get('/login_vk_success')
   async code(@Query('code') code: string, @Res() res: Response) {
-    return res.json('code: ' + code + ' (используется единожды)');
+    const host =
+    process.env.NODE_ENV === 'prod'
+      ? process.env.APP_HOST
+      : process.env.APP_LOCAL;
+    return res.json((await firstValueFrom(this.httpService.post(`${host}/login/vk`, {code}))).data)
   }
 
   @Post('/login/vk')
-  async loginVk(@Body() body) {
+  async loginVk(@Body() body: {code: string}) {
+    console.log(body);
     let authData;
 
     try {
