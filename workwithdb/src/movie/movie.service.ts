@@ -31,7 +31,7 @@ export class MovieService {
 
 
     async getAllMovies() {
-        return this.movieRepository.findAll({
+        return await this.movieRepository.findAll({
             include: [
                 {
                     model: Genres,
@@ -175,8 +175,8 @@ export class MovieService {
         });
     }
 
-    getMovieByTitle(title: string) {
-        const movie = this.movieRepository.findOne({where: {title: title},
+    async getMovieByTitle(title: string) {
+        const movie = await this.movieRepository.findOne({where: {title: title},
             include: [
                 {
                     model: People,
