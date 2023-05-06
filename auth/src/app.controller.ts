@@ -5,6 +5,7 @@ import { AuthDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class AppController {
@@ -32,6 +33,16 @@ export class AppController {
     return this.appService.activate(link);
   }
 
+  @Get('login_gmail')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {}
+
+  @Get('login_gmail_success')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    return this.appService.gmailLogin(req)
+  }
+
   @Get('/login_vk')
   async auth(@Res() res: Response) {
     const host =
@@ -39,7 +50,7 @@ export class AppController {
         ? process.env.APP_HOST
         : process.env.APP_LOCAL;
 
-    return res.redirect(`https://oauth.vk.com/authorize?client_id=${process.env.CLIENT_ID}&display=page&redirect_uri=${host}/login_vk_success&scope=offline&response_type=code&v=5.92`);
+    return res.redirect(`https://oauth.vk.com/authorize?client_id=${process.env.VK_CLIENT_ID}&display=page&redirect_uri=${host}/login_vk_success&scope=offline&response_type=code&v=5.92`);
   }
 
   @Get('/login_vk_success')
