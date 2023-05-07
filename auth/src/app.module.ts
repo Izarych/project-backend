@@ -8,6 +8,8 @@ import { AppService } from './app.service';
 import { Token } from './token/token.model';
 import { HttpModule } from '@nestjs/axios';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleStrategy } from './strategy/google.strategy';
 @Module({
   imports: [
     HttpModule,
@@ -55,6 +57,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GoogleStrategy],
 })
 export class AppModule { }

@@ -156,10 +156,19 @@ export class AppService {
     };
   }
 
- async getVkToken(code: string): Promise<any> {
+  gmailLogin(req: any) {
+    if (!req.user) {
+      return 'No user from google'
+    }
+
+    return req.user;
+    
+  }
+
+  async getVkToken(code: string): Promise<any> {
     const VKDATA = {
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
+      clientId: process.env.VK_CLIENT_ID,
+      clientSecret: process.env.VK_CLIENT_SECRET,
     };
 
     const host =
@@ -169,7 +178,7 @@ export class AppService {
 
     const res = await firstValueFrom(this.httpService
       .get(
-        `https://oauth.vk.com/access_token?&client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/login_vk_success&code=${code}`
+        `https://oauth.vk.com/access_token?&client_id=${VKDATA.clientId}&client_secret=${VKDATA.clientSecret}&redirect_uri=${host}/login_vk_success&code=${code}`
       )); 
 
     return res.data;
