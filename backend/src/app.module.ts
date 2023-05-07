@@ -17,7 +17,7 @@ import {JwtModule} from "@nestjs/jwt";
       transport: Transport.RMQ,
       options: {
         // urls: [`amqp://rabbitmq:5672`],
-        urls: [`amqp://localhost:5672`],
+        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
         queue: 'parse_queue',
         queueOptions: {
           durable: true
@@ -29,7 +29,7 @@ import {JwtModule} from "@nestjs/jwt";
       transport: Transport.RMQ,
       options: {
         // urls: [`amqp://rabbitmq:5672`],
-        urls: [`amqp://localhost:5672`],
+        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
         queue: 'user_queue',
         queueOptions: {
           durable: true

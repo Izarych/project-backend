@@ -10,7 +10,7 @@ import { UserRoles } from './roles/user-roles.model';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.development.env`
+      envFilePath: `.${process.env.NODE_ENV}.env`
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
