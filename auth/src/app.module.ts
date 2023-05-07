@@ -12,7 +12,11 @@ import { MailerModule } from '@nestjs-modules/mailer';
   imports: [
     HttpModule,
     SequelizeModule.forFeature([Token]),
-    JwtModule.register({}),
+    JwtModule.register({
+      signOptions: {
+        expiresIn: '24h'
+      }
+    }),
     ConfigModule.forRoot({
       envFilePath: `.development.env`
     }),
@@ -30,8 +34,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
       name: 'AUTH_SERVICE',
       transport: Transport.RMQ,
       options: {
-        urls: [`amqp://rabbitmq:5672`],
-        //urls: [`amqp://localhost:5672`],
+        // urls: [`amqp://rabbitmq:5672`],
+        urls: [`amqp://localhost:5672`],
         queue: 'from_auth_queue',
         queueOptions: {
           durable: true
