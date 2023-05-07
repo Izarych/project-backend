@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException,  Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/sequelize';
@@ -6,7 +6,6 @@ import { AuthDto } from './dto/auth.dto';
 import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
 import { firstValueFrom } from 'rxjs';
-import { Model } from "sequelize-typescript";
 import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -67,7 +66,7 @@ export class AppService {
     const hashPassword = await bcrypt.hash(dto.password, 5);
     const link = uuid.v4();
     const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
-    await this.sendActivationLink(dto.email, link);
+    // await this.sendActivationLink(dto.email, link);
     return this.generateAndSaveTokenAndPayload(user);
   }
 
@@ -95,7 +94,7 @@ export class AppService {
   }
 
   private async generateToken(user) {
-    const payload = { userId: user.id, email: user.email, isActivated: user.isActivated };
+    const payload = { userId: user.id, email: user.email, isActivated: user.isActivated, roles: user.roles };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
         ...payload
