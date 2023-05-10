@@ -43,7 +43,7 @@ export class UsersService {
   async getUserById(id: number) {
     const user = await this.userRepository.findByPk(id);
     if (!user) {
-      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
     return user;
 
@@ -74,7 +74,7 @@ export class UsersService {
   async getUserByLink(link: string) {
     const user = await this.userRepository.findOne({ where: { activationLink: link } });
     if (!user) {
-      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -85,15 +85,15 @@ export class UsersService {
     const role = await this.roleService.getRoleByValue(dto.value);
 
     if (dto.value == 'USER') {
-      throw new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
+      return new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
     }
 
     if (!role) {
-      throw new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
+      return new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
     }
 
     if (!user) {
-      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
 
     if (operation == 'add') {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -9,8 +9,13 @@ export class ReviewsService {
     constructor(@InjectModel(Review) private reviewRepository: typeof Review) { }
 
     async create(dto: CreateReviewDto) {
-        const review = await this.reviewRepository.create(dto);
-        return review;
+        try {
+            const review = await this.reviewRepository.create(dto);
+            return review;
+        } catch (error) {
+            return error.parent;
+        }
+
     }
 
     async removeOneById(id: number) {
@@ -41,5 +46,27 @@ export class ReviewsService {
 
     async update(dto: UpdateReviewDto) {
         return await this.reviewRepository.update(dto, { where: { id: dto.reviewId } });
+    }
+
+    async increaseRate(id: number) {
+        return await this.changeRate(id, 'increase');
+    }
+
+    async decreaseRate(id: number) {
+        return await this.changeRate(id, 'decrease');
+    }
+
+    private async changeRate(id: number, operation: string) {
+        const review = await this.getOneById(id);
+        if(!review){
+            return new HttpException(`Review with "${id}" ID not found`, HttpStatus.NOT_FOUND); 
+        }
+        if (operation == 'increase') {
+            review.rate = review.rate + 1;
+        } else if (operation == 'decrease') {
+            review.rate = review.rate - 1;
+        }
+        await review.save();
+        return review;
     }
 }

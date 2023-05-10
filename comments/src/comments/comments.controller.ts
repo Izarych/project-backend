@@ -49,4 +49,14 @@ export class CommentsController {
     update(@Payload() dto: UpdateCommentDto) {
         return this.commentService.update(dto);
     }
+
+    @MessagePattern('increase.rate.comment')
+    increaseRateComment(@Payload() id: number) {
+        return this.commentService.increaseRate(id);
+    }
+
+    @MessagePattern('decrease.rate.comment')
+    decreaseRateComment(@Payload() id: number) {
+        return this.commentService.decreaseRate(id);
+    }
 }

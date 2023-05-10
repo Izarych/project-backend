@@ -6,9 +6,9 @@ import { UpdateUserPhoneDto } from "./dto/update-user-phone.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { RolesGuard } from "../guard/roles.guard";
 import { Roles } from "../guard/roles-auth.decorator";
-import { JwtAuthGuard } from "../guard/jwt-auth.guard";
 import { CreateCommentDto } from "./dto/create-comment.dto";
 import { CreateReviewDto } from "./dto/create-review.dto";
+import { UpdateReviewDto } from "./dto/update-review.dto";
 
 @Controller()
 export class AppController {
@@ -82,115 +82,143 @@ export class AppController {
         return this.userService.send('delete.user', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Post('/comment')
     createComment(@Body() dto: CreateCommentDto) {
         return this.commentService.send('create.comment', dto);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
+    @Get('/comment/increase_rate/:id')
+    increaseRateComment(@Param('id') id: number) {
+        return this.commentService.send('increase.rate.comment', id);
+    }
+
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
+    @Get('/comment/decrease_rate/:id')
+    decreaseRateComment(@Param('id') id: number) {
+        return this.commentService.send('decrease.rate.comment', id);
+    }
+
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/comment')
     getAllComment() {
         return this.commentService.send('get.all.comment', '');
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/comment/user/:id')
     getAllCommentByUser(@Param('id') id: number) {
         return this.commentService.send('get.all.comment.user', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/comment/review/:id')
     getAllCommentByReview(@Param('id') id: number) {
         return this.commentService.send('get.all.comment.review', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/comment/:id')
     getOneByIdComment(@Param('id') id: number) {
         return this.commentService.send('get.comment', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Put('/comment')
     updateComment(@Body() dto: UpdateUserDto) {
         return this.commentService.send('update.comment', dto);
     }
 
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('ADMIN')
+    // @UseGuards(RolesGuard)
     @Delete('/comment/user/:id')
     removeCommentByUserId(@Param('id') id: number) {
         return this.commentService.send('remove.comment.userId', id);
     }
 
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('ADMIN')
+    // @UseGuards(RolesGuard)
     @Delete('/comment/:id')
     removeCommentByCommentId(@Param('id') id: number) {
         return this.commentService.send('remove.comment.commentId', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
+    @Get('/review/increase_rate/:id')
+    increaseRateReview(@Param('id') id: number) {
+        return this.commentService.send('increase.rate.review', id);
+    }
+
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
+    @Get('/review/decrease_rate/:id')
+    decreaseRateReview(@Param('id') id: number) {
+        return this.commentService.send('decrease.rate.review', id);
+    }
+
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Post('/review')
     createReview(@Body() dto: CreateReviewDto) {
         return this.commentService.send('create.review', dto);
     }
-    
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+
+    // @Roles('ADMIN')
+    // @UseGuards(RolesGuard)
     @Delete('/review/user/:id')
     removeReviewByUserId(@Param('id') id: number) {
         return this.commentService.send('remove.review.userId', id);
     }
 
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('ADMIN')
+    // @UseGuards(RolesGuard)
     @Delete('/review/:id')
     removeReviewByReviewId(@Param('id') id: number) {
         return this.commentService.send('remove.review.reviewId', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/review')
     getAllReview() {
         return this.commentService.send('get.all.review', '');
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/review/user/:id')
     getAllReviewByUserId(@Param('id') id: number) {
         return this.commentService.send('get.all.review.user', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/review/movie/:id')
     getAllReviewByMovieId(@Param('id') id: number) {
         return this.commentService.send('get.all.review.movie', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/review/:id')
     getOneReviewById(@Param('id') id: number) {
         return this.commentService.send('get.review', id);
     }
 
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
-    @Put('/review/:id')
-    updateReview(@Param('id') id: number) {
-        return this.commentService.send('update.review', id);
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
+    @Put('/review')
+    updateReview(@Body() dto: UpdateReviewDto) {
+        return this.commentService.send('update.review', dto);
     }
 }

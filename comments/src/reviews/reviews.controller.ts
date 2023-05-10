@@ -47,4 +47,14 @@ export class ReviewsController {
     update(@Payload() dto: UpdateReviewDto) {
         return this.reviewService.update(dto);
     }
+
+    @MessagePattern('increase.rate.review')
+    increaseRateReview(@Payload() id: number) {
+        return this.reviewService.increaseRate(id);
+    }
+
+    @MessagePattern('decrease.rate.review')
+    decreaseRateReview(@Payload() id: number) {
+        return this.reviewService.decreaseRate(id);
+    }
 }
