@@ -23,13 +23,13 @@ export class AppService {
     const user = await this.checkEmail(dto.email);
 
     if (!user) {
-      return new BadRequestException('User does not exist');
+      throw new BadRequestException('User does not exist');
     }
 
     const isPasswordEquals = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordEquals) {
-      return new BadRequestException('Invalid password');
+      throw new BadRequestException('Invalid password');
     }
 
     return await this.generateAndSaveTokenAndPayload(user);
@@ -52,7 +52,7 @@ export class AppService {
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
 
     if (!userData || !tokenFromDB) {
-      return new UnauthorizedException({ message: 'No auth' });
+      throw new UnauthorizedException({ message: 'No auth' });
     }
 
     const user = await this.checkEmail(userData.email);
