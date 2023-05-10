@@ -12,7 +12,6 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [`amqp://${host}:5672`],
-      // urls: [`amqp://localhost:5672`],
       queue: 'db_queue',
       queueOptions: {
         durable: true
