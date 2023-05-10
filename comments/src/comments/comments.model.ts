@@ -5,6 +5,7 @@ interface CommentCreationAttr {
     commentId: number;
     userId: number;
     comment: string;
+    rate: number;
 }
 
 @Table({ tableName: 'comments' })
@@ -21,6 +22,9 @@ export class Comment extends Model<Comment, CommentCreationAttr> {
 
     @Column({ type: DataType.TEXT, allowNull: false })
     comment: string;
+
+    @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
+    rate: number;
 
     @ForeignKey(() => Review)
     @Column({ type: DataType.INTEGER })

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Controller} from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -46,5 +46,15 @@ export class ReviewsController {
     @MessagePattern('update.review')
     update(@Payload() dto: UpdateReviewDto) {
         return this.reviewService.update(dto);
+    }
+
+    @MessagePattern('increase.rate.review')
+    increaseRateReview(@Payload() id: number) {
+        return this.reviewService.increaseRate(id);
+    }
+
+    @MessagePattern('decrease.rate.review')
+    decreaseRateReview(@Payload() id: number) {
+        return this.reviewService.decreaseRate(id);
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Comment } from './comments.model';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -9,8 +9,12 @@ export class CommentsService {
     constructor(@InjectModel(Comment) private commentRepository: typeof Comment) { }
 
     async create(dto: CreateCommentDto) {
-        const comment = await this.commentRepository.create(dto);
-        return comment;
+        try {
+            const comment = await this.commentRepository.create(dto);
+            return comment;
+        } catch (error) {
+            return error.parent;
+        }
     }
 
     async getAll() {
@@ -40,5 +44,27 @@ export class CommentsService {
 
     async update(dto: UpdateCommentDto) {
         return await this.commentRepository.update(dto, { where: { id: dto.id } });
+    }
+
+    async increaseRate(id: number) {
+        return await this.changeRate(id, 'increase');
+    }
+
+    async decreaseRate(id: number) {
+        return await this.changeRate(id, 'decrease');
+    }
+
+    private async changeRate(id: number, operation: string) {
+        const comment = await this.getOneById(id);
+        if (!comment) {
+            return new HttpException(`Comment with "${id}" ID not found`, HttpStatus.NOT_FOUND);
+        }
+        if (operation == 'increase') {
+            comment.rate = comment.rate + 1;
+        } else if (operation == 'decrease') {
+            comment.rate = comment.rate - 1;
+        }
+        await comment.save();
+        return comment;
     }
 }
