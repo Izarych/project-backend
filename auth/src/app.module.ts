@@ -36,7 +36,6 @@ import { GoogleStrategy } from './strategy/google.strategy';
       name: 'AUTH_SERVICE',
       transport: Transport.RMQ,
       options: {
-        // urls: [`amqp://rabbitmq:5672`],
         urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
         queue: 'from_auth_queue',
         queueOptions: {

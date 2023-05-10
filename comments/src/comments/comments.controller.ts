@@ -4,7 +4,7 @@ import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
-@Controller('comments')
+@Controller()
 export class CommentsController {
     constructor(private commentService: CommentsService) { }
 
@@ -34,7 +34,7 @@ export class CommentsController {
         return this.commentService.getAllByReview(id);
     }
 
-    @MessagePattern('get.comment.commentId')
+    @MessagePattern('remove.comment.commentId')
     removeByCommentId(@Payload() id: number) {
         return this.commentService.removeByCommentId(id);
     }

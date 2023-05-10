@@ -16,7 +16,6 @@ import {JwtModule} from "@nestjs/jwt";
       name: 'PARSE_SERVICE',
       transport: Transport.RMQ,
       options: {
-        // urls: [`amqp://rabbitmq:5672`],
         urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
         queue: 'parse_queue',
         queueOptions: {
@@ -28,9 +27,19 @@ import {JwtModule} from "@nestjs/jwt";
       name: 'USER_SERVICE',
       transport: Transport.RMQ,
       options: {
-        // urls: [`amqp://rabbitmq:5672`],
         urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
         queue: 'user_queue',
+        queueOptions: {
+          durable: true
+        }
+      }
+    }]),
+    ClientsModule.register([{
+      name: 'COMMENT_SERVICE',
+      transport: Transport.RMQ,
+      options: {
+        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+        queue: 'comment_queue',
         queueOptions: {
           durable: true
         }

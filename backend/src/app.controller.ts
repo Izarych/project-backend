@@ -1,22 +1,25 @@
-import {Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { AddRoleDto } from "./dto/add-user-role.dto";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateUserPhoneDto } from "./dto/update-user-phone.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import {RolesGuard} from "../guard/roles.guard";
-import {Roles} from "../guard/roles-auth.decorator";
-import {JwtAuthGuard} from "../guard/jwt-auth.guard";
+import { RolesGuard } from "../guard/roles.guard";
+import { Roles } from "../guard/roles-auth.decorator";
+import { JwtAuthGuard } from "../guard/jwt-auth.guard";
+import { CreateCommentDto } from "./dto/create-comment.dto";
+import { CreateReviewDto } from "./dto/create-review.dto";
 
 @Controller()
 export class AppController {
     constructor(@Inject('USER_SERVICE') private userService: ClientProxy,
-                @Inject('PARSE_SERVICE') private parseService: ClientProxy) { }
+        @Inject('PARSE_SERVICE') private parseService: ClientProxy,
+        @Inject('COMMENT_SERVICE') private commentService: ClientProxy) { }
 
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Post('/role')
-    create(@Body() dto: CreateRoleDto) {
+    createRole(@Body() dto: CreateRoleDto) {
         return this.userService.send('create.role', dto);
     }
 
@@ -35,12 +38,12 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Get('/user')
-    getAll() {
+    getAllUsers() {
         return this.userService.send('get.all.users', '');
     }
 
     @Get('/user/:id')
-    getOneById(@Param('id') id: number) {
+    getOneByIdUser(@Param('id') id: number) {
         return this.userService.send('get.user.id', id);
     }
 
@@ -48,7 +51,7 @@ export class AppController {
     @UseGuards(RolesGuard)
     @Post('/user/addrole/:id')
     addRole(@Param('id') userId: number, @Body() dto: AddRoleDto) {
-        return this.userService.send('add.role', {userId, value: dto.value});
+        return this.userService.send('add.role', { userId, value: dto.value });
     }
 
     @Roles('ADMIN')
@@ -75,7 +78,119 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    delete(@Param('id') id: number) {
+    deleteUser(@Param('id') id: number) {
         return this.userService.send('delete.user', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Post('/comment')
+    createComment(@Body() dto: CreateCommentDto) {
+        return this.commentService.send('create.comment', dto);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/comment')
+    getAllComment() {
+        return this.commentService.send('get.all.comment', '');
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/comment/user/:id')
+    getAllCommentByUser(@Param('id') id: number) {
+        return this.commentService.send('get.all.comment.user', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/comment/review/:id')
+    getAllCommentByReview(@Param('id') id: number) {
+        return this.commentService.send('get.all.comment.review', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/comment/:id')
+    getOneByIdComment(@Param('id') id: number) {
+        return this.commentService.send('get.comment', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Put('/comment')
+    updateComment(@Body() dto: UpdateUserDto) {
+        return this.commentService.send('update.comment', dto);
+    }
+
+    @Roles('ADMIN')
+    @UseGuards(RolesGuard)
+    @Delete('/comment/user/:id')
+    removeCommentByUserId(@Param('id') id: number) {
+        return this.commentService.send('remove.comment.userId', id);
+    }
+
+    @Roles('ADMIN')
+    @UseGuards(RolesGuard)
+    @Delete('/comment/:id')
+    removeCommentByCommentId(@Param('id') id: number) {
+        return this.commentService.send('remove.comment.commentId', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Post('/review')
+    createReview(@Body() dto: CreateReviewDto) {
+        return this.commentService.send('create.review', dto);
+    }
+    
+    @Roles('ADMIN')
+    @UseGuards(RolesGuard)
+    @Delete('/review/user/:id')
+    removeReviewByUserId(@Param('id') id: number) {
+        return this.commentService.send('remove.review.userId', id);
+    }
+
+    @Roles('ADMIN')
+    @UseGuards(RolesGuard)
+    @Delete('/review/:id')
+    removeReviewByReviewId(@Param('id') id: number) {
+        return this.commentService.send('remove.review.reviewId', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/review')
+    getAllReview() {
+        return this.commentService.send('get.all.review', '');
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/review/user/:id')
+    getAllReviewByUserId(@Param('id') id: number) {
+        return this.commentService.send('get.all.review.user', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/review/movie/:id')
+    getAllReviewByMovieId(@Param('id') id: number) {
+        return this.commentService.send('get.all.review.movie', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Get('/review/:id')
+    getOneReviewById(@Param('id') id: number) {
+        return this.commentService.send('get.review', id);
+    }
+
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
+    @Put('/review/:id')
+    updateReview(@Param('id') id: number) {
+        return this.commentService.send('update.review', id);
     }
 }
