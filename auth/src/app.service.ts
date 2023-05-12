@@ -1,14 +1,14 @@
-import { BadRequestException,  Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ClientProxy } from '@nestjs/microservices';
-import { InjectModel } from '@nestjs/sequelize';
-import { AuthDto } from './dto/auth.dto';
-import { Token } from './token/token.model';
+import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
+import {JwtService} from '@nestjs/jwt';
+import {ClientProxy} from '@nestjs/microservices';
+import {InjectModel} from '@nestjs/sequelize';
+import {AuthDto} from './dto/auth.dto';
+import {Token} from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import { firstValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
+import {firstValueFrom} from 'rxjs';
+import {HttpService} from '@nestjs/axios';
 import * as uuid from 'uuid';
-import { MailerService } from '@nestjs-modules/mailer';
+import {MailerService} from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AppService {
@@ -68,6 +68,10 @@ export class AppService {
     const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
     // await this.sendActivationLink(dto.email, link);
     return this.generateAndSaveTokenAndPayload(user);
+  }
+
+  async hashNewPassword(password: string) {
+    return await bcrypt.hash(password, 5);
   }
 
 
