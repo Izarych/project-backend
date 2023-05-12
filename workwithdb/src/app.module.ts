@@ -9,6 +9,7 @@ import {Genres} from "./genres/genres.model";
 import {People} from "./people/people.model";
 import {MoviePeople} from "./people/moviepeople.model";
 import {MovieGenres} from "./genres/moviegenres.model";
+import { AdminModule } from './admin/admin.module';
 
 
 @Module({
@@ -29,6 +30,7 @@ import {MovieGenres} from "./genres/moviegenres.model";
       MovieModule,
       PeopleModule,
       GenresModule,
+      AdminModule,
   ],
   controllers: [],
   providers: [],
