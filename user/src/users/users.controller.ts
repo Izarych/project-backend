@@ -1,11 +1,9 @@
 import { Controller } from '@nestjs/common';
 import { AddRoleDto } from './dto/add-user-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
-import { UpdateUserPhoneDto } from './dto/update-user-phone.dto';
-import { UpdateUserLinkDto } from './dto/update-user-link.dto';
+import {User} from "./users.model";
 
 @Controller()
 export class UsersController {
@@ -48,24 +46,24 @@ export class UsersController {
   }
 
   @MessagePattern('remove.role')
-  removeRole(@Payload() dto: AddRoleDto) {
+  removeRole(@Payload() dto : AddRoleDto) {
     return this.userService.removeRole(dto);
   }
 
   @EventPattern('update.user')
-  update(@Payload() userDto: UpdateUserDto) {
-    return this.userService.updateUser(userDto);
+  update(@Payload() data: Partial<User>) : Promise<User> {
+    return this.userService.updateUser(data);
   }
 
-  @EventPattern('update.user.link')
-  updateActivationLink(@Payload() dto: UpdateUserLinkDto) {
-    return this.userService.updateActivationLink(dto);
-  }
+  // @EventPattern('update.user.link')
+  // updateActivationLink(@Payload() dto: UpdateUserLinkDto) {
+  //   return this.userService.updateActivationLink(dto);
+  // }
 
-  @EventPattern('update.user.phone')
-  updatePhone(@Payload() dto: UpdateUserPhoneDto) {
-    return this.userService.updateUserPhone(dto);
-  }
+  // @EventPattern('update.user.phone')
+  // updatePhone(@Payload() dto: UpdateUserPhoneDto) {
+  //   return this.userService.updateUserPhone(dto);
+  // }
 
   @EventPattern('delete.user')
   delete(@Payload() id: number) {

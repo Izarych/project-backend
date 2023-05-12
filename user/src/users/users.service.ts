@@ -3,10 +3,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { RolesService } from 'src/roles/roles.service';
 import { AddRoleDto } from './dto/add-user-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './users.model';
-import { UpdateUserPhoneDto } from './dto/update-user-phone.dto';
-import { UpdateUserLinkDto } from './dto/update-user-link.dto';
+import {Role} from "../roles/roles.model";
 
 
 @Injectable()
@@ -28,9 +26,9 @@ export class UsersService {
     return await this.userRepository.update({ isActivated: true }, { where: { activationLink: link } });
   }
 
-  async updateActivationLink(dto: UpdateUserLinkDto) {
-    return await this.userRepository.update({ activationLink: dto.link }, { where: { email: dto.email } });
-  }
+  // async updateActivationLink(dto: UpdateUserLinkDto) {
+  //   return await this.userRepository.update({ activationLink: dto.link }, { where: { email: dto.email } });
+  // }
 
   async getAllUsers() {
     return await this.userRepository.findAll({ include: { all: true } });
@@ -59,15 +57,17 @@ export class UsersService {
     return user;
   }
 
-  async updateUser(userDto: UpdateUserDto) {
-    return await this.userRepository.update(userDto, { where: { id: userDto.id } });
+  async updateUser(data: Partial<User>) : Promise<User> {
+    const user : User = await this.userRepository.findByPk(data.id);
+    await user.update(data);
+    return user;
   }
 
-  async updateUserPhone(dto: UpdateUserPhoneDto) {
-    return await this.userRepository.update({ ...dto, phoneNumber: dto.phoneNumber }, { where: { id: dto.id } });
-  }
+  // async updateUserPhone(dto: UpdateUserPhoneDto) {
+  //   return await this.userRepository.update({ ...dto, phoneNumber: dto.phoneNumber }, { where: { id: dto.id } });
+  // }
 
-  async removeRole(dto: AddRoleDto) {
+  async removeRole(dto : AddRoleDto) {
     return await this.addOrRemoveRole(dto, 'remove');
   }
 
@@ -81,8 +81,8 @@ export class UsersService {
 
 
   private async addOrRemoveRole(dto: AddRoleDto, operation: string) {
-    const user = await this.userRepository.findByPk(dto.userId);
-    const role = await this.roleService.getRoleByValue(dto.value);
+    const user : User = await this.userRepository.findByPk(dto.userId);
+    const role : Role = await this.roleService.getRoleByValue(dto.value);
 
     if (dto.value == 'USER') {
       return new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
