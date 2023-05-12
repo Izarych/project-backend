@@ -23,7 +23,7 @@ export class User extends Model<User, UserCreationAttr> {
   password: string;
 
   @Column({ type: DataType.STRING, unique: true, defaultValue: null })
-  phoneNumber: number;
+  phoneNumber: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   isActivated: boolean;
