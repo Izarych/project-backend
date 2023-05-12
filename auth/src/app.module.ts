@@ -29,8 +29,9 @@ import { GoogleStrategy } from './strategy/google.strategy';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [],
-      autoLoadModels: true
+      models: [Token],
+      autoLoadModels: true,
+      synchronize: true
     }),
     ClientsModule.register([{
       name: 'AUTH_SERVICE',
