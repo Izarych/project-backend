@@ -45,6 +45,17 @@ import {JwtModule} from "@nestjs/jwt";
         }
       }
     }]),
+    ClientsModule.register([{
+      name: 'AUTH_SERVICE',
+      transport: Transport.RMQ,
+      options: {
+        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+        queue: 'auth_queue',
+        queueOptions: {
+          durable: true
+        }
+      }
+    }]),
     JwtModule.register({
       signOptions: {
         expiresIn: '24h'
