@@ -24,7 +24,8 @@ import {MovieGenres} from "./genres/moviegenres.model";
           password: process.env.POSTGRES_PASSWORD,
           database: process.env.POSTGRES_DB,
           models: [Movie, Genres, People, MoviePeople, MovieGenres],
-          autoLoadModels: true
+          autoLoadModels: true,
+          synchronize: true
       }),
       MovieModule,
       PeopleModule,

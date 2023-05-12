@@ -6,8 +6,9 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
 import { Token } from './token/token.model';
+import {EventPattern, Payload} from "@nestjs/microservices";
 
 @ApiTags('Authorization')
 @Controller()
@@ -44,23 +45,32 @@ export class AppController {
   }
 
 
-  @ApiOperation({ summary: 'Login by gmail' })  //Дописать надо
-  @ApiResponse({ status: 200 })
+  @ApiOperation({ summary: 'Login by gmail' })
+  @ApiOkResponse({ description: 'Successful gmail login' })
   @Get('login_gmail')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) { }
 
 
-  @ApiOperation({ summary: 'login_gmail_success' }) //Дописать надо
-  @ApiResponse({ status: 200 })
+  @ApiOperation({ summary: 'login_gmail_success' })
+  @ApiOkResponse({ description: 'Successful gmail login redirect' })
   @Get('login_gmail_success')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req) {
     return this.appService.gmailLogin(req)
   }
 
-  @ApiOperation({ summary: 'login_vk' })//Дописать надо
-  @ApiResponse({ status: 200})
+  @ApiOperation({ summary: 'login_vk' })
+  @ApiResponse({
+    status: 200,
+    description: 'VK token was returned',
+    schema: {
+      type: 'object',
+      properties: {
+        access_token: {type: 'string', example: 'somevktoken'}
+      }
+    }
+  })
   @Get('/login_vk')
   async auth(@Res() res: Response) {
     const host =
@@ -72,8 +82,16 @@ export class AppController {
   }
 
 
-  @ApiOperation({ summary: 'login_vk_success' }) //Дописать надо
-  @ApiResponse({ status: 200 })
+  @ApiOperation({ summary: 'login_vk_success' })
+  @ApiQuery({
+    name: 'code',
+    description: 'Code for VK login',
+    type: String,
+    example: 'somecodehere'
+  })
+  @ApiOkResponse({
+    description: 'Successful vk login redirect'
+  })
   @Get('/login_vk_success')
   async code(@Query('code') code: string, @Res() res: Response) {
     const host =
@@ -84,8 +102,24 @@ export class AppController {
   }
 
 
-  @ApiOperation({ summary: '/login/vk' }) //Дописать надо
-  @ApiResponse({ status: 200 })
+  @ApiOperation({ summary: '/login/vk' })
+  @ApiBody({
+    description: 'Code for VK login',
+    schema: {
+      type: 'object',
+      properties: {
+        code: {type: 'string', example: 'somecodehere'}
+      }
+    }
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'VK token was returned',
+    schema: {
+      type: 'string',
+      example: 'somevktoken'
+    }
+  })
   @Post('/login/vk')
   async loginVk(@Body() body: { code: string }) {
     let authData;
@@ -101,7 +135,17 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Check if user email exists or not' })
-  @ApiResponse({ status: 200})
+  @ApiResponse({
+    status: 200,
+    description: 'User was returned if exists',
+    schema: {
+      type: 'object',
+      properties: {
+        email: {type: 'string', example: 'email@gmail.com'},
+        password: {type: 'string', example: 'hashpassword'}
+      }
+    }
+  })
   @Get('/check/:email')
   async checkEmail(@Param('email') email: string) {
     return this.appService.checkEmail(email);
@@ -109,7 +153,7 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Logout' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200})
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     try {
@@ -142,9 +186,27 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Registration' })
-  @ApiResponse({ status: 200})
+  @ApiResponse({
+    status: 200,
+    description: 'User registration',
+    schema: {
+      type: 'object',
+      properties: {
+        userId: {type: 'number', example: 1},
+        accesstoken: {type: 'string', example: 'someaccesstoken'},
+        refreshtoken: {type: 'string', example: 'somerefreshtoken'},
+        email: {type: 'string', example: 'email@gmail.com'},
+        password: {type: 'string', example: 'hashpassword'}
+      }
+    }
+  })
   @Post('/registration')
   async registration(@Body() dto: AuthDto) {
     return this.appService.registration(dto);
+  }
+
+  @EventPattern('hash_password')
+  async hashPassword(@Payload() password: string) {
+    return this.appService.hashNewPassword(password);
   }
 }

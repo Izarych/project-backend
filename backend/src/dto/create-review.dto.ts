@@ -3,18 +3,18 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateReviewDto {
 
-    @ApiProperty({ example: '1', description: "Unique movie ID" })
-    @IsNotEmpty({ message: "Movie id should not be empty" })
-    @IsNumber({}, { message: 'Movie id must be number' })
+    @ApiProperty({ example: 1, description: "id фильма" })
+    @IsNotEmpty({ message: "Не должно быть пустым" })
+    @IsNumber({}, { message: 'Должно быть числом' })
     readonly movieId: number;
 
-    @ApiProperty({ example: '1', description: "Unique user ID" })
-    @IsNotEmpty({ message: "User id should not be empty" })
-    @IsNumber({}, { message: 'User id must be number' })
+    @ApiProperty({ example: 1, description: "id пользователя" })
+    @IsNotEmpty({ message: "Не должен быть пустым" })
+    @IsNumber({}, { message: 'Должно быть числом' })
     readonly userId: number;
 
     @ApiProperty({ example: 'any review', description: "Review" })
-    @IsNotEmpty({ message: "Review should not be empty" })
-    @IsString({ message: 'Review must be string' })
+    @IsNotEmpty({ message: "Не должно быть пустым" })
+    @IsString({ message: 'Должно быть строкой' })
     readonly review: string;
 }

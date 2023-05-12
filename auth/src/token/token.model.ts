@@ -8,7 +8,7 @@ export class Token extends Model<Token>{
     @Column({ type: DataType.INTEGER, unique: true })
     userId: number;
 
-    @ApiProperty({ example: 'hjkdawhkjdhawkjdaw', description: "Refresh token" })
+    @ApiProperty({ example: 'token', description: "Refresh token" })
     @Column({ type: DataType.TEXT })
     refreshToken: string;
 }
