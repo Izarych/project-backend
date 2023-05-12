@@ -8,10 +8,10 @@ async function start() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
-    .setTitle("RTR")
-    .setDescription("Test Document")
-    .setVersion("0.0.1")
-    .addTag("RTR")
+    .setTitle("Main app")
+    .setDescription("Main app documentation")
+    .setVersion("1.0.0")
+    .addTag("backend")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api/docs', app, document);
