@@ -1,4 +1,4 @@
 export class UpdateReviewDto {
-    readonly reviewId: number;
+    readonly id?: number;
     readonly review: string;
 }

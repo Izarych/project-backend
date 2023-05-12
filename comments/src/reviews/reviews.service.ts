@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
-import { Review } from './reviews.model';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {InjectModel} from '@nestjs/sequelize';
+import {CreateReviewDto} from './dto/create-review.dto';
+import {Review} from './reviews.model';
+import {UpdateReviewDto} from "./dto/update-review.dto";
 
 @Injectable()
 export class ReviewsService {
@@ -10,8 +10,7 @@ export class ReviewsService {
 
     async create(dto: CreateReviewDto) {
         try {
-            const review = await this.reviewRepository.create(dto);
-            return review;
+            return await this.reviewRepository.create(dto);
         } catch (error) {
             return error.parent;
         }
@@ -26,26 +25,27 @@ export class ReviewsService {
         return await this.reviewRepository.destroy({ where: { userId: id } });
     }
 
-    async getAll() {
+    async getAll() : Promise<Review[]> {
         return await this.reviewRepository.findAll({
             include: { all: true }
         });
     }
 
-    async getByMovieId(id: number) {
+    async getByMovieId(id: number) : Promise<Review[]> {
         return await this.reviewRepository.findAll({ where: { movieId: id } });
     }
 
-    async getByUserId(id: number) {
+    async getByUserId(id: number) : Promise<Review[]> {
         return await this.reviewRepository.findAll({ where: { userId: id } });
     }
 
-    async getOneById(id: number) {
+    async getOneById(id: number) : Promise<Review> {
         return await this.reviewRepository.findByPk(id);
     }
 
-    async update(dto: UpdateReviewDto) {
-        return await this.reviewRepository.update(dto, { where: { id: dto.reviewId } });
+    async update(dto: UpdateReviewDto) : Promise<Review> {
+        const review : Review = await this.reviewRepository.findByPk(dto.id);
+        return await review.update(dto);
     }
 
     async increaseRate(id: number) {

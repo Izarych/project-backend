@@ -42,8 +42,9 @@ export class CommentsService {
         return await this.commentRepository.destroy({ where: { userId: id } });
     }
 
-    async update(dto: UpdateCommentDto) {
-        return await this.commentRepository.update(dto, { where: { id: dto.id } });
+    async update(dto: UpdateCommentDto) : Promise<Comment> {
+        const comment = await this.commentRepository.findByPk(dto.id);
+        return await comment.update(dto);
     }
 
     async increaseRate(id: number) {
