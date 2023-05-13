@@ -40,7 +40,7 @@ export class AppController {
   @ApiOperation({ summary: 'Activate account' })
   @ApiResponse({ status: 200})
   @Get('/activate/:link')
-  async test(@Param('link') link: string) {
+  async activate(@Param('link') link: string) {
     return this.appService.activate(link);
   }
 

@@ -8,7 +8,7 @@ export class AppController {
   }
 
   @EventPattern('parse')
-  parseFilms() {
+  async parseFilms() {
     return this.parseService.parse();
   }
 }

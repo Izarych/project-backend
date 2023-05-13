@@ -9,12 +9,12 @@ export class RolesController {
   constructor(private roleService: RolesService) { }
 
   @MessagePattern('create.role')
-  create(@Payload() roleDto: CreateRoleDto) {
+  async create(@Payload() roleDto: CreateRoleDto) {
     return this.roleService.createRole(roleDto);
   }
 
   @MessagePattern('get.role.by.value')
-  getByValue(@Payload() value: string) {
+  async getByValue(@Payload() value: string) {
     return this.roleService.getRoleByValue(value);
   }
 }
