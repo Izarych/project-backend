@@ -67,7 +67,7 @@ export class AppService {
     const link = uuid.v4();
     const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
     // await this.sendActivationLink(dto.email, link);
-    return this.generateAndSaveTokenAndPayload(user);
+    return await this.generateAndSaveTokenAndPayload(user);
   }
 
   async hashNewPassword(password: string) {
