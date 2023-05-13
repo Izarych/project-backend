@@ -54,17 +54,7 @@ export class UsersController {
   update(@Payload() data: Partial<User>) : Promise<User> {
     return this.userService.updateUser(data);
   }
-
-  // @EventPattern('update.user.link')
-  // updateActivationLink(@Payload() dto: UpdateUserLinkDto) {
-  //   return this.userService.updateActivationLink(dto);
-  // }
-
-  // @EventPattern('update.user.phone')
-  // updatePhone(@Payload() dto: UpdateUserPhoneDto) {
-  //   return this.userService.updateUserPhone(dto);
-  // }
-
+  
   @EventPattern('delete.user')
   delete(@Payload() id: number) {
     return this.userService.deleteUser(id);

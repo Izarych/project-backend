@@ -5,9 +5,11 @@ import {ApiProperty} from "@nestjs/swagger";
 
 @Table({ tableName: 'people', createdAt: false, updatedAt: false })
 export class People extends Model<People> {
+
     @ApiProperty({ example: 1, description: "id человека" })
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number;
+    
     @ApiProperty({ example: 'Клинт Иствуд', description: "Имя" })
     @Column({ type: DataType.STRING, allowNull: false })
     fullName: string;

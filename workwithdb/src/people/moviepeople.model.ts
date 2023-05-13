@@ -4,6 +4,7 @@ import {Movie} from "../movie/movie.model";
 
 @Table({ tableName: 'movie_people', createdAt: false, updatedAt: false })
 export class MoviePeople extends Model<MoviePeople> {
+    
     @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true, unique: true })
     id: number;
 

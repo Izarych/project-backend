@@ -26,10 +26,6 @@ export class UsersService {
     return await this.userRepository.update({ isActivated: true }, { where: { activationLink: link } });
   }
 
-  // async updateActivationLink(dto: UpdateUserLinkDto) {
-  //   return await this.userRepository.update({ activationLink: dto.link }, { where: { email: dto.email } });
-  // }
-
   async getAllUsers() {
     return await this.userRepository.findAll({ include: { all: true } });
   }
@@ -62,10 +58,6 @@ export class UsersService {
     await user.update(data);
     return user;
   }
-
-  // async updateUserPhone(dto: UpdateUserPhoneDto) {
-  //   return await this.userRepository.update({ ...dto, phoneNumber: dto.phoneNumber }, { where: { id: dto.id } });
-  // }
 
   async removeRole(dto : AddRoleDto) {
     return await this.addOrRemoveRole(dto, 'remove');

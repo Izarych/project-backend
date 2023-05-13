@@ -187,31 +187,6 @@ export class AppController {
         return this.userService.send('update.user', {...dto, id: id});
     }
 
-    // @ApiOperation({ summary: 'Add/change user`s phonenumber' })
-    // @ApiBody({
-    //     description: 'send phone number to body',
-    //     type: UpdateUserPhoneDto
-    // })
-    // @ApiResponse({
-    //     status: 200,
-    //     description: 'add phone number to user',
-    //     schema: {
-    //         type: 'object',
-    //         properties: {
-    //             userId: {type: 'number', example: 1},
-    //             email: {type: 'string', example: 'mail@gmail.com'},
-    //             password: {type: 'string', example: 'newhashpassword'},
-    //             phoneNumber: {type: 'string', example: '123456798'}
-    //         }
-    //     }
-    // })
-    // @Roles('USER', 'ADMIN')
-    // @UseGuards(RolesGuard)
-    // @Put('/user/:id/phone')
-    // updatePhoneNumber(@Param('id') id: number, @Body() dto: UpdateUserPhoneDto) {
-    //     return this.userService.send('update.user.phone', {id: id, phoneNumber: dto.phoneNumber});
-    // }
-
     @ApiOperation({ summary: 'Удаление пользователя' })
     @ApiParam({
         name: 'id',
