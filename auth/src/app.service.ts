@@ -19,7 +19,6 @@ export class AppService {
     private readonly mailerService: MailerService) { }
 
   async login(dto: AuthDto) {
-
     const user = await this.checkEmail(dto.email);
 
     if (!user) {
