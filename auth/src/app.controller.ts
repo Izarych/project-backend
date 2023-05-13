@@ -6,9 +6,8 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
-import {ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import { Token } from './token/token.model';
-import {EventPattern, Payload} from "@nestjs/microservices";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EventPattern, Payload } from "@nestjs/microservices";
 
 @ApiTags('Authorization')
 @Controller()
@@ -17,7 +16,20 @@ export class AppController {
     private readonly httpService: HttpService) { }
 
   @ApiOperation({ summary: 'Login' })
-  @ApiResponse({ status: 200, type: Token })
+  @ApiResponse({
+    status: 200,
+    description: "Log in",
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'number', example: 1 },
+        accesstoken: { type: 'string', example: 'someaccesstoken' },
+        refreshtoken: { type: 'string', example: 'somerefreshtoken' },
+        email: { type: 'string', example: 'email@gmail.com' },
+        password: { type: 'string', example: 'hashpassword' }
+      }
+    }
+  })
   @Post('/login')
   async login(@Body() dto: AuthDto, @Res() res: Response) {
     try {
@@ -30,7 +42,16 @@ export class AppController {
   }
 
   @ApiOperation({ summary: 'Resend activation link on email' })
-  @ApiResponse({ status: 200})
+  @ApiParam({
+    name: 'email',
+    description: 'Email for sending mail',
+    type: String,
+    example: "test@mail.ru"
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Resend mail on email, update link in table"
+  })
   @Get('/sendlink/:email')
   async resendLink(@Param('email') email: string) {
     return this.appService.reSendActivationLink(email);
@@ -38,9 +59,18 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Activate account' })
-  @ApiResponse({ status: 200})
+  @ApiParam({
+    name: 'link',
+    description: 'Activation link',
+    type: String,
+    example: "anylinkhere"
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Activate account if link is right"
+  })
   @Get('/activate/:link')
-  async test(@Param('link') link: string) {
+  async activate(@Param('link') link: string) {
     return this.appService.activate(link);
   }
 
@@ -67,7 +97,7 @@ export class AppController {
     schema: {
       type: 'object',
       properties: {
-        access_token: {type: 'string', example: 'somevktoken'}
+        access_token: { type: 'string', example: 'somevktoken' }
       }
     }
   })
@@ -108,7 +138,7 @@ export class AppController {
     schema: {
       type: 'object',
       properties: {
-        code: {type: 'string', example: 'somecodehere'}
+        code: { type: 'string', example: 'somecodehere' }
       }
     }
   })
@@ -141,8 +171,8 @@ export class AppController {
     schema: {
       type: 'object',
       properties: {
-        email: {type: 'string', example: 'email@gmail.com'},
-        password: {type: 'string', example: 'hashpassword'}
+        email: { type: 'string', example: 'email@gmail.com' },
+        password: { type: 'string', example: 'hashpassword' }
       }
     }
   })
@@ -153,7 +183,10 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Logout' })
-  @ApiResponse({ status: 200})
+  @ApiResponse({
+    status: 200,
+    description: "Удаление refresh токена из куков и удаление записи в таблице токенов"
+  })
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     try {
@@ -167,7 +200,20 @@ export class AppController {
   }
 
   @ApiOperation({ summary: 'Refresh tokens' })
-  @ApiResponse({ status: 200, type: Token })
+  @ApiResponse({
+    status: 200,
+    description: "Обновление resfresh и access токенов",
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'number', example: 1 },
+        accesstoken: { type: 'string', example: 'someaccesstoken' },
+        refreshtoken: { type: 'string', example: 'somerefreshtoken' },
+        email: { type: 'string', example: 'email@gmail.com' },
+        password: { type: 'string', example: 'hashpassword' }
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   @Get('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
@@ -186,17 +232,21 @@ export class AppController {
 
 
   @ApiOperation({ summary: 'Registration' })
+  @ApiBody({
+    description: 'В body отправляем email и пароль',
+    type: AuthDto
+  })
   @ApiResponse({
     status: 200,
     description: 'User registration',
     schema: {
       type: 'object',
       properties: {
-        userId: {type: 'number', example: 1},
-        accesstoken: {type: 'string', example: 'someaccesstoken'},
-        refreshtoken: {type: 'string', example: 'somerefreshtoken'},
-        email: {type: 'string', example: 'email@gmail.com'},
-        password: {type: 'string', example: 'hashpassword'}
+        userId: { type: 'number', example: 1 },
+        accesstoken: { type: 'string', example: 'someaccesstoken' },
+        refreshtoken: { type: 'string', example: 'somerefreshtoken' },
+        email: { type: 'string', example: 'email@gmail.com' },
+        password: { type: 'string', example: 'hashpassword' }
       }
     }
   })

@@ -25,7 +25,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Post('/role')
-    createRole(@Body() dto: CreateRoleDto) {
+    async createRole(@Body() dto: CreateRoleDto) {
         return this.userService.send('create.role', dto);
     }
 
@@ -52,7 +52,7 @@ export class AppController {
         }
     })
     @Get('/role/:role')
-    getByValue(@Param('role') role: string) {
+    async getByValue(@Param('role') role: string) {
         return this.userService.send('get.role.by.value', role);
     }
 
@@ -72,7 +72,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Get('/user')
-    getAllUsers() {
+    async getAllUsers() {
         return this.userService.send('get.all.users', '');
     }
 
@@ -96,7 +96,7 @@ export class AppController {
         }
     })
     @Get('/user/:id')
-    getOneByIdUser(@Param('id') id: number) {
+    async getOneByIdUser(@Param('id') id: number) {
         return this.userService.send('get.user.id', id);
     }
 
@@ -162,7 +162,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/removerole/:id/:value')
-    removeRole(@Param('id') id: number, @Param('value') roleValue: string) {
+    async removeRole(@Param('id') id: number, @Param('value') roleValue: string) {
         return this.userService.send('remove.role', {userId: id, value: roleValue});
     }
 
@@ -187,31 +187,6 @@ export class AppController {
         return this.userService.send('update.user', {...dto, id: id});
     }
 
-    // @ApiOperation({ summary: 'Add/change user`s phonenumber' })
-    // @ApiBody({
-    //     description: 'send phone number to body',
-    //     type: UpdateUserPhoneDto
-    // })
-    // @ApiResponse({
-    //     status: 200,
-    //     description: 'add phone number to user',
-    //     schema: {
-    //         type: 'object',
-    //         properties: {
-    //             userId: {type: 'number', example: 1},
-    //             email: {type: 'string', example: 'mail@gmail.com'},
-    //             password: {type: 'string', example: 'newhashpassword'},
-    //             phoneNumber: {type: 'string', example: '123456798'}
-    //         }
-    //     }
-    // })
-    // @Roles('USER', 'ADMIN')
-    // @UseGuards(RolesGuard)
-    // @Put('/user/:id/phone')
-    // updatePhoneNumber(@Param('id') id: number, @Body() dto: UpdateUserPhoneDto) {
-    //     return this.userService.send('update.user.phone', {id: id, phoneNumber: dto.phoneNumber});
-    // }
-
     @ApiOperation({ summary: 'Удаление пользователя' })
     @ApiParam({
         name: 'id',
@@ -226,7 +201,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    deleteUser(@Param('id') id: number) {
+    async deleteUser(@Param('id') id: number) {
         return this.userService.send('delete.user', id);
     }
 
@@ -243,7 +218,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Post('/comment')
-    createComment(@Body() dto: CreateCommentDto) {
+    async createComment(@Body() dto: CreateCommentDto) {
         return this.commentService.send('create.comment', dto);
     }
 
@@ -269,7 +244,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment/increase_rate/:id')
-    increaseRateComment(@Param('id') id: number) {
+    async increaseRateComment(@Param('id') id: number) {
         return this.commentService.send('increase.rate.comment', id);
     }
 
@@ -295,7 +270,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment/decrease_rate/:id')
-    decreaseRateComment(@Param('id') id: number) {
+    async decreaseRateComment(@Param('id') id: number) {
         return this.commentService.send('decrease.rate.comment', id);
     }
 
@@ -315,7 +290,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment')
-    getAllComment() {
+    async getAllComment() {
         return this.commentService.send('get.all.comment', '');
     }
 
@@ -341,7 +316,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment/user/:id')
-    getAllCommentByUser(@Param('id') id: number) {
+    async getAllCommentByUser(@Param('id') id: number) {
         return this.commentService.send('get.all.comment.user', id);
     }
 
@@ -367,7 +342,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment/review/:id')
-    getAllCommentByReview(@Param('id') id: number) {
+    async getAllCommentByReview(@Param('id') id: number) {
         return this.commentService.send('get.all.comment.review', id);
     }
 
@@ -393,7 +368,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/comment/:id')
-    getOneByIdComment(@Param('id') id: number) {
+    async getOneByIdComment(@Param('id') id: number) {
         return this.commentService.send('get.comment', id);
     }
 
@@ -423,7 +398,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/comment/:id')
-    updateComment(@Param('id') id: number, @Body() dto: UpdateCommentDto) {
+    async updateComment(@Param('id') id: number, @Body() dto: UpdateCommentDto) {
         return this.commentService.send('update.comment', {id: id, comment: dto.comment});
     }
 
@@ -438,7 +413,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/comment/user/:id')
-    removeCommentByUserId(@Param('id') id: number) {
+    async removeCommentByUserId(@Param('id') id: number) {
         return this.commentService.send('remove.comment.userId', id);
     }
 
@@ -453,7 +428,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/comment/:id')
-    removeCommentByCommentId(@Param('id') id: number) {
+    async removeCommentByCommentId(@Param('id') id: number) {
         return this.commentService.send('remove.comment.commentId', id);
     }
 
@@ -468,7 +443,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/increase_rate/:id')
-    increaseRateReview(@Param('id') id: number) {
+    async increaseRateReview(@Param('id') id: number) {
         return this.commentService.send('increase.rate.review', id);
     }
 
@@ -483,7 +458,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/decrease_rate/:id')
-    decreaseRateReview(@Param('id') id: number) {
+    async decreaseRateReview(@Param('id') id: number) {
         return this.commentService.send('decrease.rate.review', id);
     }
 
@@ -496,7 +471,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Post('/review')
-    createReview(@Body() dto: CreateReviewDto) {
+    async createReview(@Body() dto: CreateReviewDto) {
         return this.commentService.send('create.review', dto);
     }
 
@@ -511,7 +486,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/review/user/:id')
-    removeReviewByUserId(@Param('id') id: number) {
+    async removeReviewByUserId(@Param('id') id: number) {
         return this.commentService.send('remove.review.userId', id);
     }
 
@@ -526,7 +501,7 @@ export class AppController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/review/:id')
-    removeReviewByReviewId(@Param('id') id: number) {
+    async removeReviewByReviewId(@Param('id') id: number) {
         return this.commentService.send('remove.review.reviewId', id);
     }
 
@@ -546,7 +521,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review')
-    getAllReview() {
+    async getAllReview() {
         return this.commentService.send('get.all.review', '');
     }
 
@@ -571,7 +546,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/user/:id')
-    getAllReviewByUserId(@Param('id') id: number) {
+    async getAllReviewByUserId(@Param('id') id: number) {
         return this.commentService.send('get.all.review.user', id);
     }
 
@@ -596,7 +571,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/movie/:id')
-    getAllReviewByMovieId(@Param('id') id: number) {
+    async getAllReviewByMovieId(@Param('id') id: number) {
         return this.commentService.send('get.all.review.movie', id);
     }
 
@@ -622,7 +597,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/:id')
-    getOneReviewById(@Param('id') id: number) {
+    async getOneReviewById(@Param('id') id: number) {
         return this.commentService.send('get.review', id);
     }
 
@@ -652,7 +627,7 @@ export class AppController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/review/:id')
-    updateReview(@Param('id') id: number, @Body() dto: UpdateReviewDto) {
+    async updateReview(@Param('id') id: number, @Body() dto: UpdateReviewDto) {
         return this.commentService.send('update.review', {id: id, review: dto.review});
     }
 }

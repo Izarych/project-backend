@@ -9,54 +9,54 @@ export class CommentsController {
     constructor(private commentService: CommentsService) { }
 
     @MessagePattern('create.comment')
-    create(@Payload() dto: CreateCommentDto) {
+    async create(@Payload() dto: CreateCommentDto) {
         return this.commentService.create(dto);
     }
 
     @MessagePattern('get.all.comment')
-    getAll() {
+    async getAll() {
         return this.commentService.getAll();
     }
 
 
     @MessagePattern('get.comment')
-    getOneById(@Payload() id: number) {
+    async getOneById(@Payload() id: number) {
         return this.commentService.getOneById(id);
     }
 
     @MessagePattern('get.all.comment.user')
-    getAllByUser(@Payload() id: number) {
+    async getAllByUser(@Payload() id: number) {
         return this.commentService.getAllByUser(id);
     }
 
     @MessagePattern('get.all.comment.review')
-    getAllByReview(@Payload() id: number) {
+    async getAllByReview(@Payload() id: number) {
         return this.commentService.getAllByReview(id);
     }
 
     @MessagePattern('remove.comment.commentId')
-    removeByCommentId(@Payload() id: number) {
+    async removeByCommentId(@Payload() id: number) {
         return this.commentService.removeByCommentId(id);
     }
 
 
     @MessagePattern('remove.comment.userId')
-    removeByUserId(@Payload() id: number) {
+    async removeByUserId(@Payload() id: number) {
         return this.commentService.removeByUserId(id);
     }
 
     @MessagePattern('update.comment')
-    update(@Payload() dto: UpdateCommentDto) {
+    async update(@Payload() dto: UpdateCommentDto) {
         return this.commentService.update(dto);
     }
 
     @MessagePattern('increase.rate.comment')
-    increaseRateComment(@Payload() id: number) {
+    async increaseRateComment(@Payload() id: number) {
         return this.commentService.increaseRate(id);
     }
 
     @MessagePattern('decrease.rate.comment')
-    decreaseRateComment(@Payload() id: number) {
+    async decreaseRateComment(@Payload() id: number) {
         return this.commentService.decreaseRate(id);
     }
 }

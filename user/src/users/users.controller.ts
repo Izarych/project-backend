@@ -11,65 +11,52 @@ export class UsersController {
   constructor(private userService: UsersService) { }
 
   @MessagePattern('create.user')
-  create(@Payload() userDto: CreateUserDto) {
+  async create(@Payload() userDto: CreateUserDto) {
     return this.userService.createUser(userDto);
   }
 
   @MessagePattern('activate.user')
-  activateUser(@Payload() link: string) {
+  async activateUser(@Payload() link: string) {
     return this.userService.activateUser(link);
   }
 
   @MessagePattern('get.all.users')
-  getAll() {
+  async getAll() {
     return this.userService.getAllUsers();
   }
 
   @MessagePattern('get.user.id')
-  getUserById(@Payload() id: number) {
+  async getUserById(@Payload() id: number) {
     return this.userService.getUserById(id);
   }
 
   @MessagePattern('get.user.email')
-  getUserByEmail(@Payload() email: string) {
+  async getUserByEmail(@Payload() email: string) {
     return this.userService.getUserByEmail(email);
   }
 
   @MessagePattern('get.user.link')
-  getUserByLink(@Payload() link: string) {
+  async getUserByLink(@Payload() link: string) {
     return this.userService.getUserByLink(link);
   }
 
   @MessagePattern('add.role')
-  addRole(@Payload() dto: AddRoleDto) {
+  async addRole(@Payload() dto: AddRoleDto) {
     return this.userService.addRole(dto);
   }
 
   @MessagePattern('remove.role')
-  removeRole(@Payload() dto : AddRoleDto) {
+  async removeRole(@Payload() dto : AddRoleDto) {
     return this.userService.removeRole(dto);
   }
 
   @EventPattern('update.user')
-  update(@Payload() data: Partial<User>) : Promise<User> {
+  async update(@Payload() data: Partial<User>) : Promise<User> {
     return this.userService.updateUser(data);
   }
 
-  // @EventPattern('update.user.link')
-  // updateActivationLink(@Payload() dto: UpdateUserLinkDto) {
-  //   return this.userService.updateActivationLink(dto);
-  // }
-
-  // @EventPattern('update.user.phone')
-  // updatePhone(@Payload() dto: UpdateUserPhoneDto) {
-  //   return this.userService.updateUserPhone(dto);
-  // }
-
   @EventPattern('delete.user')
-  delete(@Payload() id: number) {
+  async delete(@Payload() id: number) {
     return this.userService.deleteUser(id);
   }
-
-
-
 }

@@ -5,7 +5,7 @@ import { UserRoles } from "src/roles/user-roles.model";
 interface UserCreationAttr {
   email: string;
   password: string;
-  phoneNumber: number;
+  phoneNumber: string;
   isActivated: boolean;
   activationLink: string;
 }
