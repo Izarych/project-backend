@@ -19,7 +19,6 @@ export class AppService {
     private readonly mailerService: MailerService) { }
 
   async login(dto: AuthDto) {
-
     const user = await this.checkEmail(dto.email);
 
     if (!user) {
@@ -82,7 +81,7 @@ export class AppService {
   async reSendActivationLink(email: string) {
     const link = uuid.v4();
     await this.sendActivationLink(email, link);
-    return await firstValueFrom(this.userService.send('update.user.link', { email, link }));
+    return await firstValueFrom(this.userService.send('update.user', { email, link }));
   }
 
   async sendActivationLink(to: string, link: string,) {

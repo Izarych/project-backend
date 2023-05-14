@@ -252,7 +252,8 @@ export class AppController {
   })
   @Post('/registration')
   async registration(@Body() dto: AuthDto) {
-    return this.appService.registration(dto);
+    const user = this.appService.registration(dto);
+    return user;
   }
 
   @EventPattern('hash_password')
