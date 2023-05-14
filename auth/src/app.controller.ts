@@ -35,8 +35,6 @@ export class AppController {
     try {
       const userData = await this.appService.login(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      console.log(res.json(userData));
-      
       return res.json(userData);
     } catch (error) {
       return res.json(error.response)
@@ -255,8 +253,6 @@ export class AppController {
   @Post('/registration')
   async registration(@Body() dto: AuthDto) {
     const user = this.appService.registration(dto);
-    console.log(user);
-    
     return user;
   }
 
