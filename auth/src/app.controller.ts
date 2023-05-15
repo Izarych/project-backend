@@ -107,7 +107,6 @@ export class AppController {
       process.env.NODE_ENV === 'prod'
         ? process.env.APP_HOST
         : process.env.APP_LOCAL;
-
     return res.redirect(`https://oauth.vk.com/authorize?client_id=${process.env.VK_CLIENT_ID}&display=page&redirect_uri=${host}/login_vk_success&scope=offline&response_type=code&v=5.92`);
   }
 
@@ -189,7 +188,7 @@ export class AppController {
   })
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
-    try {
+    try {     
       const refreshToken = req.headers.cookie.split('=')[1];
       const token = await this.appService.logout(refreshToken);
       res.clearCookie('refreshToken');
