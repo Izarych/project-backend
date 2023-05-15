@@ -63,6 +63,12 @@ describe('AppController', () => {
         appService = moduleRef.get<AppService>(AppService);
     });
 
+    describe('Check created test module', () => {
+        it('should be defined', () => {
+            expect(appController).toBeDefined();
+        });
+    });
+
     describe('registration', () => {
         describe('when registration called', () => {
 
