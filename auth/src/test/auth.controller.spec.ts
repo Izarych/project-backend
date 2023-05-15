@@ -3,7 +3,7 @@ import { AppController } from "../app.controller";
 import { AppService } from "../app.service";
 import { JwtModule } from "@nestjs/jwt";
 import { HttpModule } from "@nestjs/axios";
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 
 describe('AppController', () => {
@@ -43,6 +43,9 @@ describe('AppController', () => {
                         getVkToken: jest.fn().mockResolvedValue({}),
                         checkEmail: jest.fn().mockResolvedValue({}),
                         refresh: jest.fn().mockResolvedValue({}),
+                        logout: jest.fn().mockResolvedValue({}),
+                        hashNewPassword: jest.fn().mockResolvedValue({}),
+                        code: jest.fn().mockResolvedValue({})
                     },
                 },
             ],
@@ -58,6 +61,12 @@ describe('AppController', () => {
 
         appController = moduleRef.get<AppController>(AppController);
         appService = moduleRef.get<AppService>(AppService);
+    });
+
+    describe('Check created test module', () => {
+        it('should be defined', () => {
+            expect(appController).toBeDefined();
+        });
     });
 
     describe('registration', () => {
@@ -143,56 +152,97 @@ describe('AppController', () => {
         });
     });
 
-    describe('googleAuthRedirect', () => {              //change
+    describe('googleAuthRedirect', () => {
         describe('when googleAuthRedirect called', () => {
+            let response;
+            const user = "test";
             const mockRequest: any = {
+                user: "test"
             }
             beforeEach(async () => {
-                jest.spyOn(appService, 'gmailLogin').mockResolvedValue(mockRequest);
-                await appController.googleAuthRedirect(mockRequest);
+                jest.spyOn(appService, 'gmailLogin').mockResolvedValue(user);
+                response = await appController.googleAuthRedirect(mockRequest);
             });
 
             it('should call app service with request', async () => {
                 expect(appService.gmailLogin).toHaveBeenCalledWith(mockRequest);
             });
+
+            it('should return user', async () => {
+                expect(response).toEqual(user);
+            });
         });
     });
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// ++++ login_vk_success
+    describe('/login_vk_success', () => {
+        describe('when /login_vk called', () => {
+            let response;
+            const code = "any";
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+            };
 
-    // describe('login_vk', () => {                 
-    //     describe('when login_vk called', () => {
-    //         let response;
-    //         let mockResponse: any = {
-    //             redirect: jest.fn().mockImplementation((result) => {
-    //                 return result;
-    //             }),
-    //         };
-    //         beforeEach(async () => {
-    //             response = await appController.auth(mockResponse);
-    //         });
+            beforeEach(async () => {
+                jest.spyOn(appController, 'code').mockResolvedValue(mockResponse);
+                response = await appController.code(code, mockResponse as Response);
+            });
 
-    //         it('should call app service with response', async () => {
-    //             expect(response).toHaveBeenCalledWith(mockResponse);
-    //         });
-    //     });
-    // });
+            it('should call app service with body', async () => {
+                expect(appController.code).toHaveBeenCalledWith(code, mockResponse);
+            });
+        });
+    });
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    describe('/login/vk', () => {                       //change
+    describe('/login_vk', () => {
+        describe('when /login_vk called', () => {
+            let response;
+            let mockResponse: any = {
+                redirect: jest.fn().mockImplementation((result) => {
+                    return result;
+                })
+            };
+
+            beforeEach(async () => {
+                jest.spyOn(appController, 'auth').mockResolvedValue();
+                response = await appController.auth(mockResponse as Response);
+            });
+
+            it('should call app service with body', async () => {
+                expect(appController.auth).toHaveBeenCalled();
+            });
+
+            it('should return undefind', async () => {
+                expect(response).toBeUndefined();
+            })
+        });
+    });
+
+
+
+    describe('/login/vk', () => {
         describe('when /login/vk called', () => {
+            let response;
             const body = {
                 code: ""
             }
+            const data = "any";
+
             beforeEach(async () => {
-                jest.spyOn(appService, 'getVkToken').mockResolvedValue(body);
-                await appController.loginVk(body);
+
+                jest.spyOn(appService, 'getVkToken').mockResolvedValue(data);
+                response = await appController.loginVk(body);
             });
 
             it('should call app service with body', async () => {
                 expect(appService.getVkToken).toHaveBeenCalledWith(body.code);
             });
+
+            it('should return data', async () => {
+                expect(response).toEqual(data)
+            })
         });
     });
 
@@ -214,22 +264,106 @@ describe('AppController', () => {
         });
     });
 
-    // describe('/refresh', () => {
-    //     describe('when /refresh called', () => {
-    //         let response;
-    //         beforeEach(async () => {
-    //             jest.spyOn(appService, 'refresh').mockResolvedValue(userObject.user);
-    //             response = await appController.refresh(authDto.email);
-    //         });
+    describe('/logout', () => {
+        describe('when /logout called', () => {
+            let response;
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+                status: jest.fn(),
+                cookie: jest.fn(),
+                clearCookie: jest.fn(),
+            };
+            const mockRequest: any = {
+                headers: {
+                    cookie: "any"
+                }
+            };
+            beforeEach(async () => {
+                jest.spyOn(appService, 'logout').mockResolvedValue();
+                jest.clearAllMocks()
+            });
 
-    //         it('should call app service with body', async () => {
-    //             expect(appService.refresh).toHaveBeenCalledWith(authDto.email);
-    //         });
+            it('should call app service with body', async () => {
 
-    //         it('should return user', async () => {
-    //             expect(response).toBe(userObject.user);
-    //         });
-    //     });
-    // });
+                response = await appController.logout(mockRequest as Request, mockResponse as Response);
+                expect(appService.logout).toHaveBeenCalled();
+            });
+
+            it('should return undefined', async () => {
+                response = await appController.logout(mockRequest as Request, mockResponse as Response);
+                expect(response).toBeUndefined();
+            });
+
+            it('should not call app cuz of invalid request', async () => {
+                const mockRequest2: any = {};
+                response = await appController.logout(mockRequest2 as Request, mockResponse as Response);
+                expect(appService.logout).not.toHaveBeenCalled();
+            })
+        });
+    });
+
+    describe('/refresh', () => {
+        describe('when /refresh called', () => {
+            let response;
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+                status: jest.fn(),
+                cookie: jest.fn(),
+                clearCookie: jest.fn(),
+            };
+            const mockRequest: any = {
+                headers: {
+                    cookie: "any"
+                }
+            };
+            beforeEach(async () => {
+                jest.spyOn(appService, 'refresh').mockResolvedValue(userObject);
+                jest.clearAllMocks()
+            });
+
+            it('should call app service with body', async () => {
+                response = await appController.refresh(mockRequest as Request, mockResponse as Response);
+                expect(appService.refresh).toHaveBeenCalled();
+            });
+
+            it('should return userObject', async () => {
+                response = await appController.refresh(mockRequest as Request, mockResponse as Response);
+                expect(response).toEqual(userObject);
+            });
+
+            it('should not call app cuz of invalid request', async () => {
+                const mockRequest2: any = {};
+                response = await appController.refresh(mockRequest2 as Request, mockResponse as Response);
+                expect(appService.refresh).not.toHaveBeenCalled();
+            })
+        });
+    });
+
+
+    describe('hashPassword', () => {
+        describe('when hashPassword called', () => {
+            let response;
+            let password = "dawjsk";
+            let hashedPassword = "TestHashedPassword"
+            beforeEach(async () => {
+                jest.spyOn(appService, 'hashNewPassword').mockResolvedValue(hashedPassword);
+                jest.clearAllMocks()
+            });
+
+            it('should call app service with body', async () => {
+                response = await appController.hashPassword(password);
+                expect(appService.hashNewPassword).toHaveBeenCalledWith(password);
+            });
+
+            it('should return hashed password', async () => {
+                response = await appController.hashPassword(password);
+                expect(response).toEqual(hashedPassword);
+            });
+        });
+    });
 
 });
