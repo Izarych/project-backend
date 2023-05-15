@@ -8,8 +8,28 @@ import { Token } from "../token/token.model";
 
 describe('AppService', () => {
     let appService: AppService;
-    const mockUserService = {
 
+    const userRepository = [
+        { 
+            id: 1,
+            email: "email1@mail.ru",
+            password: "password1",
+            phoneNumber: "123456789",
+            isActivated: false,
+            activationLink: "testlink1" 
+        },
+        { 
+            id: 2,
+            email: "email2@mail.ru",
+            password: "password2",
+            phoneNumber: "123456788",
+            isActivated: false,
+            activationLink: "testlink2"
+        }
+    ]
+    const mockUserService = {
+        //send: jest.fn().mockResolvedValue({}),
+        //send: jest.fn().mockImplementation((user) => { return userRepository.includes(user) ? user : undefined}),
     }
 
     const mockTokenRepository = {
@@ -56,4 +76,13 @@ describe('AppService', () => {
             expect(appService).toBeDefined();
         });
     });
+
+    describe('Check email', () => {
+        describe('when check email called', () => {
+
+
+        });
+    });
+
+
 })
