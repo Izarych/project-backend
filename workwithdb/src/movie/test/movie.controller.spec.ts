@@ -6,7 +6,7 @@ import { People } from '../../people/people.model';
 import { Genres } from '../../genres/genres.model';
 
 
-describe('AppController', () => {
+describe('MovieController', () => {
   let movieController: MovieController;
   let movieService: MovieService;
 
@@ -96,15 +96,15 @@ describe('AppController', () => {
         {
           provide: MovieService,
           useValue: {
-            getAllMovies: jest.fn().mockResolvedValue({}),
-            getMovieByAgeRate: jest.fn().mockResolvedValue({}),
-            getMovieByCountry: jest.fn().mockResolvedValue({}),
-            getMovieByGenre: jest.fn().mockResolvedValue({}),
-            getMovieByRate: jest.fn().mockResolvedValue({}),
-            getMovie: jest.fn().mockResolvedValue({}),
-            getMoviePeople: jest.fn().mockResolvedValue({}),
-            getMovieGenres: jest.fn().mockResolvedValue({}),
-            getMovieByTitle: jest.fn().mockResolvedValue({}),
+            getAllMovies: jest.fn(),
+            getMovieByAgeRate: jest.fn(),
+            getMovieByCountry: jest.fn(),
+            getMovieByGenre: jest.fn(),
+            getMovieByRate: jest.fn(),
+            getMovie: jest.fn(),
+            getMoviePeople: jest.fn(),
+            getMovieGenres: jest.fn(),
+            getMovieByTitle: jest.fn(),
           },
         },
       ],
