@@ -9,8 +9,9 @@ import {Op} from "sequelize";
 @Injectable()
 export class MovieService {
     constructor(@InjectModel(Movie) private movieRepository: typeof Movie,
-                @InjectModel(People) private peopleRepository: typeof People,
-                @InjectModel(Genres) private genreRepository: typeof Genres) { }
+                // @InjectModel(People) private peopleRepository: typeof People,
+                // @InjectModel(Genres) private genreRepository: typeof Genres
+                ) { }
 
     async createMovie(dto: CreateMovieDto) {
         const movie = await this.movieRepository.findOne({
