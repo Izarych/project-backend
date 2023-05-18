@@ -18,6 +18,7 @@ describe('MovieController', () => {
       "ageRate": 16,
       "country": "Франция",
       "rate": 8.8,
+      "rateQuantity": 1570549,
       "genres": [
         {
           "id": 3,
@@ -57,6 +58,7 @@ describe('MovieController', () => {
       "ageRate": 18,
       "country": "Великобритания, США",
       "rate": 8.5,
+      "rateQuantity": 1369010,
       "genres": [
         {
           "id": 5,
@@ -101,7 +103,8 @@ describe('MovieController', () => {
             getAllMovies: jest.fn(() => movies),
 
             getMovieByAgeRate: jest.fn((ageRate: number) =>
-              movies.filter((movie) => movie.ageRate <= ageRate)),
+              movies.filter((movie) => movie.ageRate <= ageRate)
+            ),
 
             getMovieByCountry: jest.fn((countries: string) =>
               movies.filter((movie) => movie.country === countries)
@@ -115,6 +118,16 @@ describe('MovieController', () => {
 
             getMovieByRate: jest.fn((rate: number) =>
               movies.filter((movie) => movie.rate >= rate)
+            ),
+
+            getMovieByHuman: jest.fn((fullName: string) =>
+              movies.filter((movie) =>
+                movie.people.find((human) => human.fullName === fullName)
+              )
+            ),
+
+            getMovieByRateQuantity: jest.fn((rateQuantity: number) =>
+              movies.filter((movie) => movie.rateQuantity >= rateQuantity)
             ),
 
             getMovie: jest.fn((id: number) =>
@@ -187,6 +200,48 @@ describe('MovieController', () => {
 
       it('should return movies whose age rate does not exceed the specified age rate', async () => {
         expect(response).toEqual([movies[0]]);
+      });
+    });
+  });
+
+  describe('getMovieByRateQuantity', () => {
+    describe('when getMovieByRateQuantity called', () => {
+
+      let response, spy;
+      const rateQuantity = 2000000;
+
+      beforeEach(async () => {
+        spy = jest.spyOn(movieService, 'getMovieByRateQuantity');
+        response = await movieController.getMovieByRateQuantity(rateQuantity);
+      });
+
+      it('should call app service with rateQuantity', async () => {
+        expect(spy).toHaveBeenCalledWith(rateQuantity);
+      });
+
+      it('should return movies whose rate quantity is not less than the given rate quantity', async () => {
+        expect(response).toEqual([]);
+      });
+    });
+  });
+
+  describe('getMovieByHuman', () => {
+    describe('when getMovieByHuman called', () => {
+
+      let response, spy;
+      const fullName = 'Гай Ричи';
+
+      beforeEach(async () => {
+        spy = jest.spyOn(movieService, 'getMovieByHuman');
+        response = await movieController.getMovieByHuman(fullName);
+      });
+
+      it('should call app service with fullName', async () => {
+        expect(spy).toHaveBeenCalledWith(fullName);
+      });
+
+      it('should return the movies in which the human with the given full name is involved', async () => {
+        expect(response).toEqual([movies[1]]);
       });
     });
   });
