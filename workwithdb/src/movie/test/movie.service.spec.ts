@@ -2,6 +2,7 @@ import { MovieService } from "../movie.service";
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from "@nestjs/sequelize";
 import { Movie } from "../movie.model";
+import { CreateMovieDto } from "../dto/create-movie.dto";
 
 describe('MovieService', () => {
   let movieService: MovieService;
@@ -46,7 +47,38 @@ describe('MovieService', () => {
   const movies = [
     {
       "id": 1,
-      ...dto[0]
+      ...dto[0],
+      "genres": [
+        {
+          "id": 3,
+          "genre": "биография"
+        },
+        {
+          "id": 2,
+          "genre": "комедия"
+        },
+        {
+          "id": 1,
+          "genre": "драма"
+        }
+      ],
+      "people": [
+        {
+          "id": 4,
+          "fullName": "Матьё Вадпьед",
+          "profession": "Оператор"
+        },
+        {
+          "id": 2,
+          "fullName": "Франсуа Клюзе",
+          "profession": "Актёр"
+        },
+        {
+          "id": 3,
+          "fullName": "Арно Бертран",
+          "profession": "Продюсер"
+        },
+      ]
     },
     {
       "id": 2,
@@ -65,14 +97,44 @@ describe('MovieService', () => {
       "verticalPhoto": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/d5cc31da-ec0c-4e4f-9282-614da6a5dbf2/orig",
       "horizontalPhoto": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/d5cc31da-ec0c-4e4f-9282-614da6a5dbf2/orig",
       "trailer": null,
-      
+      "genres": [
+        {
+          "id": 5,
+          "genre": "боевик"
+        },
+        {
+          "id": 2,
+          "genre": "комедия"
+        },
+        {
+          "id": 4,
+          "genre": "криминал"
+        }
+      ],
+      "people": [
+        {
+          "id": 58,
+          "fullName": "Мэттью МакКонахи",
+          "profession": "Актёр"
+        },
+        {
+          "id": 59,
+          "fullName": "Гай Ричи",
+          "profession": "Сценарист"
+        },
+        {
+          "id": 60,
+          "fullName": "Алан Стюарт",
+          "profession": "Оператор"
+        },
+      ]
+
     }
   ];
 
   const mockMovieRepository = {
 
     findOne: jest.fn(filter => {
-
       const movie = movies.find((movie) =>
         movie.title == filter.where.title &&
         movie.originalTitle == filter.where.originalTitle &&
@@ -81,25 +143,44 @@ describe('MovieService', () => {
         movie.yearTill == filter.where.yearTill &&
         movie.country == filter.where.country
       )
-      console.log(movie, 'поиск');
       return Promise.resolve(movie);
     }),
 
-
-    create: jest.fn((dto) => {
-
+    create: jest.fn((dto: CreateMovieDto) => {
       const movie = {
         id: Date.now(),
         ...dto
       }
-
       return Promise.resolve(movie);
-
     }),
 
+    findAll: jest.fn((
+      filter?: {
+        where: {
+          ageRate?: any,
+          rate?: any,
+          rateQuantity?: any
+        }
+      }) => {
 
-    findAll: jest.fn(),
-    findByPk: jest.fn(),
+      if (!filter?.where) {
+        return Promise.resolve(movies)
+      }
+
+      const filteredMovies = movies.filter((movie) =>
+        movie.ageRate <= filter.where?.ageRate ||
+        movie.rate <= filter.where?.rate ||
+        movie.rateQuantity <= filter.where?.rateQuantity
+      )
+
+      return Promise.resolve(filteredMovies);
+    }
+
+    ),
+
+    findByPk: jest.fn((id: number) =>
+      movies.find((movie) => movie.id === id)
+    ),
   }
 
   beforeEach(async () => {
@@ -140,14 +221,14 @@ describe('MovieService', () => {
       });
 
       it('should call findOne of mockMovieRepository', async () => {
-        expect(mockMovieRepository.findOne).toHaveBeenCalledTimes(1);
+        expect(spyFindOne).toHaveBeenCalledTimes(1);
       });
 
       it('should call create of mockMovieRepository', async () => {
-        expect(mockMovieRepository.create).toHaveBeenCalledTimes(1);
+        expect(spyCreate).toHaveBeenCalledTimes(1);
       });
 
-      it('should create a new user record and return that', async () => {
+      it('should create a new movie record and return that', async () => {
         expect(response).toEqual({ id: expect.any(Number), ...dto[1] });
       });
 
@@ -174,15 +255,119 @@ describe('MovieService', () => {
         expect(spyCreate).toHaveBeenCalledTimes(0);
       });
 
-      it('should find a user record and return that', async () => {
-        expect(response).toEqual({ id: expect.any(Number), ...dto[0] });
+      it('should find a movie record and return that', async () => {
+        expect(response).toEqual(movies[0]);
       });
 
     });
 
   });
 
+  describe('getAllMovies', () => {
 
+    describe('when getAllMovies called', () => {
+      let response, spy;
 
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll');
+        response = await movieService.getAllMovies();
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should find all movie records and return them', async () => {
+        expect(response).toEqual(movies);
+      });
+
+    });
+
+  });
+
+  describe('getMovie', () => {
+
+    describe('when getMovie called', () => {
+      let response, spy;
+      const id = 1;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findByPk');
+        response = await movieService.getMovie(id);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findByPk of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should find movie record with given id and return that', async () => {
+        expect(response).toEqual(movies[0]);
+      });
+
+    });
+
+  });
+
+  describe('getMoviePeople', () => {
+
+    describe('when getMoviePeople called', () => {
+      let response, spy;
+      const id = 1;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findByPk');
+        response = await movieService.getMoviePeople(id);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findByPk of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should find movie record with given id and return the people who match it', async () => {
+        expect(response).toEqual(movies[0].people);
+      });
+
+    });
+
+  });
+
+  describe('getMovieGenres', () => {
+
+    describe('when getMovieGenres called', () => {
+      let response, spy;
+      const id = 1;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findByPk');
+        response = await movieService.getMovieGenres(id);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findByPk of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should find movie record with given id and return the genres that match it', async () => {
+        expect(response).toEqual(movies[0].genres);
+      });
+
+    });
+
+  });
 
 })
