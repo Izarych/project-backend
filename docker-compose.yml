@@ -68,7 +68,7 @@ services:
     volumes:
       - ./user/dumps/userdump.sql:/docker-entrypoint-initdb.d/userdump.sql
       - userdata:/var/lib/postgresql/data/
-    restart: on-failure
+    restart: always
 
   comments-postgres:
     image: postgres
@@ -78,7 +78,7 @@ services:
     volumes:
 #      - ./comments/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - comments-data:/var/lib/postgresql/data/
-    restart: on-failure
+    restart: always
 
   auth-postgres:
     image: postgres
@@ -89,7 +89,7 @@ services:
     volumes:
 #      - ./auth/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - authdata:/var/lib/postgresql/data/
-    restart: on-failure
+    restart: always
 
   rabbitmq:
     image: rabbitmq
@@ -107,8 +107,7 @@ services:
     volumes:
       - ./workwithdb/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - kinopoisknew-parse-db:/var/lib/postgresql/data/
-    restart: on-failure
-
+    restart: always
 
 
 volumes:
