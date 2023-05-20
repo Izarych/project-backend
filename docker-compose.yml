@@ -19,7 +19,7 @@ services:
       - auth-postgres
       - rabbitmq
     env_file:
-      - ./auth/.development.env
+      - ./auth/.production.env
 
   parse:
     build:
@@ -27,6 +27,15 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - rabbitmq
+
+  comments:
+    build:
+      context: ./comments
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - comments-postgres
+    env_file: ./comments/.production.env
 
   user:
     build:
@@ -36,7 +45,7 @@ services:
       - rabbitmq
       - user-postgres
     env_file:
-      - ./user/.development.env
+      - ./user/.production.env
 
   workwithdb:
     build:
@@ -48,28 +57,39 @@ services:
       - postgres
       - rabbitmq
     env_file:
-      - ./workwithdb/.development.env
-    restart: always
+      - ./workwithdb/.production.env
 
   user-postgres:
     image: postgres
     env_file:
-      - ./user/.development.env
+      - ./user/.production.env
     ports:
       - "5433:5432"
     volumes:
+      - ./user/dumps/userdump.sql:/docker-entrypoint-initdb.d/userdump.sql
       - userdata:/var/lib/postgresql/data/
-    restart: always
+    restart: on-failure
+
+  comments-postgres:
+    image: postgres
+    env_file: ./comments/.production.env
+    ports:
+      - '5434:5432'
+    volumes:
+#      - ./comments/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
+      - comments-data:/var/lib/postgresql/data/
+    restart: on-failure
 
   auth-postgres:
     image: postgres
     env_file:
-      - ./auth/.development.env
+      - ./auth/.production.env
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
+#      - ./auth/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - authdata:/var/lib/postgresql/data/
-    restart: always
+    restart: on-failure
 
   rabbitmq:
     image: rabbitmq
@@ -81,7 +101,7 @@ services:
   postgres:
     image: postgres
     env_file:
-      - ./workwithdb/.development.env
+      - ./workwithdb/.production.env
     ports:
       - '5432:5432'
     volumes:
@@ -95,5 +115,6 @@ volumes:
   authdata:
   userdata:
   kinopoisknew-parse-db:
+  comments-data:
 
 
