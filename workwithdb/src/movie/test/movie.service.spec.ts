@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from "@nestjs/sequelize";
 import { Movie } from "../movie.model";
 import { CreateMovieDto } from "../dto/create-movie.dto";
+import { Op } from "sequelize";
 
 describe('MovieService', () => {
   let movieService: MovieService;
@@ -154,29 +155,12 @@ describe('MovieService', () => {
       return Promise.resolve(movie);
     }),
 
-    findAll: jest.fn((
-      filter?: {
-        where: {
-          ageRate?: any,
-          rate?: any,
-          rateQuantity?: any
-        }
-      }) => {
 
-      if (!filter?.where) {
-        return Promise.resolve(movies)
-      }
 
-      const filteredMovies = movies.filter((movie) =>
-        movie.ageRate <= filter.where?.ageRate ||
-        movie.rate <= filter.where?.rate ||
-        movie.rateQuantity <= filter.where?.rateQuantity
-      )
+    findAll: jest.fn(() => {
+      return Promise.resolve(movies);
+    }),
 
-      return Promise.resolve(filteredMovies);
-    }
-
-    ),
 
     findByPk: jest.fn((id: number) =>
       movies.find((movie) => movie.id === id)
@@ -369,5 +353,44 @@ describe('MovieService', () => {
     });
 
   });
+
+  describe('getMovieByAgeRate', () => {
+    describe('when getMovieByAgeRate called', () => {
+      let response, spy;
+      const ageRate = 16;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll').mockImplementationOnce((
+          filter?: {
+            where: {
+              ageRate: any,
+            }
+          }) => {
+
+          const filteredMovies = movies.filter((movie) =>
+            movie.ageRate <= filter.where.ageRate[Op.lte]
+          )
+
+          return Promise.resolve(filteredMovies);
+        });
+        response = await movieService.getMovieByAgeRate(ageRate);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return movies whose age rate does not exceed the specified age rate', async () => {
+        expect(response).toEqual([movies[0]]);
+      });
+
+    });
+
+  });
+
 
 })
