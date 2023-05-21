@@ -22,8 +22,8 @@ export class AppController {
 
     @ApiOperation({ summary: 'Создание роли' })
     @ApiResponse({ status: 201, type: CreateRoleDto })
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('ADMIN') Пока закомментил гварды
+    // @UseGuards(RolesGuard)
     @Post('/role')
     async createRole(@Body() dto: CreateRoleDto) {
         return this.userService.send('create.role', dto);

@@ -1,13 +1,25 @@
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UnauthorizedException, UnprocessableEntityException, UseGuards } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { AppService } from './app.service';
-import { AuthDto } from './dto/auth.dto';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { EventPattern, Payload } from "@nestjs/microservices";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  UnauthorizedException,
+  UnprocessableEntityException,
+  UseGuards
+} from '@nestjs/common';
+import {Request, Response} from 'express';
+import {AppService} from './app.service';
+import {AuthDto} from './dto/auth.dto';
+import {JwtAuthGuard} from './guard/jwt-auth.guard';
+import {HttpService} from '@nestjs/axios';
+import {firstValueFrom} from 'rxjs';
+import {AuthGuard} from '@nestjs/passport';
+import {ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
+import {EventPattern, Payload} from "@nestjs/microservices";
 
 @ApiTags('Authorization')
 @Controller()
@@ -251,8 +263,7 @@ export class AppController {
   })
   @Post('/registration')
   async registration(@Body() dto: AuthDto) {
-    const user = this.appService.registration(dto);
-    return user;
+    return this.appService.registration(dto);
   }
 
   @EventPattern('hash_password')

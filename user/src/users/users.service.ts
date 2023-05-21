@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { RolesService } from 'src/roles/roles.service';
-import { AddRoleDto } from './dto/add-user-role.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './users.model';
+import {BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/sequelize';
+import {AddRoleDto} from './dto/add-user-role.dto';
+import {CreateUserDto} from './dto/create-user.dto';
+import {User} from './users.model';
 import {Role} from "../roles/roles.model";
+import {RolesService} from "../roles/roles.service";
 
 
 @Injectable()
@@ -14,30 +14,35 @@ export class UsersService {
     private roleService: RolesService) {
   }
 
-  async createUser(userDto: CreateUserDto) {
-    const role = await this.roleService.getRoleByValue("USER");
-    const user = await this.userRepository.create(userDto);
+  async createUser(userDto: CreateUserDto) : Promise<User> {
+    const role : Role = await this.roleService.getRoleByValue("USER");
+    const user : User = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
     return user;
   }
 
-  async activateUser(link: string) {
-    return await this.userRepository.update({ isActivated: true }, { where: { activationLink: link } });
+  async activateUser(link: string) : Promise<User> {
+    const user : User = await this.userRepository.findOne({where: {activationLink: link}});
+    if (!user) {
+      throw new BadRequestException('Invalid link');
+    }
+    await user.update({ isActivated: true });
+    return user;
   }
 
   async getAllUsers() {
     return await this.userRepository.findAll({ include: { all: true } });
   }
 
-  async getUserByEmail(email: string) {
-    return await this.userRepository.findOne({ where: { email }, include: { all: true } });
+  async getUserByEmail(email: string) : Promise<User> {
+    return await this.userRepository.findOne({where: {email}, include: {all: true}});
   }
 
-  async getUserById(id: number) {
-    const user = await this.userRepository.findByPk(id);
+  async getUserById(id: number) : Promise<User> {
+    const user : User = await this.userRepository.findByPk(id);
     if (!user) {
-      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
     return user;
 
@@ -55,6 +60,9 @@ export class UsersService {
 
   async updateUser(data: Partial<User>) : Promise<User> {
     const user : User = await this.userRepository.findByPk(data.id);
+    if (!user) {
+      throw new NotFoundException('User doesnt exist');
+    }
     await user.update(data);
     return user;
   }
@@ -63,10 +71,10 @@ export class UsersService {
     return await this.addOrRemoveRole(dto, 'remove');
   }
 
-  async getUserByLink(link: string) {
-    const user = await this.userRepository.findOne({ where: { activationLink: link } });
+  async getUserByLink(link: string) : Promise<User> {
+    const user : User = await this.userRepository.findOne({ where: { activationLink: link } });
     if (!user) {
-      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -77,15 +85,15 @@ export class UsersService {
     const role : Role = await this.roleService.getRoleByValue(dto.value);
 
     if (dto.value == 'USER') {
-      return new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
     }
 
     if (!role) {
-      return new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
     }
 
     if (!user) {
-      return new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
+      throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
 
     if (operation == 'add') {
