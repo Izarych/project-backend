@@ -135,17 +135,7 @@ describe('MovieService', () => {
 
   const mockMovieRepository = {
 
-    findOne: jest.fn(filter => {
-      const movie = movies.find((movie) =>
-        movie.title == filter.where.title &&
-        movie.originalTitle == filter.where.originalTitle &&
-        movie.ageRate == filter.where.ageRate &&
-        movie.yearSince == filter.where.yearSince &&
-        movie.yearTill == filter.where.yearTill &&
-        movie.country == filter.where.country
-      )
-      return Promise.resolve(movie);
-    }),
+    findOne: jest.fn(),
 
     create: jest.fn((dto: CreateMovieDto) => {
       const movie = {
@@ -154,7 +144,6 @@ describe('MovieService', () => {
       }
       return Promise.resolve(movie);
     }),
-
 
 
     findAll: jest.fn(() => {
@@ -191,11 +180,23 @@ describe('MovieService', () => {
 
   describe('createMovie', () => {
 
+    const mockfindOne = filter => {
+      const movie = movies.find((movie) =>
+        movie.title == filter.where.title &&
+        movie.originalTitle == filter.where.originalTitle &&
+        movie.ageRate == filter.where.ageRate &&
+        movie.yearSince == filter.where.yearSince &&
+        movie.yearTill == filter.where.yearTill &&
+        movie.country == filter.where.country
+      )
+      return Promise.resolve(movie);
+    };
+
     describe('when create called', () => {
       let response, spyFindOne, spyCreate;
 
       beforeAll(async () => {
-        spyFindOne = jest.spyOn(mockMovieRepository, 'findOne');
+        spyFindOne = jest.spyOn(mockMovieRepository, 'findOne').mockImplementationOnce(mockfindOne);
         spyCreate = jest.spyOn(mockMovieRepository, 'create');
         response = await movieService.createMovie(dto[1]);
       });
@@ -222,7 +223,7 @@ describe('MovieService', () => {
       let response, spyFindOne, spyCreate;
 
       beforeAll(async () => {
-        spyFindOne = jest.spyOn(mockMovieRepository, 'findOne');
+        spyFindOne = jest.spyOn(mockMovieRepository, 'findOne').mockImplementationOnce(mockfindOne);;
         spyCreate = jest.spyOn(mockMovieRepository, 'create');
         response = await movieService.createMovie(dto[0]);
       });
@@ -351,7 +352,6 @@ describe('MovieService', () => {
       });
 
     });
-
   });
 
   describe('getMovieByAgeRate', () => {
@@ -389,8 +389,193 @@ describe('MovieService', () => {
       });
 
     });
-
   });
 
+
+  describe('getMovieByRate', () => {
+    describe('when getMovieByRate called', () => {
+      let response, spy;
+      const rate = 8.9;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll').mockImplementationOnce((
+          filter?: {
+            where: {
+              rate: any,
+            }
+          }) => {
+
+          const filteredMovies = movies.filter((movie) =>
+            movie.rate >= filter.where.rate[Op.gte]
+          )
+
+          return Promise.resolve(filteredMovies);
+        });
+        response = await movieService.getMovieByRate(rate);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return movies whose rate is not less than the given rate', async () => {
+        expect(response).toEqual([]);
+      });
+
+    });
+  });
+
+  describe('getMovieByTitle', () => {
+    describe('when getMovieByTitle called', () => {
+      let response, spy;
+      const title = 'Джентльмены';
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findOne').mockImplementationOnce((
+          filter?: {
+            where: {
+              title: string,
+            }
+          }) => {
+
+          const foundMovie = movies.find((movie) =>
+            movie.title === filter.where.title
+          )
+
+          return Promise.resolve(foundMovie);
+        });
+        response = await movieService.getMovieByTitle(title);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findOne of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return movie with sent title', async () => {
+        expect(response).toEqual(movies[1]);
+      });
+
+    });
+  });
+
+  describe('getMovieByCountry', () => {
+    describe('when getMovieByCountry called', () => {
+      let response, spy;
+      const country = 'США';
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll');
+        response = await movieService.getMovieByCountry(country);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return array containing movies that match the country', async () => {
+        expect(response).toEqual([movies[1]]);
+      });
+
+    });
+  });
+
+  describe('getMovieByHuman', () => {
+    describe('when getMovieByHuman called', () => {
+      let response, spy;
+      const fullName = 'Гай Ричи';
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll');
+        response = await movieService.getMovieByHuman(fullName);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return the movies in which the human with the given full name is involved', async () => {
+        expect(response).toEqual([movies[1]]);
+      });
+
+    });
+  });
+
+  describe('getMovieByGenre', () => {
+    describe('when getMovieByGenre called', () => {
+      let response, spy;
+      const genre = 'комедия';
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll');
+        response = await movieService.getMovieByGenre(genre);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return array containing movies that match the genre', async () => {
+        expect(response).toEqual([movies[0], movies[1]]);
+      });
+
+    });
+  });
+
+  describe('getMovieByRateQuantity', () => {
+    describe('when getMovieByRateQuantity called', () => {
+      let response, spy;
+      const rateQuantity = 2000000;
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockMovieRepository, 'findAll').mockImplementationOnce((
+          filter?: {
+            where: {
+              rateQuantity: any,
+            }
+          }) => {
+
+          const filteredMovies = movies.filter((movie) =>
+            movie.rateQuantity >= filter.where.rateQuantity[Op.gte]
+          )
+
+          return Promise.resolve(filteredMovies);
+        });
+        response = await movieService.getMovieByRateQuantity(rateQuantity);
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockMovieRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return movies whose rate quantity is not less than the given rate quantity', async () => {
+        expect(response).toEqual([]);
+      });
+
+    });
+  });
 
 })
