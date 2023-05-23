@@ -1,14 +1,14 @@
-import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
-import {ClientProxy} from '@nestjs/microservices';
-import {InjectModel} from '@nestjs/sequelize';
-import {AuthDto} from './dto/auth.dto';
-import {Token} from './token/token.model';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
+import { InjectModel } from '@nestjs/sequelize';
+import { AuthDto } from './dto/auth.dto';
+import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import {firstValueFrom} from 'rxjs';
-import {HttpService} from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
-import {MailerService} from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AppService {
@@ -35,6 +35,8 @@ export class AppService {
   }
 
   async checkEmail(email: string) {
+    console.log(await firstValueFrom(this.userService.send('get.user.email', email)));
+    
     return await firstValueFrom(this.userService.send('get.user.email', email));
   }
 
@@ -165,7 +167,7 @@ export class AppService {
     }
 
     return req.user;
-    
+
   }
 
   async getVkToken(code: string): Promise<any> {
@@ -175,14 +177,14 @@ export class AppService {
     };
 
     const host =
-    process.env.NODE_ENV === 'prod'
-      ? process.env.APP_HOST
-      : process.env.APP_LOCAL;
+      process.env.NODE_ENV === 'prod'
+        ? process.env.APP_HOST
+        : process.env.APP_LOCAL;
 
     const res = await firstValueFrom(this.httpService
       .get(
         `https://oauth.vk.com/access_token?&client_id=${VKDATA.clientId}&client_secret=${VKDATA.clientSecret}&redirect_uri=${host}/login_vk_success&code=${code}`
-      )); 
+      ));
 
     return res.data;
   }
