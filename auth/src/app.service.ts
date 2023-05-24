@@ -35,8 +35,6 @@ export class AppService {
   }
 
   async checkEmail(email: string) {
-    console.log(await firstValueFrom(this.userService.send('get.user.email', email)));
-    
     return await firstValueFrom(this.userService.send('get.user.email', email));
   }
 
