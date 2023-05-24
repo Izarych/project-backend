@@ -9,6 +9,7 @@ import { Observable, of } from "rxjs";
 
 describe('AppService', () => {
     let appService: AppService;
+    let response;
 
     const authDtoWrongEmail = {
         email: 'test@example.com',
@@ -37,7 +38,7 @@ describe('AppService', () => {
         {
             id: 2,
             email: "email2@mail.ru",
-            password: "password2",
+            password: "password3",
             phoneNumber: "123456788",
             isActivated: false,
             activationLink: "testlink2"
@@ -45,21 +46,40 @@ describe('AppService', () => {
     ];
 
     const mockUserService = {
-        send: jest.fn()
-            .mockImplementation((command, userEmail) => {
-
-                switch (command) {
-                    case 'get.user.email':
-                        return of(userRepository.find(user => user.email === userEmail));
-                    default:
-                        break;
-                }
-            }),
+        send: jest.fn().mockImplementation((command, value) => {
+            switch (command) {
+                case 'get.user.email':
+                    return of(userRepository.find(user => user.email === value));
+                case 'get.user.link':
+                    return of(userRepository.find(user => user.activationLink === value));
+                default:
+                    break;
+            }
+        }),
     }
 
     const mockTokenRepository = {
+        destroy: jest.fn((value) => {
+            const tokenFind = tokens.find(token => token.refreshToken === value.where.refreshToken);
+            if (tokenFind) {
+                tokens.splice(tokens.indexOf(tokenFind), 1);
+            };
+        }),
 
     }
+
+    const tokens = [
+        {
+            id: 1,
+            userId: 1,
+            refreshToken: "testtoken1"
+        },
+        {
+            id: 2,
+            userId: 2,
+            refreshToken: "testtoken2"
+        }
+    ]
 
     const mockMailerService = {
 
@@ -108,47 +128,109 @@ describe('AppService', () => {
 
     describe('Check email', () => {
         describe('when check email called', () => {
+            let chechEmailSpyOn;
             beforeEach(async () => {
                 jest.clearAllMocks();
+                chechEmailSpyOn = jest.spyOn(appService, 'checkEmail');
             });
 
             it('should call app service with dto', async () => {
-                const test = jest.spyOn(appService, 'checkEmail');
-                await appService.checkEmail(authDtoCorrect.email);
-                expect(test).toBeCalledWith(authDtoCorrect.email);
+                response = await appService.checkEmail(authDtoCorrect.email);
+                expect(chechEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
             });
 
             it('should return user if user in data base', async () => {
-                jest.spyOn(appService, 'checkEmail');
-                const response = await appService.checkEmail(authDtoCorrect.email);
+                response = await appService.checkEmail(authDtoCorrect.email);
                 expect(response).toEqual(userRepository[0]);
             });
 
             it('should return undefinded', async () => {
-                jest.spyOn(appService, 'checkEmail');
-                const response = await appService.checkEmail(authDtoWrongEmail.email);
+                response = await appService.checkEmail(authDtoWrongEmail.email);
                 expect(response).toBeUndefined();
             });
+        });
+    });
 
-
-
-            /*            let response;
-
+    describe('Check link', () => {
+        describe('when check link called', () => {
+            let chechLinkSpyOn;
+            const rightLink = "testlink2";
+            const wrongLink = "any";
             beforeEach(async () => {
-                jest.spyOn(appService, 'registration').mockResolvedValue(userObject);
-                response = await appController.registration(authDto);
+                jest.clearAllMocks();
+                chechLinkSpyOn = jest.spyOn(appService, 'checkLink');
             });
 
             it('should call app service with dto', async () => {
-                expect(appService.registration).toHaveBeenCalledWith(authDto);
+                response = await appService.checkLink(rightLink);
+                expect(chechLinkSpyOn).toBeCalledWith(rightLink);
             });
 
-            it('should return created user object', async () => {
-                expect(response).toEqual(userObject);
-            });*/
+            it('should return user if user in data base', async () => {
+                response = await appService.checkLink(rightLink);
+                expect(response).toEqual(userRepository[1]);
+            });
+
+            it('should return undefinded', async () => {
+                response = await appService.checkLink(wrongLink);
+                expect(response).toBeUndefined();
+            });
+        });
+    });
+
+
+    describe('Logout', () => {
+        describe('when logout called', () => {
+            let logoutSpyOn;
+            const rightRefreshToken = tokens[0].refreshToken;
+            const wrongRefreshToken = "any";
+
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                logoutSpyOn = jest.spyOn(appService, 'logout');
+            });
+
+            it('should call app service with dto', async () => {
+                response = await appService.logout(rightRefreshToken);
+                expect(logoutSpyOn).toBeCalledWith(rightRefreshToken);
+            });
+
+            it('should delete token', async () => {
+                response = await appService.logout(rightRefreshToken);
+                expect(tokens.find(token => token.refreshToken === rightRefreshToken)).toBeUndefined();
+            });
+
+            it('should not delete token', async () => {
+                const tokensCount = tokens.length;
+                response = await appService.logout(wrongRefreshToken);
+                expect(logoutSpyOn).toBeCalledWith(wrongRefreshToken);
+                expect(tokens.length).toBe(tokensCount);
+            });
 
         });
     });
 
 
-})
+
+
+});
+
+
+
+
+
+
+/*            let response;
+
+beforeEach(async () => {
+    jest.spyOn(appService, 'registration').mockResolvedValue(userObject);
+    response = await appController.registration(authDto);
+});
+
+it('should call app service with dto', async () => {
+    expect(appService.registration).toHaveBeenCalledWith(authDto);
+});
+
+it('should return created user object', async () => {
+    expect(response).toEqual(userObject);
+});*/
