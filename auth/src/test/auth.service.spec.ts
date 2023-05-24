@@ -5,7 +5,9 @@ import { JwtModule } from "@nestjs/jwt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { getModelToken } from "@nestjs/sequelize";
 import { Token } from "../token/token.model";
-import { Observable, of } from "rxjs";
+import { of } from "rxjs";
+import * as bcrypt from 'bcryptjs';
+import { ConfigModule } from "@nestjs/config";
 
 describe('AppService', () => {
     let appService: AppService;
@@ -38,7 +40,7 @@ describe('AppService', () => {
         {
             id: 2,
             email: "email2@mail.ru",
-            password: "password3",
+            password: "password2",
             phoneNumber: "123456788",
             isActivated: false,
             activationLink: "testlink2"
@@ -65,6 +67,8 @@ describe('AppService', () => {
                 tokens.splice(tokens.indexOf(tokenFind), 1);
             };
         }),
+        findOne: jest.fn().mockImplementation(),
+        create: jest.fn()
 
     }
 
@@ -107,10 +111,11 @@ describe('AppService', () => {
             imports: [
                 HttpModule,
                 JwtModule.register({
+                    secret: 'test',
                     signOptions: {
                         expiresIn: '24h'
                     }
-                }),
+                })
             ]
         }).compile();
         appService = moduleRef.get<AppService>(AppService);
@@ -134,7 +139,7 @@ describe('AppService', () => {
                 chechEmailSpyOn = jest.spyOn(appService, 'checkEmail');
             });
 
-            it('should call app service with dto', async () => {
+            it('should call app service with email', async () => {
                 response = await appService.checkEmail(authDtoCorrect.email);
                 expect(chechEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
             });
@@ -161,7 +166,7 @@ describe('AppService', () => {
                 chechLinkSpyOn = jest.spyOn(appService, 'checkLink');
             });
 
-            it('should call app service with dto', async () => {
+            it('should call app service with link', async () => {
                 response = await appService.checkLink(rightLink);
                 expect(chechLinkSpyOn).toBeCalledWith(rightLink);
             });
@@ -178,6 +183,36 @@ describe('AppService', () => {
         });
     });
 
+    describe('Login', () => {
+        describe('when login called', () => {
+            let loginSpyOn;
+            let checkEmailSpyOn;
+
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                loginSpyOn = jest.spyOn(appService, 'login');
+                checkEmailSpyOn = jest.spyOn(appService, 'checkEmail')
+            });
+
+            it('should call app service with dto and create token', async () => {
+                const hashPassword = await bcrypt.hash(userRepository[0].password, 5);
+                userRepository[0].password = hashPassword;
+                response = await appService.login(authDtoCorrect);
+                expect(checkEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
+                expect(loginSpyOn).toBeCalledWith(authDtoCorrect);
+                expect(response).toEqual(tokens[0]);
+            });
+
+            it('should throw "User does not exist" exception', async () => {
+                await expect(appService.login(authDtoWrongEmail)).rejects.toThrow('User does not exist');
+            });
+
+            it('should throw "Invalid password" exception', async () => {
+                await expect(appService.login(authDtoWrongPass)).rejects.toThrow('Invalid password');
+            });
+        });
+    });
+
 
     describe('Logout', () => {
         describe('when logout called', () => {
@@ -190,7 +225,7 @@ describe('AppService', () => {
                 logoutSpyOn = jest.spyOn(appService, 'logout');
             });
 
-            it('should call app service with dto', async () => {
+            it('should call app service with refresh token', async () => {
                 response = await appService.logout(rightRefreshToken);
                 expect(logoutSpyOn).toBeCalledWith(rightRefreshToken);
             });
@@ -209,6 +244,8 @@ describe('AppService', () => {
 
         });
     });
+
+
 
 
 

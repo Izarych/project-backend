@@ -26,6 +26,9 @@ export class AppService {
     }
 
     const isPasswordEquals = await bcrypt.compare(dto.password, user.password);
+    console.log(dto.password);
+    console.log(user.password);
+
 
     if (!isPasswordEquals) {
       throw new BadRequestException('Invalid password');
