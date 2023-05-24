@@ -83,7 +83,16 @@ describe('AppService', () => {
             userId: 2,
             refreshToken: "testtoken2"
         }
-    ]
+    ];
+    const testToken = {
+        accessToken: "test",
+        refreshToken: "test",
+        user: {
+            email: "email1@mail.ru",
+            id: 1,
+            isActivated: false
+        }
+    }
 
     const mockMailerService = {
 
@@ -198,9 +207,12 @@ describe('AppService', () => {
                 const hashPassword = await bcrypt.hash(userRepository[0].password, 5);
                 userRepository[0].password = hashPassword;
                 response = await appService.login(authDtoCorrect);
+                testToken.accessToken = response.accessToken;
+                testToken.refreshToken = response.refreshToken;
+
                 expect(checkEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
                 expect(loginSpyOn).toBeCalledWith(authDtoCorrect);
-                expect(response).toEqual(tokens[0]);
+                expect(response).toEqual(testToken);
             });
 
             it('should throw "User does not exist" exception', async () => {
@@ -212,6 +224,53 @@ describe('AppService', () => {
             });
         });
     });
+
+    // describe('Refresh', () => {
+    //     describe('when Refresh called', () => {
+    //         let loginSpyOn;
+    //         let checkEmailSpyOn;
+
+    //         beforeEach(async () => {
+    //             jest.clearAllMocks();
+    //             loginSpyOn = jest.spyOn(appService, 'login');
+    //             checkEmailSpyOn = jest.spyOn(appService, 'checkEmail')
+    //         });
+
+    //         it('should call app service with dto and create token', async () => {
+    //             const hashPassword = await bcrypt.hash(userRepository[0].password, 5);
+    //             userRepository[0].password = hashPassword;
+    //             response = await appService.login(authDtoCorrect);
+    //             testToken.accessToken = response.accessToken;
+    //             testToken.refreshToken = response.refreshToken;
+
+    //             expect(checkEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
+    //             expect(loginSpyOn).toBeCalledWith(authDtoCorrect);
+    //             expect(response).toEqual(testToken);
+    //         });
+
+    //         it('should throw "User does not exist" exception', async () => {
+    //             await expect(appService.login(authDtoWrongEmail)).rejects.toThrow('User does not exist');
+    //         });
+
+    //         it('should throw "Invalid password" exception', async () => {
+    //             await expect(appService.login(authDtoWrongPass)).rejects.toThrow('Invalid password');
+    //         });
+    //     });
+    // });
+
+    /*
+      async refresh(refreshToken: string) {
+    const userData = await this.validateRefreshToken(refreshToken);
+    const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
+
+    if (!userData || !tokenFromDB) {
+      throw new UnauthorizedException({ message: 'No auth' });
+    }
+
+    const user = await this.checkEmail(userData.email);
+    return await this.generateAndSaveTokenAndPayload(user);
+  }
+     */
 
 
     describe('Logout', () => {
