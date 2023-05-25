@@ -225,7 +225,6 @@ export class AppController {
       }
     }
   })
-  //@UseGuards(JwtAuthGuard)
   @Get('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {
