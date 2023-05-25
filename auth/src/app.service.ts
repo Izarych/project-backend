@@ -47,6 +47,7 @@ export class AppService {
   }
 
   async refresh(refreshToken: string) {
+    
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
 
@@ -119,9 +120,9 @@ export class AppService {
       accessToken,
       refreshToken
     };
-
-
   }
+
+
   private async saveToken(userId: number, refreshToken: string) {
     const tokenData = await this.tokenRepository.findOne({ where: { userId } });
     if (tokenData) {

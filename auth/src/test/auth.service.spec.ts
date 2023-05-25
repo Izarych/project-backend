@@ -1,13 +1,14 @@
 import { AppService } from "../app.service";
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpModule } from "@nestjs/axios";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { getModelToken } from "@nestjs/sequelize";
 import { Token } from "../token/token.model";
 import { of } from "rxjs";
 import * as bcrypt from 'bcryptjs';
 import { ConfigModule } from "@nestjs/config";
+import { BadRequestException } from "@nestjs/common";
 
 describe('AppService', () => {
     let appService: AppService;
@@ -54,6 +55,26 @@ describe('AppService', () => {
                     return of(userRepository.find(user => user.email === value));
                 case 'get.user.link':
                     return of(userRepository.find(user => user.activationLink === value));
+                case 'create.user':
+                    const user = {
+                        id: 3,
+                        email: value.email,
+                        password: value.password,
+                        phoneNumber: null,
+                        isActivated: false,
+                        activationLink: value.activationLink
+                    }
+                    userRepository.push(user);
+                    return of(user);
+
+                case 'activate.user':
+                    let result = userRepository.find(user => user.activationLink === value);
+                    if (!result) {
+                        throw new BadRequestException('Invalid link');
+                    }
+                    const index = userRepository.indexOf(result);
+                    userRepository[index].isActivated = true;
+                    return of(userRepository[index]);
                 default:
                     break;
             }
@@ -67,16 +88,51 @@ describe('AppService', () => {
                 tokens.splice(tokens.indexOf(tokenFind), 1);
             };
         }),
-        findOne: jest.fn().mockImplementation(),
+        findOne: jest.fn(),
         create: jest.fn()
 
     }
+
+
+    const payload = { userId: 1, email: "email1@mail.ru", isActivated: false };
+
+    const accessTokenMocked = ([
+        new JwtService().sign({
+            ...payload
+        },
+            {
+                secret: "anystringhere",
+                expiresIn: '24h'
+            }
+        )
+    ]).toString();
+
+    const refreshTokenMocked = ([
+        new JwtService().sign({
+            ...payload
+        },
+            {
+                secret: "anyanotherstringhere",
+                expiresIn: '24h'
+            }
+        )
+    ]).toString();
+
+    const testToken = {
+        accessToken: accessTokenMocked,
+        refreshToken: refreshTokenMocked,
+        user: {
+            email: "email1@mail.ru",
+            id: 1,
+            isActivated: false
+        }
+    };
 
     const tokens = [
         {
             id: 1,
             userId: 1,
-            refreshToken: "testtoken1"
+            refreshToken: testToken.refreshToken
         },
         {
             id: 2,
@@ -84,15 +140,6 @@ describe('AppService', () => {
             refreshToken: "testtoken2"
         }
     ];
-    const testToken = {
-        accessToken: "test",
-        refreshToken: "test",
-        user: {
-            email: "email1@mail.ru",
-            id: 1,
-            isActivated: false
-        }
-    }
 
     const mockMailerService = {
 
@@ -120,7 +167,7 @@ describe('AppService', () => {
             imports: [
                 HttpModule,
                 JwtModule.register({
-                    secret: 'test',
+                    secret: 'anyanotherstringhere',
                     signOptions: {
                         expiresIn: '24h'
                     }
@@ -225,53 +272,120 @@ describe('AppService', () => {
         });
     });
 
-    // describe('Refresh', () => {
-    //     describe('when Refresh called', () => {
-    //         let loginSpyOn;
-    //         let checkEmailSpyOn;
+    describe('Refresh', () => {
+        const mockfindOne = filter => {
+            const tokenFromDb = tokens.find((token) =>
+                token.refreshToken === filter.where.refreshToken
+            );
+            return Promise.resolve(tokenFromDb);
+        };
 
-    //         beforeEach(async () => {
-    //             jest.clearAllMocks();
-    //             loginSpyOn = jest.spyOn(appService, 'login');
-    //             checkEmailSpyOn = jest.spyOn(appService, 'checkEmail')
-    //         });
+        describe('when refresh called', () => {
+            let refreshSpyOn;
+            const rightRefreshToken = testToken.refreshToken;
+            const wrongRefreshToken = "any";
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                refreshSpyOn = jest.spyOn(appService, 'refresh');
+            });
 
-    //         it('should call app service with dto and create token', async () => {
-    //             const hashPassword = await bcrypt.hash(userRepository[0].password, 5);
-    //             userRepository[0].password = hashPassword;
-    //             response = await appService.login(authDtoCorrect);
-    //             testToken.accessToken = response.accessToken;
-    //             testToken.refreshToken = response.refreshToken;
+            it('should call app service with token and refresh tokens in db', async () => {
+                const findOneSpyOn = jest.spyOn(mockTokenRepository, 'findOne').mockImplementationOnce(mockfindOne);
+                response = await appService.refresh(rightRefreshToken);
+                testToken.accessToken = response.accessToken;
+                testToken.refreshToken = response.refreshToken;
 
-    //             expect(checkEmailSpyOn).toBeCalledWith(authDtoCorrect.email);
-    //             expect(loginSpyOn).toBeCalledWith(authDtoCorrect);
-    //             expect(response).toEqual(testToken);
-    //         });
+                expect(findOneSpyOn).toBeCalled();
+                expect(refreshSpyOn).toBeCalledWith(rightRefreshToken);
+                expect(response).toEqual(testToken);
+            });
 
-    //         it('should throw "User does not exist" exception', async () => {
-    //             await expect(appService.login(authDtoWrongEmail)).rejects.toThrow('User does not exist');
-    //         });
+            it('should throw "No auth" exception cuz of invalid user token', async () => {
+                await expect(appService.refresh(wrongRefreshToken)).rejects.toThrow('No auth');
+            });
 
-    //         it('should throw "Invalid password" exception', async () => {
-    //             await expect(appService.login(authDtoWrongPass)).rejects.toThrow('Invalid password');
-    //         });
-    //     });
-    // });
+            it('should throw "No auth" exception cuz of havent token in db', async () => {
+                await expect(appService.refresh(rightRefreshToken)).rejects.toThrow('No auth');
+            });
+        });
+    });
 
-    /*
-      async refresh(refreshToken: string) {
-    const userData = await this.validateRefreshToken(refreshToken);
-    const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
 
-    if (!userData || !tokenFromDB) {
-      throw new UnauthorizedException({ message: 'No auth' });
-    }
+    describe('Registration', () => {
+        describe('when registration called', () => {
+            let registrationSpyOn;
+            let checkEmailSpyOn;
 
-    const user = await this.checkEmail(userData.email);
-    return await this.generateAndSaveTokenAndPayload(user);
-  }
-     */
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                registrationSpyOn = jest.spyOn(appService, 'registration');
+                checkEmailSpyOn = jest.spyOn(appService, 'checkEmail')
+            });
 
+            it('should throw "User with such email exists" exception', async () => {
+                await expect(appService.registration(authDtoCorrect)).rejects.toThrow('User with such email exists');
+            });
+
+            it('should call app service with dto and create new user', async () => {
+                const userRepositoryLength = userRepository.length;
+                response = await appService.registration(authDtoWrongEmail);
+
+                expect(checkEmailSpyOn).toBeCalledWith(authDtoWrongEmail.email);
+                expect(registrationSpyOn).toBeCalledWith(authDtoWrongEmail);
+                expect(userRepository.length).toBe(userRepositoryLength + 1);
+
+            });
+        });
+    });
+
+    describe('hashNewPassword', () => {
+        describe('when hashNewPassword called', () => {
+            let hashNewPasswordSpyOn;
+            const testPassword = "any";
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                hashNewPasswordSpyOn = jest.spyOn(appService, 'hashNewPassword');
+                response = await appService.hashNewPassword(testPassword);
+            });
+
+            it('should call app service with password', async () => {
+                expect(hashNewPasswordSpyOn).toBeCalledWith(testPassword);
+            });
+
+            it('should return new password', async () => {
+                expect(response).toBe<string>
+            });
+        });
+    });
+
+
+    describe('activate', () => {
+        describe('when activate called', () => {
+            let activateSpyOn;
+            const rightLink = "testlink1";
+            const wrongLink = "any";
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                activateSpyOn = jest.spyOn(appService, 'activate');
+            });
+
+            it('should call app service with link', async () => {
+                response = await appService.activate(rightLink);
+                expect(activateSpyOn).toBeCalledWith(rightLink);
+            });
+
+            it('should set isActivated true if link right', async () => {
+                response = await appService.activate(rightLink);
+                expect(response).toHaveProperty('isActivated', true);
+                expect(userRepository[0]).toHaveProperty('isActivated', true);
+            });
+
+            it('should throw "Invalid link" exception', async () => {
+                await expect(appService.activate(wrongLink)).rejects.toThrow('Invalid link');
+            });
+
+        });
+    });
 
     describe('Logout', () => {
         describe('when logout called', () => {
