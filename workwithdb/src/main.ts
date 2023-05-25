@@ -3,10 +3,14 @@ import {AppModule} from './app.module';
 import {MicroserviceOptions, Transport} from "@nestjs/microservices";
 import {ConfigService} from "@nestjs/config";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
+import {INestApplication} from "@nestjs/common";
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5001;
-  const app = await NestFactory.create(AppModule);
+  const app : INestApplication = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: 'http://localhost:3000'
+  })
   const configService = app.get(ConfigService);
   const host = configService.get('RABBITMQ_HOST');
   app.connectMicroservice<MicroserviceOptions>({

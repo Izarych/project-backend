@@ -1,13 +1,13 @@
-import { AppService } from "../app.service";
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpModule } from "@nestjs/axios";
-import { JwtModule, JwtService } from "@nestjs/jwt";
-import { MailerService } from "@nestjs-modules/mailer";
-import { getModelToken } from "@nestjs/sequelize";
-import { Token } from "../token/token.model";
-import { of } from "rxjs";
+import {AppService} from "../app.service";
+import {Test, TestingModule} from '@nestjs/testing';
+import {HttpModule} from "@nestjs/axios";
+import {JwtModule, JwtService} from "@nestjs/jwt";
+import {MailerService} from "@nestjs-modules/mailer";
+import {getModelToken} from "@nestjs/sequelize";
+import {Token} from "../token/token.model";
+import {of} from "rxjs";
 import * as bcrypt from 'bcryptjs';
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import {BadRequestException, NotFoundException} from "@nestjs/common";
 
 describe('AppService', () => {
     let appService: AppService;
@@ -226,17 +226,17 @@ describe('AppService', () => {
 
     describe('Check link', () => {
         describe('when check link called', () => {
-            let chechLinkSpyOn;
+            let checkLinkSpyOn;
             const rightLink = "testlink2";
             const wrongLink = "any";
             beforeEach(async () => {
                 jest.clearAllMocks();
-                chechLinkSpyOn = jest.spyOn(appService, 'checkLink');
+                checkLinkSpyOn = jest.spyOn(appService, 'checkLink');
             });
 
             it('should call app service with link', async () => {
                 response = await appService.checkLink(rightLink);
-                expect(chechLinkSpyOn).toBeCalledWith(rightLink);
+                expect(checkLinkSpyOn).toBeCalledWith(rightLink);
             });
 
             it('should return user if user in data base', async () => {
@@ -263,8 +263,7 @@ describe('AppService', () => {
             });
 
             it('should call app service with dto and create token', async () => {
-                const hashPassword = await bcrypt.hash(userRepository[0].password, 5);
-                userRepository[0].password = hashPassword;
+                userRepository[0].password = await bcrypt.hash(userRepository[0].password, 5);
                 response = await appService.login(authDtoCorrect);
                 testToken.accessToken = response.accessToken;
                 testToken.refreshToken = response.refreshToken;
@@ -365,7 +364,7 @@ describe('AppService', () => {
             });
 
             it('should return new password', async () => {
-                expect(response).toBe<string>
+                expect(response).toBe<string>;
             });
         });
     });
