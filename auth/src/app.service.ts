@@ -1,14 +1,14 @@
-import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
-import {ClientProxy} from '@nestjs/microservices';
-import {InjectModel} from '@nestjs/sequelize';
-import {AuthDto} from './dto/auth.dto';
-import {Token} from './token/token.model';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
+import { InjectModel } from '@nestjs/sequelize';
+import { AuthDto } from './dto/auth.dto';
+import { Token } from './token/token.model';
 import * as bcrypt from 'bcryptjs';
-import {firstValueFrom} from 'rxjs';
-import {HttpService} from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
-import {MailerService} from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AppService {
@@ -47,9 +47,9 @@ export class AppService {
   }
 
   async refresh(refreshToken: string) {
+    
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
-
     if (!userData || !tokenFromDB) {
       throw new UnauthorizedException({ message: 'No auth' });
     }
@@ -119,9 +119,9 @@ export class AppService {
       accessToken,
       refreshToken
     };
-
-
   }
+
+
   private async saveToken(userId: number, refreshToken: string) {
     const tokenData = await this.tokenRepository.findOne({ where: { userId } });
     if (tokenData) {
@@ -131,13 +131,6 @@ export class AppService {
     return await this.tokenRepository.create({ userId, refreshToken });
   }
 
-  private async validateAccessToken(token: string) {
-    try {
-      return await this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
-    } catch (error) {
-      return null;
-    }
-  }
   private async validateRefreshToken(token: string) {
     try {
       return await this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_SECRET });
@@ -165,7 +158,7 @@ export class AppService {
     }
 
     return req.user;
-    
+
   }
 
   async getVkToken(code: string): Promise<any> {
@@ -175,14 +168,14 @@ export class AppService {
     };
 
     const host =
-    process.env.NODE_ENV === 'prod'
-      ? process.env.APP_HOST
-      : process.env.APP_LOCAL;
+      process.env.NODE_ENV === 'prod'
+        ? process.env.APP_HOST
+        : process.env.APP_LOCAL;
 
     const res = await firstValueFrom(this.httpService
       .get(
         `https://oauth.vk.com/access_token?&client_id=${VKDATA.clientId}&client_secret=${VKDATA.clientSecret}&redirect_uri=${host}/login_vk_success&code=${code}`
-      )); 
+      ));
 
     return res.data;
   }
