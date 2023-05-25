@@ -156,8 +156,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.roles (id, value, description) FROM stdin;
-1	ADMIN	Администратор
-2	USER	Пользователь
+1	USER	Пользователь
 \.
 
 
@@ -166,7 +165,6 @@ COPY public.roles (id, value, description) FROM stdin;
 --
 
 COPY public.user_roles (id, "userId", "roleId") FROM stdin;
-1	1	1
 \.
 
 
@@ -175,7 +173,6 @@ COPY public.user_roles (id, "userId", "roleId") FROM stdin;
 --
 
 COPY public.users (id, email, password, "phoneNumber", "isActivated", "activationLink", "createdAt", "updatedAt") FROM stdin;
-1	admin@mail.ru	$2a$05$g4s/1u0qUESv7XMApRi3VuTNyKWaMw8.HZyif.HKnKY2DrQf/ZngO	\N	f	eb39d8f6-7db2-43fb-8706-2c941f7cb57b	2023-05-25 14:33:48.073+03	2023-05-25 14:33:48.073+03
 \.
 
 
@@ -183,21 +180,21 @@ COPY public.users (id, email, password, "phoneNumber", "isActivated", "activatio
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.roles_id_seq', 2, true);
+SELECT pg_catalog.setval('public.roles_id_seq', 1, true);
 
 
 --
 -- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_roles_id_seq', 1, true);
+SELECT pg_catalog.setval('public.user_roles_id_seq', 1, false);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, true);
+SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 
 
 --
