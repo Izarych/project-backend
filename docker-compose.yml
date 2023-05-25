@@ -74,7 +74,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./user/dumps/userdump.sql:/docker-entrypoint-initdb.d/userdump.sql
+#      - ./user/dumps/userdump.sql:/docker-entrypoint-initdb.d/userdump.sql
       - userdata:/var/lib/postgresql/data/
     restart: always
 
