@@ -14,7 +14,6 @@ import {
 import {Request, Response} from 'express';
 import {AppService} from './app.service';
 import {AuthDto} from './dto/auth.dto';
-import {JwtAuthGuard} from './guard/jwt-auth.guard';
 import {HttpService} from '@nestjs/axios';
 import {firstValueFrom} from 'rxjs';
 import {AuthGuard} from '@nestjs/passport';
