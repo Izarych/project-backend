@@ -8,6 +8,10 @@ services:
       - "5000:5000"
     depends_on:
       - rabbitmq
+      - user
+      - parse
+      - comments
+      - workwithdb
 
   auth:
     build:
@@ -17,6 +21,7 @@ services:
       - "5002:5002"
     depends_on:
       - auth-postgres
+      - user
       - rabbitmq
     env_file:
       - ./auth/.production.env
@@ -27,6 +32,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - rabbitmq
+      - workwithdb
 
   comments:
     build:
@@ -61,8 +67,10 @@ services:
 
   user-postgres:
     image: postgres
-    env_file:
-      - ./user/.production.env
+    environment:
+      POSTGRES_DB: 'users'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'userpassword'
     ports:
       - "5433:5432"
     volumes:
@@ -72,22 +80,25 @@ services:
 
   comments-postgres:
     image: postgres
-    env_file: ./comments/.production.env
+    environment:
+      POSTGRES_DB: 'comments'
+      POSTGRES_USER: 'comment'
+      POSTGRES_PASSWORD: 'commentpassword'
     ports:
       - '5434:5432'
     volumes:
-#      - ./comments/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - comments-data:/var/lib/postgresql/data/
     restart: always
 
   auth-postgres:
     image: postgres
-    env_file:
-      - ./auth/.production.env
+    environment:
+        POSTGRES_DB: 'tokens'
+        POSTGRES_USER: 'auth'
+        POSTGRES_PASSWORD: 'authpassword'
     ports:
       - "5435:5432"
     volumes:
-#      - ./auth/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
       - authdata:/var/lib/postgresql/data/
     restart: always
 

@@ -11,22 +11,22 @@ export class UsersController {
   constructor(private userService: UsersService) { }
 
   @MessagePattern('create.user')
-  async create(@Payload() userDto: CreateUserDto) {
+  async create(@Payload() userDto: CreateUserDto): Promise<User> {
     return this.userService.createUser(userDto);
   }
 
   @MessagePattern('activate.user')
-  async activateUser(@Payload() link: string) {
+  async activateUser(@Payload() link: string) : Promise<User> {
     return this.userService.activateUser(link);
   }
 
   @MessagePattern('get.all.users')
-  async getAll() {
+  async getAll() : Promise<User[]> {
     return this.userService.getAllUsers();
   }
 
   @MessagePattern('get.user.id')
-  async getUserById(@Payload() id: number) {
+  async getUserById(@Payload() id: number) : Promise<User> {
     return this.userService.getUserById(id);
   }
 

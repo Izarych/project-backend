@@ -156,8 +156,8 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.roles (id, value, description) FROM stdin;
-1	USER	Пользователь
-2	ADMIN	Админ
+1	ADMIN	Администратор
+2	USER	Пользователь
 \.
 
 
@@ -166,13 +166,7 @@ COPY public.roles (id, value, description) FROM stdin;
 --
 
 COPY public.user_roles (id, "userId", "roleId") FROM stdin;
-1	2	1
-2	2	2
-3	3	1
-4	4	1
-5	5	1
-6	6	1
-7	7	1
+1	1	1
 \.
 
 
@@ -181,13 +175,7 @@ COPY public.user_roles (id, "userId", "roleId") FROM stdin;
 --
 
 COPY public.users (id, email, password, "phoneNumber", "isActivated", "activationLink", "createdAt", "updatedAt") FROM stdin;
-1	pikach3u359@mail.ru	$2a$05$B6I7iB9IPBfL/VIuwn5kG.kPVeSeXan/s0nSMLhHdyRaMqy0pm0FW	\N	f	23099d0b-a769-4885-845c-ae8fe4a0ba3d	2023-05-06 03:35:03.138+03	2023-05-06 03:35:03.138+03
-2	pikach35u359@mail.ru	$2a$05$w.GYiRpjhZClrCyxa9yPR.OOklNzTLAL.ulC0uh6ztBkhirGJdsEi	\N	f	a6efbf76-f202-425f-a752-c7fadb4a85f6	2023-05-06 03:38:56.331+03	2023-05-06 03:38:56.331+03
-3	pikach335u359@mail.ru	$2a$05$6XX/KZQHyx2KXjEmuJXoIeEE03sy7Z83OhOwl9FRfH0h7z5PRSv/S	\N	f	906ca8e5-37ba-419d-93b0-5a9d114a5083	2023-05-06 17:33:48.065+03	2023-05-06 17:33:48.065+03
-4	pika3ch335u359@mail.ru	mynewpassword	\N	f	aa5c29e7-5846-4c01-a84a-1ba9c5ed1e0d	2023-05-12 16:33:41.14+03	2023-05-12 16:44:22.661+03
-5	pika33ch335u359@mail.ru	$2a$05$HS25DeYVqPiW5E8vgLAob.qdnA./JPaswKo98j7N7KSqasKA5bYna	\N	f	8dd14342-bcd7-4984-b69d-db94426b1482	2023-05-12 17:01:09.549+03	2023-05-12 17:01:09.549+03
-6	pika33c3h335u359@mail.ru	$2a$05$GxIbd6cMrwfgqMiUT6J2U.Xr9oGTfcip5NLsJwqHln0qKodcfq8ES	\N	f	a5eb473a-753f-4bee-9f50-d8bfeaf0fd56	2023-05-12 17:09:09.857+03	2023-05-12 17:09:09.857+03
-7	newmail@mail.ru	$2a$05$jjID9yoRUqgoL5ctsFsXq.D2scaMGM6a.BX7AIGrTzWeTeeZRrcK6	+790035934832	f	5688c01c-15b4-4555-becd-85c3ccd1538d	2023-05-13 00:06:21.815+03	2023-05-13 00:14:35.013+03
+1	admin@mail.ru	$2a$05$g4s/1u0qUESv7XMApRi3VuTNyKWaMw8.HZyif.HKnKY2DrQf/ZngO	\N	f	eb39d8f6-7db2-43fb-8706-2c941f7cb57b	2023-05-25 14:33:48.073+03	2023-05-25 14:33:48.073+03
 \.
 
 
@@ -202,14 +190,14 @@ SELECT pg_catalog.setval('public.roles_id_seq', 2, true);
 -- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_roles_id_seq', 7, true);
+SELECT pg_catalog.setval('public.user_roles_id_seq', 1, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 7, true);
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 
 
 --

@@ -19,7 +19,8 @@ import { ReviewsModule } from './reviews/reviews.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       models: [Review, Comment],
-      autoLoadModels: true
+      autoLoadModels: true,
+      synchronize: true
     }),
     CommentsModule,
     ReviewsModule,
