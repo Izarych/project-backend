@@ -50,7 +50,6 @@ export class AppService {
     
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
-
     if (!userData || !tokenFromDB) {
       throw new UnauthorizedException({ message: 'No auth' });
     }
@@ -132,13 +131,6 @@ export class AppService {
     return await this.tokenRepository.create({ userId, refreshToken });
   }
 
-  private async validateAccessToken(token: string) {
-    try {
-      return await this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
-    } catch (error) {
-      return null;
-    }
-  }
   private async validateRefreshToken(token: string) {
     try {
       return await this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_SECRET });

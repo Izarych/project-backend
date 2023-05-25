@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -8,8 +8,8 @@ import { AppService } from './app.service';
 import { Token } from './token/token.model';
 import { HttpModule } from '@nestjs/axios';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './strategy/google.strategy';
+import { JwtAuthMiddleware } from './middleware/jwt-auth.middleware';
 @Module({
   imports: [
     HttpModule,
@@ -59,4 +59,11 @@ import { GoogleStrategy } from './strategy/google.strategy';
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtAuthMiddleware)
+      .forRoutes('refresh');
+  }
+
+}
