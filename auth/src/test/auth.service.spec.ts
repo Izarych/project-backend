@@ -477,30 +477,4 @@ describe('AppService', () => {
 
         });
     });
-
-
-
-
-
-
 });
-
-
-
-
-
-
-/*            let response;
-
-beforeEach(async () => {
-    jest.spyOn(appService, 'registration').mockResolvedValue(userObject);
-    response = await appController.registration(authDto);
-});
-
-it('should call app service with dto', async () => {
-    expect(appService.registration).toHaveBeenCalledWith(authDto);
-});
-
-it('should return created user object', async () => {
-    expect(response).toEqual(userObject);
-});*/
