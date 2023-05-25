@@ -7,8 +7,7 @@ import { getModelToken } from "@nestjs/sequelize";
 import { Token } from "../token/token.model";
 import { of } from "rxjs";
 import * as bcrypt from 'bcryptjs';
-import { ConfigModule } from "@nestjs/config";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 
 describe('AppService', () => {
     let appService: AppService;
@@ -69,12 +68,23 @@ describe('AppService', () => {
 
                 case 'activate.user':
                     let result = userRepository.find(user => user.activationLink === value);
+
                     if (!result) {
                         throw new BadRequestException('Invalid link');
                     }
                     const index = userRepository.indexOf(result);
                     userRepository[index].isActivated = true;
                     return of(userRepository[index]);
+
+                case 'update.user':
+                    let requestedUser = userRepository.find(user => user.email === value.email);
+
+                    if (!requestedUser) {
+                        throw new NotFoundException('User doesnt exist');
+                    }
+
+                    userRepository[userRepository.indexOf(requestedUser)].activationLink = value.link
+                    return of(requestedUser);
                 default:
                     break;
             }
@@ -142,7 +152,9 @@ describe('AppService', () => {
     ];
 
     const mockMailerService = {
-
+        sendMail: jest.fn().mockImplementation((value) => {
+            return Promise.all([])
+        })
     }
 
     beforeEach(async () => {
@@ -382,6 +394,54 @@ describe('AppService', () => {
 
             it('should throw "Invalid link" exception', async () => {
                 await expect(appService.activate(wrongLink)).rejects.toThrow('Invalid link');
+            });
+
+        });
+    });
+
+    describe('sendActivationLink', () => {
+        describe('when sendActivationLink called', () => {
+            let sendActivationLinkSpyOn;
+            const link = "testlink1";
+            const to = "test@mail.ru";
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                sendActivationLinkSpyOn = jest.spyOn(appService, 'sendActivationLink');
+                response = await appService.sendActivationLink(to, link);
+            });
+
+            it('should call app service with link', async () => {
+                expect(sendActivationLinkSpyOn).toBeCalledWith(to, link);
+            });
+
+            it('should return undefined', async () => {
+                expect(response).toBeUndefined();
+            });
+        });
+    });
+
+
+    describe('reSendActivationLink', () => {
+        describe('when reSendActivationLink called', () => {
+            let sendActivationLinkSpyOn;
+            const wrongEmail = "any@mail.ru";
+            beforeEach(async () => {
+                jest.clearAllMocks();
+                sendActivationLinkSpyOn = jest.spyOn(appService, 'reSendActivationLink');
+            });
+
+            it('should call app service with link', async () => {
+                response = await appService.reSendActivationLink(authDtoCorrect.email);
+                expect(sendActivationLinkSpyOn).toBeCalledWith(authDtoCorrect.email);
+            });
+
+            it('should return user', async () => {
+                response = await appService.reSendActivationLink(authDtoCorrect.email);
+                expect(response).toEqual(userRepository[0]);
+            });
+
+            it('should throw "Invalid link" exception', async () => {
+                await expect(appService.reSendActivationLink(wrongEmail)).rejects.toThrow('User doesnt exist');
             });
 
         });
