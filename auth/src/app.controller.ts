@@ -246,7 +246,7 @@ export class AppController {
     type: AuthDto
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User registration',
     schema: {
       type: 'object',
@@ -262,6 +262,30 @@ export class AppController {
   @Post('/registration')
   async registration(@Body() dto: AuthDto) {
     return this.appService.registration(dto);
+  }
+
+  @ApiOperation({ summary: 'Регистрация админа' })
+  @ApiBody({
+    description: 'В body отправляем email и пароль',
+    type: AuthDto
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Admin registration',
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'number', example: 1 },
+        accesstoken: { type: 'string', example: 'someaccesstoken' },
+        refreshtoken: { type: 'string', example: 'somerefreshtoken' },
+        email: { type: 'string', example: 'email@gmail.com' },
+        password: { type: 'string', example: 'hashpassword' }
+      }
+    }
+  })
+  @Post('/registrationAdmin')
+  async registrationAdmin(@Body() dto: AuthDto) {
+    return this.appService.registrationAdmin(dto);
   }
 
   @EventPattern('hash_password')

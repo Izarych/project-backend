@@ -69,6 +69,16 @@ export class AppService {
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
+  async registrationAdmin(dto: AuthDto) {
+    if (await this.checkEmail(dto.email)) {
+      throw new BadRequestException('User with such email exists');
+    }
+    const hashPassword = await bcrypt.hash(dto.password, 5);
+    const link = uuid.v4();
+    const admin = await firstValueFrom(this.userService.send('create.admin', {...dto, password: hashPassword, activationLink: link}));
+    return await this.generateAndSaveTokenAndPayload(admin);
+  }
+
   async hashNewPassword(password: string) {
     return await bcrypt.hash(password, 5);
   }

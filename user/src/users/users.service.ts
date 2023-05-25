@@ -22,6 +22,14 @@ export class UsersService {
     return user;
   }
 
+  async createAdmin(userDto: CreateUserDto) : Promise<User> {
+    const role : Role = await this.roleService.getRoleByValue("ADMIN");
+    const user : User = await this.userRepository.create(userDto);
+    await user.$set('roles', [role.id]);
+    user.roles = [role];
+    return user;
+  }
+
   async activateUser(link: string) : Promise<User> {
     const user : User = await this.userRepository.findOne({where: {activationLink: link}});
     if (!user) {

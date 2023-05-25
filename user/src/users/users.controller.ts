@@ -15,6 +15,11 @@ export class UsersController {
     return this.userService.createUser(userDto);
   }
 
+  @MessagePattern('create.admin')
+  async createAdmin(@Payload() userDto: CreateUserDto) : Promise<User> {
+    return this.userService.createAdmin(userDto);
+  }
+
   @MessagePattern('activate.user')
   async activateUser(@Payload() link: string) : Promise<User> {
     return this.userService.activateUser(link);
