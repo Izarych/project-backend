@@ -59,7 +59,7 @@ export class ReviewsService {
     private async changeRate(id: number, operation: string) {
         const review = await this.getOneById(id);
         if(!review){
-            return new HttpException(`Review with "${id}" ID not found`, HttpStatus.NOT_FOUND); 
+            throw new HttpException(`Review with "${id}" ID not found`, HttpStatus.NOT_FOUND);
         }
         if (operation == 'increase') {
             review.rate = review.rate + 1;
