@@ -30,7 +30,7 @@ export class AdminService {
   async deleteMovie(id: number) {
     const movie = await this.movieRepository.findByPk(id);
     if (!movie) {
-      return new HttpException('Movie doesnt exist', HttpStatus.NOT_FOUND);
+      throw new HttpException('Movie doesnt exist', HttpStatus.NOT_FOUND);
     }
     await this.movieRepository.destroy({ where: { id } });
     return movie;

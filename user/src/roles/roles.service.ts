@@ -13,7 +13,7 @@ export class RolesService {
     try {
       return await this.roleRepository.create(roleDto);
     } catch (error) {
-      return new HttpException('Role exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Role exists', HttpStatus.BAD_REQUEST);
     }
   }
 

@@ -102,9 +102,9 @@ export class MovieService {
     }
 
     async getMovieByCountry(countries: string) {
-        let country = countries.split('+');
+        let country : string[] = countries.split('+');
         const array = [];
-        const movies = await this.movieRepository.findAll();
+        const movies : Movie[] = await this.movieRepository.findAll();
         for (const item of country) {
             for (const movie of movies) {
                 if (movie.country.includes(item)) {
@@ -120,7 +120,7 @@ export class MovieService {
 
     async getMovieByHuman(fullName: string){
         const array = [];
-        const movies = await this.movieRepository.findAll({
+        const movies : Movie[] = await this.movieRepository.findAll({
             include: [{
                 model: People,
                 attributes: ['fullName'],

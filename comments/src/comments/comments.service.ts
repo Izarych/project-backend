@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Comment } from './comments.model';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {InjectModel} from '@nestjs/sequelize';
+import {Comment} from './comments.model';
+import {CreateCommentDto} from './dto/create-comment.dto';
+import {UpdateCommentDto} from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -10,8 +10,7 @@ export class CommentsService {
 
     async create(dto: CreateCommentDto) {
         try {
-            const comment = await this.commentRepository.create(dto);
-            return comment;
+            return await this.commentRepository.create(dto);
         } catch (error) {
             return error.parent;
         }
@@ -43,7 +42,7 @@ export class CommentsService {
     }
 
     async update(dto: UpdateCommentDto) : Promise<Comment> {
-        const comment = await this.commentRepository.findByPk(dto.id);
+        const comment : Comment = await this.commentRepository.findByPk(dto.id);
         return await comment.update(dto);
     }
 
