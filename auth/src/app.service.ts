@@ -47,7 +47,7 @@ export class AppService {
   }
 
   async refresh(refreshToken: string) {
-    
+
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
     if (!userData || !tokenFromDB) {
@@ -75,7 +75,7 @@ export class AppService {
     }
     const hashPassword = await bcrypt.hash(dto.password, 5);
     const link = uuid.v4();
-    const admin = await firstValueFrom(this.userService.send('create.admin', {...dto, password: hashPassword, activationLink: link}));
+    const admin = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
     return await this.generateAndSaveTokenAndPayload(admin);
   }
 
@@ -162,29 +162,22 @@ export class AppService {
     };
   }
 
-  gmailLogin(req: any) {
+  loginGmail(req: any) {
     if (!req.user) {
-      return 'No user from google'
+      throw new BadRequestException('No user from google');
     }
 
     return req.user;
-
   }
 
   async getVkToken(code: string): Promise<any> {
-    const VKDATA = {
-      clientId: process.env.VK_CLIENT_ID,
-      clientSecret: process.env.VK_CLIENT_SECRET,
-    };
-
-    const host =
-      process.env.NODE_ENV === 'prod'
-        ? process.env.APP_HOST
-        : process.env.APP_LOCAL;
-
     const res = await firstValueFrom(this.httpService
       .get(
-        `https://oauth.vk.com/access_token?&client_id=${VKDATA.clientId}&client_secret=${VKDATA.clientSecret}&redirect_uri=${host}/login_vk_success&code=${code}`
+        `https://oauth.vk.com/access_token?&` +
+        `client_id=${process.env.VK_CLIENT_ID}&` +
+        `client_secret=${process.env.VK_CLIENT_SECRET}&` +
+        `redirect_uri=${process.env.APP_LOCAL}/login_vk_success&` +
+        `code=${code}`
       ));
 
     return res.data;

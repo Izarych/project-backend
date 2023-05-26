@@ -160,12 +160,12 @@ describe('AppController', () => {
                 user: "test"
             }
             beforeEach(async () => {
-                jest.spyOn(appService, 'gmailLogin').mockResolvedValue(user);
+                jest.spyOn(appService, 'loginGmail').mockResolvedValue(user);
                 response = await appController.googleAuthRedirect(mockRequest);
             });
 
             it('should call app service with request', async () => {
-                expect(appService.gmailLogin).toHaveBeenCalledWith(mockRequest);
+                expect(appService.loginGmail).toHaveBeenCalledWith(mockRequest);
             });
 
             it('should return user', async () => {
@@ -185,12 +185,12 @@ describe('AppController', () => {
             };
 
             beforeEach(async () => {
-                jest.spyOn(appController, 'code').mockResolvedValue(mockResponse);
-                response = await appController.code(code, mockResponse as Response);
+                jest.spyOn(appController, 'vkAuthRedirect').mockResolvedValue(mockResponse);
+                response = await appController.vkAuthRedirect(code, mockResponse as Response);
             });
 
             it('should call app service with body', async () => {
-                expect(appController.code).toHaveBeenCalledWith(code, mockResponse);
+                expect(appController.vkAuthRedirect).toHaveBeenCalledWith(code, mockResponse);
             });
         });
     });
@@ -206,12 +206,12 @@ describe('AppController', () => {
             };
 
             beforeEach(async () => {
-                jest.spyOn(appController, 'auth').mockResolvedValue();
-                response = await appController.auth(mockResponse as Response);
+                jest.spyOn(appController, 'vkAuth').mockResolvedValue();
+                response = await appController.vkAuth(mockResponse as Response);
             });
 
             it('should call app service with body', async () => {
-                expect(appController.auth).toHaveBeenCalled();
+                expect(appController.vkAuth).toHaveBeenCalled();
             });
 
             it('should return undefind', async () => {
