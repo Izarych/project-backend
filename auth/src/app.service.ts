@@ -176,7 +176,7 @@ export class AppService {
         `https://oauth.vk.com/access_token?&` +
         `client_id=${process.env.VK_CLIENT_ID}&` +
         `client_secret=${process.env.VK_CLIENT_SECRET}&` +
-        `redirect_uri=${process.env.APP_LOCAL}/login_vk_success&` +
+        `redirect_uri=${process.env.REDIRECT_URI_VK}&` +
         `code=${code}`
       ));
 
