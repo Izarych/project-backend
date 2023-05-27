@@ -73,10 +73,17 @@ describe('AppController', () => {
         describe('when registration called', () => {
 
             let response;
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+                status: jest.fn(),
+                cookie: jest.fn()
+            };
 
             beforeEach(async () => {
                 jest.spyOn(appService, 'registration').mockResolvedValue(userObject);
-                response = await appController.registration(authDto);
+                response = await appController.registration(authDto, mockResponse as Response);
             });
 
             it('should call app service with dto', async () => {
