@@ -98,7 +98,7 @@ export class AppController {
   @Get('login_gmail_success')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req) {
-    return this.appService.gmailLogin(req)
+    return this.appService.loginGmail(req)
   }
 
   @ApiOperation({ summary: 'login_vk' })
@@ -113,12 +113,15 @@ export class AppController {
     }
   })
   @Get('/login_vk')
-  async auth(@Res() res: Response) {
-    const host =
-      process.env.NODE_ENV === 'prod'
-        ? process.env.APP_HOST
-        : process.env.APP_LOCAL;
-    return res.redirect(`https://oauth.vk.com/authorize?client_id=${process.env.VK_CLIENT_ID}&display=page&redirect_uri=${host}/login_vk_success&scope=offline&response_type=code&v=5.92`);
+  async vkAuth(@Res() res: Response) {
+    return res.redirect(`https://oauth.vk.com/authorize?` +
+      `client_id=${process.env.VK_CLIENT_ID}&` +
+      `display=page&` +
+      `redirect_uri=${process.env.REDIRECT_URI_VK}&` +
+      //`redirect_uri=${process.env.APP_LOCAL}/login_vk_success&` +
+      `scope=offline&` +
+      `response_type=code&` +
+      `v=5.92`);
   }
 
 
@@ -133,12 +136,12 @@ export class AppController {
     description: 'Successful vk login redirect'
   })
   @Get('/login_vk_success')
-  async code(@Query('code') code: string, @Res() res: Response) {
-    const host =
-      process.env.NODE_ENV === 'prod'
-        ? process.env.APP_HOST
-        : process.env.APP_LOCAL;
-    return res.json((await firstValueFrom(this.httpService.post(`${host}/login/vk`, { code }))).data)
+  async vkAuthRedirect(@Query('code') code: string, @Res() res: Response) {
+    const resLoginVk = await firstValueFrom(this.httpService
+      .post(
+        `${process.env.APP_LOCAL}/login/vk`, { code }
+      ))
+    return res.json(resLoginVk.data)
   }
 
 

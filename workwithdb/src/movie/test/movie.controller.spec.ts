@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MovieController } from "../movie.controller";
 import { MovieService } from "../movie.service";
-import { Movie } from '../movie.model';
-import { People } from '../../people/people.model';
 import { Genres } from '../../genres/genres.model';
 
 
