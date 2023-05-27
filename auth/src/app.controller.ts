@@ -11,14 +11,14 @@ import {
   UnprocessableEntityException,
   UseGuards
 } from '@nestjs/common';
-import {Request, Response} from 'express';
-import {AppService} from './app.service';
-import {AuthDto} from './dto/auth.dto';
-import {HttpService} from '@nestjs/axios';
-import {firstValueFrom} from 'rxjs';
-import {AuthGuard} from '@nestjs/passport';
-import {ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {EventPattern, Payload} from "@nestjs/microservices";
+import { Request, Response } from 'express';
+import { AppService } from './app.service';
+import { AuthDto } from './dto/auth.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EventPattern, Payload } from "@nestjs/microservices";
 
 @ApiTags('Authorization')
 @Controller()
@@ -199,7 +199,7 @@ export class AppController {
   })
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
-    try {     
+    try {
       const refreshToken = req.headers.cookie.split('=')[1];
       const token = await this.appService.logout(refreshToken);
       res.clearCookie('refreshToken');
@@ -260,8 +260,14 @@ export class AppController {
     }
   })
   @Post('/registration')
-  async registration(@Body() dto: AuthDto) {
-    return this.appService.registration(dto);
+  async registration(@Body() dto: AuthDto, @Res() res: Response) {
+    try {
+      const userData = await this.appService.registration(dto);
+      res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      return res.json(userData);
+    } catch (error) {
+      return res.json(error.response)
+    }
   }
 
   @ApiOperation({ summary: 'Регистрация админа' })
