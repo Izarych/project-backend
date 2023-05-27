@@ -118,6 +118,7 @@ export class AppController {
       `client_id=${process.env.VK_CLIENT_ID}&` +
       `display=page&` +
       `redirect_uri=${process.env.REDIRECT_URI_VK}&` +
+      //`redirect_uri=${process.env.APP_LOCAL}/login_vk_success&` +
       `scope=offline&` +
       `response_type=code&` +
       `v=5.92`);
