@@ -99,8 +99,8 @@ export class AppService {
       .sendMail({
         to: `${to}`,
         from: process.env.MAIL_ACC,
-        subject: `Activation link for ${process.env.APP_LOCAL}`, // ЗАГЛУШКА
-        html: `<h1>This is your activation link</h1><a href="${process.env.APP_LOCAL}/activate/${link}">CLICK HERE</a>`,  //Заглушка
+        subject: `Activation link for ${process.env.MAIL_REDIRECT_URI}`, // ЗАГЛУШКА
+        html: `<h1>This is your activation link</h1><a href="${process.env.MAIL_REDIRECT_URI}/activate/${link}">CLICK HERE</a>`,  //Заглушка
       })
       .then(() => { })
       .catch((error) => console.log(error));
