@@ -30,6 +30,8 @@ services:
     build:
       context: ./parse
       dockerfile: Dockerfile
+    .env_file:
+      - ./parse/.production.env
     depends_on:
       - rabbitmq
       - workwithdb
@@ -116,7 +118,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./workwithdb/dumps/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
+      - ./workwithdb/dumps/newdbdump.sql:/docker-entrypoint-initdb.d/newdbdump.sql
       - kinopoisknew-parse-db:/var/lib/postgresql/data/
     restart: always
 
