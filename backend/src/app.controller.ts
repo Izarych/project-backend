@@ -31,8 +31,8 @@ export class AppController {
 
     @ApiOperation({ summary: 'Парсинг с кинопоиска' })
     @ApiResponse({ status: 200, description: 'Парсинг с помощью puppeteer' })
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('ADMIN')
+    // @UseGuards(RolesGuard)
     @Get('/parse')
     async parseFilms() {
         return this.parseService.emit('parse', '');
