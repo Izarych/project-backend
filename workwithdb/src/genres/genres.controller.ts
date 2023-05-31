@@ -8,7 +8,7 @@ export class GenresController {
     }
 
     @EventPattern('create_genres')
-    async createGenres({id, arr}) {
+    async createGenres({id, arr}) : Promise<void> {
         return this.genresService.createGenres(id, arr);
     }
 }

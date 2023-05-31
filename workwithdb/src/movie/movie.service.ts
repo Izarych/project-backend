@@ -8,13 +8,10 @@ import {Op} from "sequelize";
 
 @Injectable()
 export class MovieService {
-    constructor(@InjectModel(Movie) private movieRepository: typeof Movie,
-                // @InjectModel(People) private peopleRepository: typeof People,
-                // @InjectModel(Genres) private genreRepository: typeof Genres
-                ) { }
+    constructor(@InjectModel(Movie) private movieRepository: typeof Movie) { }
 
     async createMovie(dto: CreateMovieDto) {
-        const movie = await this.movieRepository.findOne({
+        const movie : Movie = await this.movieRepository.findOne({
             where: {
                 title: dto.title,
                 originalTitle: dto.originalTitle,
@@ -31,12 +28,12 @@ export class MovieService {
     }
 
 
-    async getAllMovies() {
+    async getAllMovies() : Promise<Movie[]> {
         return await this.movieRepository.findAll({
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'genre'],
+                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 },
                 {
@@ -48,12 +45,12 @@ export class MovieService {
         });
     }
 
-    async getMovie(id: number) {
+    async getMovie(id: number) : Promise<Movie> {
         return this.movieRepository.findByPk(id, { include: { all: true } });
     }
 
-    async getMoviePeople(id: number) {
-        const movie = await this.movieRepository.findByPk(id, {
+    async getMoviePeople(id: number) : Promise<People[]> {
+        const movie : Movie = await this.movieRepository.findByPk(id, {
             include: [{
                 model: People,
                 attributes: ['id', 'fullName', 'fullNameOrig', 'profession', 'photo'],
@@ -66,11 +63,11 @@ export class MovieService {
         throw new NotFoundException('Фильм не найден')
     }
 
-    async getMovieGenres(id: number) {
-        const movie = await this.movieRepository.findByPk(id, {
+    async getMovieGenres(id: number) : Promise<Genres[]> {
+        const movie : Movie = await this.movieRepository.findByPk(id, {
             include: [{
                 model: Genres,
-                attributes: ['id', 'genre'],
+                attributes: ['id', 'title', 'originalTitle'],
                 through: { attributes: [] }
             }]
         })
@@ -80,7 +77,7 @@ export class MovieService {
         throw new NotFoundException('Фильм не найден')
     }
 
-    async getMovieByAgeRate(ageRate: number) {
+    async getMovieByAgeRate(ageRate: number) : Promise<Movie[]> {
         return await this.movieRepository.findAll({
             where: {
                 ageRate: {[Op.lte]: ageRate}
@@ -88,7 +85,7 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'genre'],
+                    attributes: ['id', 'title', 'originalTitle'],
                     through: {attributes: []}
                 },
                 {
@@ -101,9 +98,9 @@ export class MovieService {
 
     }
 
-    async getMovieByCountry(countries: string) {
+    async getMovieByCountry(countries: string) : Promise<Movie[]> {
         let country : string[] = countries.split('+');
-        const array = [];
+        const array : Movie[] = [];
         const movies : Movie[] = await this.movieRepository.findAll();
         for (const item of country) {
             for (const movie of movies) {
@@ -118,8 +115,8 @@ export class MovieService {
 
     }
 
-    async getMovieByHuman(fullName: string){
-        const array = [];
+    async getMovieByHuman(fullName: string) : Promise<Movie[]>{
+        const array : Movie[] = [];
         const movies : Movie[] = await this.movieRepository.findAll({
             include: [{
                 model: People,
@@ -139,19 +136,19 @@ export class MovieService {
         return array
     }
 
-    async getMovieByGenre(genre: string) {
-        const array = [];
-        const movies = await this.movieRepository.findAll({
+    async getMovieByGenre(genre: string) : Promise<Movie[]> {
+        const array : Movie[] = [];
+        const movies : Movie[] = await this.movieRepository.findAll({
             include: [{
                 model: Genres,
-                attributes: ['genre'],
+                attributes: ['title', 'originalTitle'],
                 through: { attributes: [] }
             }]
         })
         if (movies) {
             for (const movie of movies) {
                 for (const item of movie.genres) {
-                    if (item.genre == genre) {
+                    if (item.title == genre) {
                         array.push(movie);
                     }
                 }
@@ -160,7 +157,7 @@ export class MovieService {
         return array;
     }
 
-    async getMovieByRate(rate: number) {
+    async getMovieByRate(rate: number) : Promise<Movie[]> {
         return await this.movieRepository.findAll({
             where: {
                 rate: {[Op.gte]: rate}
@@ -168,7 +165,7 @@ export class MovieService {
         });
     }
 
-    async getMovieByRateQuantity(rateQuantity: number) {
+    async getMovieByRateQuantity(rateQuantity: number) : Promise<Movie[]> {
         return await this.movieRepository.findAll({
             where: {
                 rateQuantity: {[Op.gte]: rateQuantity}
@@ -176,8 +173,8 @@ export class MovieService {
         });
     }
 
-    async getMovieByTitle(title: string) {
-        const movie = await this.movieRepository.findOne({where: {title: title},
+    async getMovieByTitle(title: string) : Promise<Movie> {
+        const movie : Movie = await this.movieRepository.findOne({where: {title: title},
             include: [
                 {
                     model: People,

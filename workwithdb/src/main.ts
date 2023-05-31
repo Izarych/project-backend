@@ -5,8 +5,8 @@ import {ConfigService} from "@nestjs/config";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import {INestApplication} from "@nestjs/common";
 
-async function bootstrap() {
-  const PORT = process.env.PORT || 5001;
+async function bootstrap() : Promise<void> {
+  const PORT : string | 5001 = process.env.PORT || 5001;
   const app : INestApplication = await NestFactory.create(AppModule);
   app.enableCors({
     origin: 'http://localhost:3000'

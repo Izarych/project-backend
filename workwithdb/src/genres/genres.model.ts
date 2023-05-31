@@ -11,7 +11,11 @@ export class Genres extends Model<Genres> {
 
     @ApiProperty({ example: 'драма', description: "Название жанра" })
     @Column({ type: DataType.STRING, unique: true })
-    genre: string;
+    title: string;
+
+    @ApiProperty({example: 'Horror', description: 'Оригинальное название жанра'})
+    @Column({type: DataType.STRING, unique: true, allowNull: true})
+    originalTitle: string;
 
     @BelongsToMany(() => Movie, () => MovieGenres)
     movies: Movie[]

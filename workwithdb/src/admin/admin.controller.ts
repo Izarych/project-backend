@@ -6,7 +6,6 @@ import { MovieService } from '../movie/movie.service';
 import { ApiOperation, ApiParam, ApiResponse, ApiBody } from "@nestjs/swagger";
 import { Genres } from 'src/genres/genres.model';
 import { Movie } from 'src/movie/movie.model';
-import { People } from 'src/people/people.model';
 
 @Controller('admin')
 export class AdminController {
@@ -22,7 +21,7 @@ export class AdminController {
     type: Genres
   })
   @Get('/genres')
-  async getGenres() {
+  async getGenres() : Promise<Genres[]> {
     return this.adminService.getAllGenres();
   }
 
@@ -39,7 +38,7 @@ export class AdminController {
     type: Genres
   })
   @Get('/genre/:id')
-  async getGenre(@Param('id') id: number) {
+  async getGenre(@Param('id') id: number) : Promise<Genres> {
     return this.adminService.getGenre(id);
   }
 
@@ -55,7 +54,7 @@ export class AdminController {
     type: UpdateGenreDto
   })
   @Put('/genre')
-  async updateGenre(@Body() dto: UpdateGenreDto) {
+  async updateGenre(@Body() dto: UpdateGenreDto) : Promise<Genres> {
     return this.adminService.updateGenre(dto);
   }
 
@@ -67,7 +66,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movies')
-  async getMovies() {
+  async getMovies() : Promise<Movie[]> {
     return this.movieService.getAllMovies();
   }
 
@@ -84,7 +83,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/:id')
-  async getMovie(@Param('id') id: number) {
+  async getMovie(@Param('id') id: number) : Promise<Movie> {
     return this.movieService.getMovie(id);
   }
 
@@ -101,7 +100,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/age/:ageRate')
-  async getMovieByAgeRate(@Param('ageRate') ageRate: number) {
+  async getMovieByAgeRate(@Param('ageRate') ageRate: number) : Promise<Movie[]> {
     return this.movieService.getMovieByAgeRate(ageRate);
   }
 
@@ -118,7 +117,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/country/:countries')
-  async getMovieByCountry(@Param('countries') countries: string) {
+  async getMovieByCountry(@Param('countries') countries: string) : Promise<Movie[]> {
     return this.movieService.getMovieByCountry(countries);
   }
 
@@ -135,7 +134,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/genre/:genre')
-  async getMovieByGenre(@Param('genre') genre: string) {
+  async getMovieByGenre(@Param('genre') genre: string) : Promise<Movie[]> {
     return this.movieService.getMovieByGenre(genre);
   }
 
@@ -152,7 +151,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/rate/:rate')
-  async getMovieByRate(@Param('rate') rate: number) {
+  async getMovieByRate(@Param('rate') rate: number) : Promise<Movie[]> {
     return this.movieService.getMovieByRate(rate)
   }
 
@@ -169,43 +168,43 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/ratequan/:ratequan')
-  async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number) {
+  async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number) : Promise<Movie[]> {
     return this.movieService.getMovieByRateQuantity(rateQuantity)
   }
 
-  @ApiOperation({ summary: 'Получение фильмов по полному имени человека' })
-  @ApiParam({
-    name: 'fullName',
-    description: 'Полное имя человека',
-    type: String,
-    example: 'Клинт Иствуд'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Получаем фильмы в ответе',
-    type: Movie
-  })
-  @Get('/human/:fullName')
-  async getMovieByHuman(@Param('fullName') fullName: string) {
-    return this.movieService.getMovieByHuman(fullName)
-  }
+  // @ApiOperation({ summary: 'Получение фильмов по полному имени человека' })
+  // @ApiParam({
+  //   name: 'fullName',
+  //   description: 'Полное имя человека',
+  //   type: String,
+  //   example: 'Клинт Иствуд'
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Получаем фильмы в ответе',
+  //   type: Movie
+  // })
+  // @Get('/human/:fullName')
+  // async getMovieByHuman(@Param('fullName') fullName: string) : Promise<Movie[]> {
+  //   return this.movieService.getMovieByHuman(fullName)
+  // }
 
-  @ApiOperation({ summary: 'Получение всех людей участвовавших в фильме' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID фильма',
-    type: Number,
-    example: 1
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Получаем всех людей в ответе',
-    type: People
-  })
-  @Get('/movie/:id/people')
-  async getMoviePeople(@Param('id') film_id: number) {
-    return this.movieService.getMoviePeople(film_id);
-  }
+  // @ApiOperation({ summary: 'Получение всех людей участвовавших в фильме' })
+  // @ApiParam({
+  //   name: 'id',
+  //   description: 'ID фильма',
+  //   type: Number,
+  //   example: 1
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Получаем всех людей в ответе',
+  //   type: People
+  // })
+  // @Get('/movie/:id/people')
+  // async getMoviePeople(@Param('id') film_id: number) {
+  //   return this.movieService.getMoviePeople(film_id);
+  // }
 
   @ApiOperation({ summary: 'Получение всех жанров фильма' })
   @ApiParam({
@@ -220,7 +219,7 @@ export class AdminController {
     type: Genres
   })
   @Get('/movie/:id/genres')
-  async getMovieGenres(@Param('id') film_id: number) {
+  async getMovieGenres(@Param('id') film_id: number) : Promise<Genres[]> {
     return this.movieService.getMovieGenres(film_id);
   }
 
@@ -237,7 +236,7 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/title/:title')
-  async getMovieByTitle(@Param('title') title: string) {
+  async getMovieByTitle(@Param('title') title: string) : Promise<Movie> {
     return this.movieService.getMovieByTitle(title);
   }
 
@@ -252,7 +251,7 @@ export class AdminController {
     type: Movie
   })
   @Put('/movie')
-  async updateMovie(@Body() dto: UpdateMovieDto) {
+  async updateMovie(@Body() dto: UpdateMovieDto) : Promise<Movie> {
     return this.adminService.updateMovie(dto);
   }
 
@@ -269,7 +268,7 @@ export class AdminController {
     type: Movie
   })
   @Delete('/movie/:id')
-  async deleteMovie(@Param('id') id: number) {
+  async deleteMovie(@Param('id') id: number) : Promise<Movie> {
     return this.adminService.deleteMovie(id);
   }
 }

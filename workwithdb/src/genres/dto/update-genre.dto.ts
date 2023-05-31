@@ -5,6 +5,9 @@ export class UpdateGenreDto {
   @ApiProperty({ example: 1, description: "ID жанра" })
   readonly id: number;
 
-  @ApiProperty({ example: 1, description: "Название жанра" })
-  readonly genre: string;
+  @ApiProperty({ example: 'Драма', description: "Название жанра" })
+  readonly title: string;
+
+  @ApiProperty({example: 'Horror', description: 'Оригинальное название жанра'})
+  readonly originalTitle: string;
 }

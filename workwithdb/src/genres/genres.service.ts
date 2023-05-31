@@ -9,14 +9,14 @@ export class GenresService {
                 @InjectModel(Movie) private movieRepository: typeof Movie) {
     }
 
-    async createGenres(movie_id: number, genreArr: string[]) {
-        const movie = await this.movieRepository.findByPk(movie_id);
+    async createGenres(movie_id: number, genreArr: string[]) : Promise<void> {
+        const movie : Movie = await this.movieRepository.findByPk(movie_id);
         for (const element of genreArr) {
             const [genre] = await this.genreRepository.findOrCreate(
-                { where: { genre: element } }
+                { where: { title: element } }
             )
-            const currentGenre = await movie.$get('genres');
-            const updatedGenre = currentGenre.concat(genre);
+            const currentGenre : Genres[] = await movie.$get('genres');
+            const updatedGenre : Genres[] = currentGenre.concat(genre);
             await movie.$set('genres', updatedGenre);
         }
 

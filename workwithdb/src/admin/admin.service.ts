@@ -11,24 +11,28 @@ export class AdminService {
   constructor(@InjectModel(Movie) private movieRepository: typeof Movie,
               @InjectModel(Genres) private genreRepository: typeof Genres) { }
 
-  async getAllGenres() {
+  async getAllGenres() : Promise<Genres[]> {
     return await this.genreRepository.findAll();
   }
 
-  async getGenre(id: number) {
+  async getGenre(id: number) : Promise<Genres> {
     return await this.genreRepository.findByPk(id);
   }
 
-  async updateGenre(dto: UpdateGenreDto) {
-    return await this.genreRepository.update(dto, { where: { id: dto.id } });
+  async updateGenre(dto: UpdateGenreDto) : Promise<Genres> {
+    const genre : Genres = await this.genreRepository.findByPk(dto.id);
+    await genre.update(dto);
+    return genre;
   }
 
-  async updateMovie(dto: UpdateMovieDto) {
-    return await this.movieRepository.update(dto, { where: { id: dto.id } });
+  async updateMovie(dto: UpdateMovieDto) : Promise<Movie> {
+    const movie : Movie = await this.movieRepository.findByPk(dto.id);
+    await movie.update(dto);
+    return movie;
   }
 
-  async deleteMovie(id: number) {
-    const movie = await this.movieRepository.findByPk(id);
+  async deleteMovie(id: number) : Promise<Movie> {
+    const movie : Movie = await this.movieRepository.findByPk(id);
     if (!movie) {
       throw new HttpException('Movie doesnt exist', HttpStatus.NOT_FOUND);
     }
