@@ -146,12 +146,7 @@ describe('MovieService', () => {
     }),
 
 
-    findAll: jest.fn((
-      // filter?: {
-      //   include?: any,
-      //   where?: any
-      // }
-    ) => {
+    findAll: jest.fn(() => {
       return Promise.resolve(movies);
     }),
 
