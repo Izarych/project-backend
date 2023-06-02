@@ -34,16 +34,12 @@ describe('MovieService', () => {
     {
       "id": 1,
       "title": "1+1",
-      "genres": [
-        {
-          "id": 1,
-          "title": "биография"
-        }
-      ]
+      "genres": []
     },
     {
       "id": 2,
-      "title": "Джентльмены"
+      "title": "Джентльмены",
+      "genres": []
     }
   ];
 
