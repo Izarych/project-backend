@@ -52,15 +52,15 @@ describe('MovieService', () => {
       "genres": [
         {
           "id": 3,
-          "genre": "биография"
+          "title": "биография"
         },
         {
           "id": 2,
-          "genre": "комедия"
+          "title": "комедия"
         },
         {
           "id": 1,
-          "genre": "драма"
+          "title": "драма"
         }
       ],
       "people": [
@@ -101,15 +101,15 @@ describe('MovieService', () => {
       "genres": [
         {
           "id": 5,
-          "genre": "боевик"
+          "title": "боевик"
         },
         {
           "id": 2,
-          "genre": "комедия"
+          "title": "комедия"
         },
         {
           "id": 4,
-          "genre": "криминал"
+          "title": "криминал"
         }
       ],
       "people": [

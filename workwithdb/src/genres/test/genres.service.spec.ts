@@ -10,23 +10,23 @@ describe('MovieService', () => {
   const genres = [
     {
       "id": 1,
-      "genre": "биография",
+      "title": "биография",
     },
     {
       "id": 2,
-      "genre": "комедия",
+      "title": "комедия",
     },
     {
       "id": 3,
-      "genre": "драма",
+      "title": "драма",
     },
     {
       "id": 4,
-      "genre": "боевик",
+      "title": "боевик",
     },
     {
       "id": 5,
-      "genre": "криминал",
+      "title": "криминал",
     }
   ];
 
@@ -34,16 +34,12 @@ describe('MovieService', () => {
     {
       "id": 1,
       "title": "1+1",
-      "genres": [
-        {
-          "id": 1,
-          "genre": "биография"
-        }
-      ]
+      "genres": []
     },
     {
       "id": 2,
-      "title": "Джентльмены"
+      "title": "Джентльмены",
+      "genres": []
     }
   ];
 
@@ -57,7 +53,7 @@ describe('MovieService', () => {
     ) => {
 
       const foundGenre = genres.find((genre) =>
-        genre.genre === filter.where.genre
+        genre.title === filter.where.genre
       )
 
       return Promise.resolve([foundGenre]);

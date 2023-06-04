@@ -30,7 +30,7 @@ services:
     build:
       context: ./parse
       dockerfile: Dockerfile
-    .env_file:
+    env_file:
       - ./parse/.production.env
     depends_on:
       - rabbitmq

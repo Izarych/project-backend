@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import {CreatePeopleDto} from "./dto/create-people.dto";
-import {Movie} from "../movie/movie.model";
-import {InjectModel} from "@nestjs/sequelize";
-import {People} from "./people.model";
+import { CreatePeopleDto } from "./dto/create-people.dto";
+import { Movie } from "../movie/movie.model";
+import { InjectModel } from "@nestjs/sequelize";
+import { People } from "./people.model";
 
 @Injectable()
 export class PeopleService {
     constructor(@InjectModel(Movie) private movieRepository: typeof Movie,
-                @InjectModel(People) private peopleRepository: typeof People) {
+        @InjectModel(People) private peopleRepository: typeof People) {
     }
 
     async createPeoples(movie_id: number, peopleArr: CreatePeopleDto[]) {
@@ -26,14 +26,36 @@ export class PeopleService {
     }
 
     async getPeople() {
-        return this.peopleRepository.findAll({
+        return await this.peopleRepository.findAll({
             include: [
                 {
                     model: Movie,
                     attributes: ['id', 'title'],
-                    through: {attributes: []}
+                    through: { attributes: [] }
                 }
             ]
         })
+    }
+
+    async getPeopleByFullName(fullName: string) {
+        const array: People[] = [];
+        const people: People[] = await this.peopleRepository.findAll({
+            include: [
+                {
+                    model: Movie,
+                    attributes: ['id', 'title'],
+                    through: { attributes: [] }
+                }
+            ]
+        })
+
+        for (const human of people) {
+            if (human.fullName == fullName) {
+                array.push(human)
+            }
+        }
+
+        return array;
+
     }
 }

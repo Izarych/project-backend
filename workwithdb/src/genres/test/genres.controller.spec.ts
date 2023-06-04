@@ -14,7 +14,7 @@ describe('MovieController', () => {
         {
           provide: GenresService,
           useValue: {
-            
+            createGenres: jest.fn()
           },
         },
       ],
@@ -32,5 +32,28 @@ describe('MovieController', () => {
       expect(genresController).toBeDefined();
     });
   });
+
+  describe('createGenres', () => {
+    describe('when createGenres called', () => {
+
+      let response, spy;
+
+      beforeEach(async () => {
+        spy = jest.spyOn(genresService, 'createGenres');
+        response = await genresController.createGenres({id: 1, arr: ['боевик']});
+      });
+
+      it('should call app service with id and array', async () => {
+        expect(spy).toHaveBeenCalledWith(1, ['боевик']);
+      });
+
+      it('should return undefined', async () => {
+        expect(response).toBeUndefined();
+      });
+
+    });
+  });
+
+
 
 });

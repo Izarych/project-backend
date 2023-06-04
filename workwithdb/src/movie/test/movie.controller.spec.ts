@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MovieController } from "../movie.controller";
 import { MovieService } from "../movie.service";
 import { Genres } from '../../genres/genres.model';
+import { CreateMovieDto } from '../dto/create-movie.dto';
+import { Movie } from '../movie.model';
 
 
 describe('MovieController', () => {
@@ -20,15 +22,15 @@ describe('MovieController', () => {
       "genres": [
         {
           "id": 3,
-          "genre": "биография"
+          "title": "биография"
         },
         {
           "id": 2,
-          "genre": "комедия"
+          "title": "комедия"
         },
         {
           "id": 1,
-          "genre": "драма"
+          "title": "драма"
         }
       ],
       "people": [
@@ -60,15 +62,15 @@ describe('MovieController', () => {
       "genres": [
         {
           "id": 5,
-          "genre": "боевик"
+          "title": "боевик"
         },
         {
           "id": 2,
-          "genre": "комедия"
+          "title": "комедия"
         },
         {
           "id": 4,
-          "genre": "криминал"
+          "title": "криминал"
         }
       ],
       "people": [
@@ -110,7 +112,7 @@ describe('MovieController', () => {
 
             getMovieByGenre: jest.fn((genre: string) =>
               movies.filter((movie) =>
-                movie.genres.find((item) => item.genre === genre)
+                movie.genres.find((item) => item.title === genre)
               )
             ),
 
@@ -143,6 +145,8 @@ describe('MovieController', () => {
             getMovieByTitle: jest.fn((title: string) =>
               movies.find((movie) => movie.title === title)
             ),
+
+            createMovie: jest.fn()
           },
         },
       ],
@@ -392,6 +396,38 @@ describe('MovieController', () => {
       });
 
       it('should return movie with sent title', async () => {
+        expect(response).toEqual(movies[1]);
+      });
+
+    });
+  });
+
+  describe('createMovie', () => {
+    describe('when createMovie called', () => {
+
+      let response, spy;
+      const movie = movies[1];
+      const dto = {
+        title: movie.title,
+        originalTitle: movie.originalTitle,
+        ageRate: movie.ageRate,
+        country: movie.country,
+        rate: movie.rate,
+        rateQuantity: movie.rateQuantity,
+        genres: movie.genres,
+        people: movie.people,
+      }
+
+      beforeEach(async () => {
+        spy = jest.spyOn(movieService, 'createMovie').mockReturnValue(Promise.resolve(movies[1] as Movie));
+        response = await movieController.createMovie(dto as unknown as CreateMovieDto);
+      });
+
+      it('should call app service with dto', async () => {
+        expect(spy).toHaveBeenCalledWith(dto);
+      });
+
+      it('should create a new movie record and return that', async () => {
         expect(response).toEqual(movies[1]);
       });
 
