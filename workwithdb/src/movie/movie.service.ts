@@ -33,7 +33,6 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 },
                 {
@@ -54,12 +53,10 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 },
                 {
                     model: People,
-                    attributes: ['id', 'fullName', 'fullNameOrig', 'profession', 'photo'],
                     through: { attributes: [] }
                 }
             ]
@@ -75,12 +72,10 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 },
                 {
                     model: People,
-                    attributes: ['id', 'fullName', 'profession'],
                     through: { attributes: [] }
                 }
             ]
@@ -99,7 +94,6 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 }
             ]
@@ -113,7 +107,6 @@ export class MovieService {
         const movies: Movie[] = await this.movieRepository.findAll({
             include: [{
                 model: Genres,
-                attributes: ['id', 'title', 'originalTitle'],
                 through: { attributes: [] }
             }]
         });
@@ -137,7 +130,6 @@ export class MovieService {
                 [
                     {
                         model: Genres,
-                        attributes: ['id', 'title', 'originalTitle'],
                         through: { attributes: [] }
                     },
                     {
@@ -164,7 +156,6 @@ export class MovieService {
         const movies: Movie[] = await this.movieRepository.findAll({
             include: [{
                 model: Genres,
-                attributes: ['id', 'title', 'originalTitle'],
                 through: { attributes: [] }
             }]
         })
@@ -188,7 +179,6 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 }
             ]
@@ -203,7 +193,6 @@ export class MovieService {
             include: [
                 {
                     model: Genres,
-                    attributes: ['id', 'title', 'originalTitle'],
                     through: { attributes: [] }
                 }
             ]
