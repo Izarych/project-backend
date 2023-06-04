@@ -38,8 +38,10 @@ export class PeopleService {
     }
 
     async getPeopleByFullName(fullName: string) {
-        const array: People[] = [];
         const people: People[] = await this.peopleRepository.findAll({
+            where: {
+                fullName
+            },
             include: [
                 {
                     model: Movie,
@@ -49,13 +51,7 @@ export class PeopleService {
             ]
         })
 
-        for (const human of people) {
-            if (human.fullName == fullName) {
-                array.push(human)
-            }
-        }
-
-        return array;
+        return people;
 
     }
 }
