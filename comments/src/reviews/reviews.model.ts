@@ -1,5 +1,5 @@
 import { Column, DataType, HasMany, Model, setAttributes, setOptions, Table, Unique } from "sequelize-typescript";
-import { Comment } from "src/comments/comments.model";
+import { ReviewComment } from "src/review-comments/review-comments.model";
 
 interface ReviewCreationAttr {
     movieId: number;
@@ -26,6 +26,6 @@ export class Review extends Model<Review, ReviewCreationAttr> {
     @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
     rate: number;
 
-    @HasMany(() => Comment)
-    comments: Comment[]
+    @HasMany(() => ReviewComment)
+    comments: ReviewComment[]
 }

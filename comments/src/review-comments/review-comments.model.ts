@@ -1,15 +1,15 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Review } from "src/reviews/reviews.model";
 
-interface CommentCreationAttr {
+interface ReviewCommentCreationAttr {
     commentId: number;
     userId: number;
     comment: string;
     rate: number;
 }
 
-@Table({ tableName: 'comments' })
-export class Comment extends Model<Comment, CommentCreationAttr> {
+@Table({ tableName: 'review-comments' })
+export class ReviewComment extends Model<ReviewComment, ReviewCommentCreationAttr> {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number;
