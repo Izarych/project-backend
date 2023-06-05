@@ -1,14 +1,14 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/sequelize';
-import {Comment} from './comments.model';
-import {CreateCommentDto} from './dto/create-comment.dto';
-import {UpdateCommentDto} from './dto/update-comment.dto';
+import {ReviewComment} from './review-comments.model';
+import {CreateReviewCommentDto} from './dto/create-review-comment.dto';
+import {UpdateReviewCommentDto} from './dto/update-review-comment.dto';
 
 @Injectable()
-export class CommentsService {
-    constructor(@InjectModel(Comment) private commentRepository: typeof Comment) { }
+export class ReviewCommentsService {
+    constructor(@InjectModel(ReviewComment) private commentRepository: typeof ReviewComment) { }
 
-    async create(dto: CreateCommentDto) {
+    async create(dto: CreateReviewCommentDto) {
         try {
             return await this.commentRepository.create(dto);
         } catch (error) {
@@ -41,8 +41,8 @@ export class CommentsService {
         return await this.commentRepository.destroy({ where: { userId: id } });
     }
 
-    async update(dto: UpdateCommentDto) : Promise<Comment> {
-        const comment : Comment = await this.commentRepository.findByPk(dto.id);
+    async update(dto: UpdateReviewCommentDto) : Promise<ReviewComment> {
+        const comment : ReviewComment = await this.commentRepository.findByPk(dto.id);
         return await comment.update(dto);
     }
 
