@@ -19,6 +19,8 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern, Payload } from "@nestjs/microservices";
+import { UserWithTokens } from './custom_types/userWithTokens.type';
+import { User } from './custom_types/user.type';
 
 @ApiTags('Authorization')
 @Controller()
@@ -42,9 +44,9 @@ export class AppController {
     }
   })
   @Post('/login')
-  async login(@Body() dto: AuthDto, @Res() res: Response) {
+  async login<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData = await this.appService.login(dto);
+      const userData: UserWithTokens = await this.appService.login(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -64,7 +66,7 @@ export class AppController {
     description: "Resend mail on email, update link in table"
   })
   @Get('/sendlink/:email')
-  async resendLink(@Param('email') email: string) {
+  async resendLink(@Param('email') email: string): Promise<User> {
     return this.appService.reSendActivationLink(email);
   }
 
@@ -81,7 +83,7 @@ export class AppController {
     description: "Activate account if link is right"
   })
   @Get('/activate/:link')
-  async activate(@Param('link') link: string) {
+  async activate(@Param('link') link: string): Promise<User> {
     return this.appService.activate(link);
   }
 
@@ -90,14 +92,14 @@ export class AppController {
   @ApiOkResponse({ description: 'Successful gmail login' })
   @Get('login_gmail')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) { }
+  async googleAuth(@Req() req): Promise<void> { }
 
 
   @ApiOperation({ summary: 'login_gmail_success' })
   @ApiOkResponse({ description: 'Successful gmail login redirect' })
   @Get('login_gmail_success')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
+  googleAuthRedirect(@Req() req): any {
     return this.appService.loginGmail(req)
   }
 
@@ -113,7 +115,7 @@ export class AppController {
     }
   })
   @Get('/login_vk')
-  async vkAuth(@Res() res: Response) {
+  async vkAuth(@Res() res: Response): Promise<void> {
     return res.redirect(`https://oauth.vk.com/authorize?` +
       `client_id=${process.env.VK_CLIENT_ID}&` +
       `display=page&` +
@@ -135,7 +137,7 @@ export class AppController {
     description: 'Successful vk login redirect'
   })
   @Get('/login_vk_success')
-  async vkAuthRedirect(@Query('code') code: string, @Res() res: Response) {
+  async vkAuthRedirect<T>(@Query('code') code: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     const resLoginVk = await firstValueFrom(this.httpService
       .post(
         `${process.env.APP_LOCAL}/login/vk`, { code }
@@ -163,7 +165,7 @@ export class AppController {
     }
   })
   @Post('/login/vk')
-  async loginVk(@Body() body: { code: string }) {
+  async loginVk<T>(@Body() body: { code: string }): Promise<T> {
     let authData;
 
     try {
@@ -189,7 +191,7 @@ export class AppController {
     }
   })
   @Get('/check/:email')
-  async checkEmail(@Param('email') email: string) {
+  async checkEmail(@Param('email') email: string): Promise<User> {
     return this.appService.checkEmail(email);
   }
 
@@ -200,12 +202,12 @@ export class AppController {
     description: "Удаление refresh токена из куков и удаление записи в таблице токенов"
   })
   @Post('/logout')
-  async logout(@Req() req: Request, @Res() res: Response) {
+  async logout<T>(@Req() req: Request, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const refreshToken = req.headers.cookie.split('=')[1];
-      const token = await this.appService.logout(refreshToken);
+      const refreshToken: string = req.headers.cookie.split('=')[1];
+      await this.appService.logout(refreshToken);
       res.clearCookie('refreshToken');
-      return res.json(token);
+      return res.status(204).send();  //ЗАГЛУШКА
     } catch (error) {
       return res.json(error.response)
     }
@@ -227,13 +229,13 @@ export class AppController {
     }
   })
   @Get('/refresh')
-  async refresh(@Req() req: Request, @Res() res: Response) {
+  async refresh<T>(@Req() req: Request, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
       if (!req.headers.cookie) {
         throw new UnauthorizedException({ message: 'Not authorized' });
       }
-      const refreshToken = req.headers.cookie.split('=')[1];
-      const userData = await this.appService.refresh(refreshToken);
+      const refreshToken: string = req.headers.cookie.split('=')[1];
+      const userData: UserWithTokens = await this.appService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -262,9 +264,9 @@ export class AppController {
     }
   })
   @Post('/registration')
-  async registration(@Body() dto: AuthDto, @Res() res: Response) {
+  async registration<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData = await this.appService.registration(dto);
+      const userData: UserWithTokens = await this.appService.registration(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -292,12 +294,12 @@ export class AppController {
     }
   })
   @Post('/registrationAdmin')
-  async registrationAdmin(@Body() dto: AuthDto) {
+  async registrationAdmin(@Body() dto: AuthDto): Promise<UserWithTokens> {
     return this.appService.registrationAdmin(dto);
   }
 
   @EventPattern('hash_password')
-  async hashPassword(@Payload() password: string) {
+  async hashPassword(@Payload() password: string): Promise<string> {
     return this.appService.hashNewPassword(password);
   }
 }

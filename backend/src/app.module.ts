@@ -2,14 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { ParseController } from './controllers/parse.controller';
-import {JwtModule} from "@nestjs/jwt";
+import { JwtModule } from "@nestjs/jwt";
 import { ReviewController } from './controllers/review.controller';
 import { ReviewCommentController } from './controllers/review-comment.controller';
 import { MovieCommentController } from './controllers/movie-comment.controller';
+import { RoleController } from './controllers/role.controller';
+import { UserController } from './controllers/user.controller';
 
 
 @Module({
-  controllers: [ParseController, ReviewController, ReviewCommentController, MovieCommentController],
+  controllers: [ParseController, ReviewController, ReviewCommentController, MovieCommentController, RoleController, UserController],
   providers: [],
   imports: [
     ConfigModule.forRoot({

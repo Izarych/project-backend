@@ -26,6 +26,16 @@ describe('AppController', () => {
         }
     };
 
+    const user = {
+        id: 22,
+        email: "test@mail.ru",
+        password: "password",
+        phoneNumber: null,
+        isActivated: false,
+        activationLink: "testlink",
+        roles: null
+    }
+
     const link = "testlink";
 
     beforeEach(async () => {
@@ -39,7 +49,7 @@ describe('AppController', () => {
                         login: jest.fn().mockResolvedValue({}),
                         reSendActivationLink: jest.fn().mockResolvedValue({}),
                         activate: jest.fn().mockResolvedValue({}),
-                        gmailLogin: jest.fn().mockResolvedValue({}),
+                        loginGmail: jest.fn().mockResolvedValue({}),
                         getVkToken: jest.fn().mockResolvedValue({}),
                         checkEmail: jest.fn().mockResolvedValue({}),
                         refresh: jest.fn().mockResolvedValue({}),
@@ -124,10 +134,9 @@ describe('AppController', () => {
 
     describe('resendLink', () => {
         describe('when resendLink called', () => {
-            const result = [0];
             let response;
             beforeEach(async () => {
-                jest.spyOn(appService, 'reSendActivationLink').mockResolvedValue(result);
+                jest.spyOn(appService, 'reSendActivationLink').mockResolvedValue(user);
                 response = await appController.resendLink(authDto.email);
             });
 
@@ -135,17 +144,16 @@ describe('AppController', () => {
                 expect(appService.reSendActivationLink).toHaveBeenCalledWith(authDto.email);
             });
             it('should return result of resend', async () => {
-                expect(response).toEqual(result);
+                expect(response).toEqual(user);
             });
         });
     });
 
     describe('activate', () => {
         describe('when activate called', () => {
-            const result = [0];
             let response;
             beforeEach(async () => {
-                jest.spyOn(appService, 'activate').mockResolvedValue(result);
+                jest.spyOn(appService, 'activate').mockResolvedValue(user);
                 response = await appController.activate(link);
             });
 
@@ -154,7 +162,7 @@ describe('AppController', () => {
             });
 
             it('should return result of activate', async () => {
-                expect(response).toEqual(result);
+                expect(response).toEqual(user);
             });
         });
     });
@@ -257,7 +265,7 @@ describe('AppController', () => {
         describe('when /check/:email called', () => {
             let response;
             beforeEach(async () => {
-                jest.spyOn(appService, 'checkEmail').mockResolvedValue(userObject.user);
+                jest.spyOn(appService, 'checkEmail').mockResolvedValue(user);
                 response = await appController.checkEmail(authDto.email);
             });
 
@@ -266,7 +274,7 @@ describe('AppController', () => {
             });
 
             it('should return user', async () => {
-                expect(response).toBe(userObject.user);
+                expect(response).toBe(user);
             });
         });
     });

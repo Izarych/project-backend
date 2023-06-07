@@ -10,7 +10,7 @@ import { Op } from "sequelize";
 export class MovieService {
     constructor(@InjectModel(Movie) private movieRepository: typeof Movie) { }
 
-    async createMovie(dto: CreateMovieDto) {
+    async createMovie(dto: CreateMovieDto): Promise<Movie> {
         const movie: Movie = await this.movieRepository.findOne({
             where: {
                 title: dto.title,

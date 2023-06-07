@@ -9,7 +9,7 @@ import { UpdateUserDto } from "src/dto/update-user.dto";
 
 @ApiTags('Gateway App. Users')
 @Controller('user')
-export class AppController {
+export class UserController {
     constructor(@Inject('USER_SERVICE') private userService: ClientProxy,
         @Inject('AUTH_SERVICE') private authService: ClientProxy) { }
 
