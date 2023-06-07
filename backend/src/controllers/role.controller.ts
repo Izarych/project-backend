@@ -7,7 +7,7 @@ import { CreateRoleDto } from "src/dto/create-role.dto";
 
 @ApiTags('Gateway App. Roles')
 @Controller('role')
-export class AppController {
+export class RoleController {
     constructor(@Inject('USER_SERVICE') private userService: ClientProxy) { }
 
     @ApiOperation({ summary: 'Создание роли' })

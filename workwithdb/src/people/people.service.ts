@@ -11,7 +11,7 @@ export class PeopleService {
     }
 
     async createPeoples(movie_id: number, peopleArr: CreatePeopleDto[]): Promise<void> {
-        const movie = await this.movieRepository.findByPk(movie_id);
+        const movie: Movie = await this.movieRepository.findByPk(movie_id);
         for (const element of peopleArr) {
             const [people] = await this.peopleRepository.findOrCreate(
                 {
@@ -49,7 +49,7 @@ export class PeopleService {
                     through: { attributes: [] }
                 }
             ]
-        })
+        });
 
         return people;
 
