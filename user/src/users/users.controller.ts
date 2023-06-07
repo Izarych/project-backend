@@ -61,7 +61,7 @@ export class UsersController {
   }
 
   @EventPattern('delete.user')
-  async delete(@Payload() id: number): Promise<User> {
+  async delete(@Payload() id: number): Promise<{message: string}> {
     return this.userService.deleteUser(id);
   }
 }

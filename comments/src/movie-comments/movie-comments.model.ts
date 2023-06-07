@@ -5,6 +5,7 @@ interface MovieCommentCreationAttr {
     userId: number;
     comment: string;
     rate: number;
+    movieId: number;
 }
 
 @Table({ tableName: 'movie-comments' })
