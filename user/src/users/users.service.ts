@@ -60,10 +60,12 @@ export class UsersService {
     return await this.addOrRemoveRole(dto, 'add');
   }
 
-  async deleteUser(id: number) {
+  async deleteUser(id: number) : Promise<{message: string}> {
     const user = await this.getUserById(id);
-    await this.userRepository.destroy({ where: { id } });
-    return user;
+    await user.destroy();
+    return {
+      message: 'Пользователь был удален'
+    };
   }
 
   async updateUser(data: Partial<User>) : Promise<User> {

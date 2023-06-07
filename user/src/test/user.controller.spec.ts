@@ -53,7 +53,8 @@ describe('UserController', () => {
             update: jest.fn(),
             findOne: jest.fn(),
             findAll: jest.fn(),
-            findByPk: jest.fn()
+            findByPk: jest.fn(),
+            destroy: jest.fn()
         };
         const moduleRef : TestingModule = await Test.createTestingModule({
             controllers: [UsersController],
@@ -259,6 +260,30 @@ describe('UserController', () => {
 
             expect(result).toEqual(updatedUser);
             expect(userService.updateUser).toHaveBeenCalledWith(data);
+        })
+        it('should throw 404 if user doesn"t exist', async () => {
+            const data: Partial<User> = {
+                email: 'testmail@mail.ru',
+                password: '12345'
+            }
+            jest.spyOn(userService, 'updateUser').mockRejectedValue(new NotFoundException('User doesnt exist'));
+
+            await expect(userController.update(data)).rejects.toThrow('User doesnt exist');
+        })
+    })
+
+    describe('delete user', () => {
+        it('should delete user', async () => {
+            let user = {...mockUser};
+            jest.spyOn(userService, 'deleteUser').mockResolvedValue(
+                {
+                    message: 'Пользователь был удален'
+                }
+            )
+            const result : {message: string} = await userController.delete(user.id);
+            expect(result).toEqual({message: 'Пользователь был удален'});
+            expect(userService.deleteUser).toHaveBeenCalledWith(user.id);
+
         })
     })
 
