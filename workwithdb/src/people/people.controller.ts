@@ -1,8 +1,8 @@
-import {Controller, Get, Param} from '@nestjs/common';
-import {PeopleService} from "./people.service";
-import {EventPattern} from "@nestjs/microservices";
-import {ApiOperation, ApiResponse} from "@nestjs/swagger";
-import {People} from "./people.model";
+import { Controller, Get, Param } from '@nestjs/common';
+import { PeopleService } from "./people.service";
+import { EventPattern } from "@nestjs/microservices";
+import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { People } from "./people.model";
 
 @Controller('people')
 export class PeopleController {
@@ -10,8 +10,8 @@ export class PeopleController {
     }
 
     @EventPattern('create_peoples')
-    async createPeoples({id, arr}) {
-        return this.peopleService.createPeoples(id,arr);
+    async createPeoples({ id, arr }): Promise<void> {
+        return this.peopleService.createPeoples(id, arr);
     }
 
     @ApiOperation({ summary: 'Получение всех людей' })
@@ -21,7 +21,7 @@ export class PeopleController {
         type: People
     })
     @Get()
-    async getPeople() {
+    async getPeople(): Promise<People[]> {
         return this.peopleService.getPeople();
     }
 
@@ -32,7 +32,7 @@ export class PeopleController {
         type: People
     })
     @Get('/:fullName')
-    async getPeopleByFullName(@Param('fullName') fullName: string) {
+    async getPeopleByFullName(@Param('fullName') fullName: string): Promise<People[]> {
         return this.peopleService.getPeopleByFullName(fullName);
     }
 }

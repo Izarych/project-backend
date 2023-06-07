@@ -1,10 +1,11 @@
-import {Controller, Get, Param} from '@nestjs/common';
-import {MovieService} from "./movie.service";
-import {EventPattern, Payload} from "@nestjs/microservices";
-import {CreateMovieDto} from "./dto/create-movie.dto";
-import {ApiOperation, ApiParam, ApiResponse} from "@nestjs/swagger";
-import {People} from "../people/people.model";
-import {Genres} from "../genres/genres.model";
+import { Controller, Get, Param } from '@nestjs/common';
+import { MovieService } from "./movie.service";
+import { EventPattern, Payload } from "@nestjs/microservices";
+import { CreateMovieDto } from "./dto/create-movie.dto";
+import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { People } from "../people/people.model";
+import { Genres } from "../genres/genres.model";
+import { Movie } from './movie.model';
 
 @Controller('movie')
 export class MovieController {
@@ -18,7 +19,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get()
-    async getMovies() {
+    async getMovies(): Promise<Movie[]> {
         return this.movieService.getAllMovies();
     }
 
@@ -35,7 +36,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/age/:ageRate')
-    async getMovieByAgeRate(@Param('ageRate') ageRate: number) {
+    async getMovieByAgeRate(@Param('ageRate') ageRate: number): Promise<Movie[]> {
         return this.movieService.getMovieByAgeRate(ageRate);
     }
 
@@ -52,7 +53,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/country/:countries')
-    async getMovieByCountry(@Param('countries') countries: string) {
+    async getMovieByCountry(@Param('countries') countries: string): Promise<Movie[]> {
         return this.movieService.getMovieByCountry(countries);
     }
 
@@ -69,7 +70,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/genre/:genre')
-    async getMovieByGenre(@Param('genre') genre: string){
+    async getMovieByGenre(@Param('genre') genre: string): Promise<Movie[]> {
         return this.movieService.getMovieByGenre(genre);
     }
 
@@ -86,7 +87,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/rate/:rate')
-    async getMovieByRate(@Param('rate') rate: number){
+    async getMovieByRate(@Param('rate') rate: number): Promise<Movie[]> {
         return this.movieService.getMovieByRate(rate)
     }
 
@@ -103,7 +104,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/ratequan/:ratequan')
-    async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number){
+    async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number): Promise<Movie[]> {
         return this.movieService.getMovieByRateQuantity(rateQuantity)
     }
 
@@ -120,7 +121,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/human/:fullName')
-    async getMovieByHuman(@Param('fullName') fullName: string){
+    async getMovieByHuman(@Param('fullName') fullName: string): Promise<Movie[]> {
         return this.movieService.getMovieByHuman(fullName)
     }
 
@@ -137,7 +138,7 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/:id')
-    async getMovie(@Param('id') id: number) {
+    async getMovie(@Param('id') id: number): Promise<Movie> {
         return this.movieService.getMovie(id);
     }
 
@@ -154,7 +155,7 @@ export class MovieController {
         type: People
     })
     @Get('/:id/people')
-    async getMoviePeople(@Param('id') film_id: number) {
+    async getMoviePeople(@Param('id') film_id: number): Promise<People[]> {
         return this.movieService.getMoviePeople(film_id);
     }
 
@@ -171,7 +172,7 @@ export class MovieController {
         type: Genres
     })
     @Get('/:id/genres')
-    async getMovieGenres(@Param('id') film_id: number) {
+    async getMovieGenres(@Param('id') film_id: number): Promise<Genres[]> {
         return this.movieService.getMovieGenres(film_id);
     }
 
@@ -188,12 +189,12 @@ export class MovieController {
         type: CreateMovieDto
     })
     @Get('/title/:title')
-    async getMovieByTitle(@Param('title') title: string) {
+    async getMovieByTitle(@Param('title') title: string): Promise<Movie> {
         return this.movieService.getMovieByTitle(title);
     }
 
     @EventPattern('create_movie')
-    async createMovie(@Payload() data: CreateMovieDto) {
+    async createMovie(@Payload() data: CreateMovieDto): Promise<Movie> {
         return this.movieService.createMovie(data);
     }
 }

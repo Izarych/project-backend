@@ -9,6 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UserWithTokens } from './custom_types/userWithTokens.type';
+import { Tokens } from './custom_types/tokens.type';
+import { User } from './custom_types/user.type';
 
 @Injectable()
 export class AppService {
@@ -18,14 +21,14 @@ export class AppService {
     @Inject('AUTH_SERVICE') private userService: ClientProxy,
     private readonly mailerService: MailerService) { }
 
-  async login(dto: AuthDto) {
-    const user = await this.checkEmail(dto.email);
+  async login(dto: AuthDto): Promise<UserWithTokens> {
+    const user: User = await this.checkEmail(dto.email);
 
     if (!user) {
       throw new BadRequestException('User does not exist');
     }
 
-    const isPasswordEquals = await bcrypt.compare(dto.password, user.password);
+    const isPasswordEquals: boolean = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordEquals) {
       throw new BadRequestException('Invalid password');
@@ -34,67 +37,66 @@ export class AppService {
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async checkEmail(email: string) {
+  async checkEmail(email: string): Promise<User> {
     return await firstValueFrom(this.userService.send('get.user.email', email));
   }
 
-  async checkLink(link: string) {
+  async checkLink(link: string): Promise<User> {
     return await firstValueFrom(this.userService.send('get.user.link', link));
   }
 
-  async logout(refreshToken: string) {
+  async logout(refreshToken: string): Promise<void> {
     await this.tokenRepository.destroy({ where: { refreshToken } });
   }
 
-  async refresh(refreshToken: string) {
-
+  async refresh(refreshToken: string): Promise<UserWithTokens> {
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
     if (!userData || !tokenFromDB) {
       throw new UnauthorizedException({ message: 'No auth' });
     }
 
-    const user = await this.checkEmail(userData.email);
+    const user: User = await this.checkEmail(userData.email);
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async registration(dto: AuthDto) {
+  async registration(dto: AuthDto): Promise<UserWithTokens> {
     if (await this.checkEmail(dto.email)) {
       throw new BadRequestException('User with such email exists');
     }
-    const hashPassword = await bcrypt.hash(dto.password, 5);
-    const link = uuid.v4();
-    const user = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
+    const hashPassword: string = await bcrypt.hash(dto.password, 5);
+    const link: string = uuid.v4();
+    const user: User = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
     // await this.sendActivationLink(dto.email, link);
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async registrationAdmin(dto: AuthDto) {
+  async registrationAdmin(dto: AuthDto): Promise<UserWithTokens> {
     if (await this.checkEmail(dto.email)) {
       throw new BadRequestException('User with such email exists');
     }
-    const hashPassword = await bcrypt.hash(dto.password, 5);
-    const link = uuid.v4();
-    const admin = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
+    const hashPassword: string = await bcrypt.hash(dto.password, 5);
+    const link: string = uuid.v4();
+    const admin: User = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
     return await this.generateAndSaveTokenAndPayload(admin);
   }
 
-  async hashNewPassword(password: string) {
+  async hashNewPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 5);
   }
 
 
-  async activate(link: string) {
+  async activate(link: string): Promise<User> {
     return await firstValueFrom(this.userService.send('activate.user', link));
   }
 
-  async reSendActivationLink(email: string) {
-    const link = uuid.v4();
+  async reSendActivationLink(email: string): Promise<User> {
+    const link: string = uuid.v4();
     await this.sendActivationLink(email, link);
     return await firstValueFrom(this.userService.send('update.user', { email, link }));
   }
 
-  async sendActivationLink(to: string, link: string,) {
+  async sendActivationLink(to: string, link: string): Promise<void> {
     this.mailerService
       .sendMail({
         to: `${to}`,
@@ -106,7 +108,7 @@ export class AppService {
       .catch((error) => console.log(error));
   }
 
-  private async generateToken(user) {
+  private async generateToken(user: User): Promise<Tokens> {
     const payload = { userId: user.id, email: user.email, isActivated: user.isActivated, roles: user.roles };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
@@ -132,16 +134,17 @@ export class AppService {
   }
 
 
-  private async saveToken(userId: number, refreshToken: string) {
-    const tokenData = await this.tokenRepository.findOne({ where: { userId } });
+
+  private async saveToken(userId: number, refreshToken: string): Promise<Token> {
+    const tokenData: Token = await this.tokenRepository.findOne({ where: { userId } });
     if (tokenData) {
       tokenData.refreshToken = refreshToken;
-      return tokenData.save();
+      return await tokenData.save();
     }
     return await this.tokenRepository.create({ userId, refreshToken });
   }
 
-  private async validateRefreshToken(token: string) {
+  private async validateRefreshToken(token: string): Promise<any | null> {
     try {
       return await this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_SECRET });
     } catch (error) {
@@ -149,8 +152,8 @@ export class AppService {
     }
   }
 
-  private async generateAndSaveTokenAndPayload(user: any) {
-    const tokens = await this.generateToken(user);
+  private async generateAndSaveTokenAndPayload(user: any): Promise<UserWithTokens> {
+    const tokens: Tokens = await this.generateToken(user);
     await this.saveToken(user.id, tokens.refreshToken);
     return {
       ...tokens,
@@ -162,7 +165,7 @@ export class AppService {
     };
   }
 
-  loginGmail(req: any) {
+  loginGmail(req: any): any {
     if (!req.user) {
       throw new BadRequestException('No user from google');
     }

@@ -1,8 +1,8 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import {ClientProxy} from "@nestjs/microservices";
-import {firstValueFrom} from "rxjs";
-import {Page} from "puppeteer";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
+import { Page } from "puppeteer";
 
 
 
@@ -11,11 +11,11 @@ export class AppService {
   constructor(@Inject('DB_SERVICE') private dbClient: ClientProxy) {
   }
 
-  async parse() : Promise<void> {
-    const urls : string[] = [];
-    let browser : puppeteer.Browser;
+  async parse(): Promise<void> {
+    const urls: string[] = [];
+    let browser: puppeteer.Browser;
     if (process.env.NODE_ENV === 'production') {
-        browser = await puppeteer.launch({
+      browser = await puppeteer.launch({
         headless: "new",
         executablePath: '/usr/bin/chromium-browser',
         args: [
@@ -30,8 +30,8 @@ export class AppService {
     }
 
     for (let i = 1; i < 15; i++) {
-      let pageUrl : string = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
-      let page : puppeteer.Page = await browser.newPage();
+      let pageUrl: string = `https://www.kinopoisk.ru/lists/movies/?page=${i}`
+      let page: puppeteer.Page = await browser.newPage();
       await page.goto(pageUrl, {
         waitUntil: 'domcontentloaded'
       });
@@ -64,13 +64,13 @@ export class AppService {
           rateQuantity: null
         }
 
-        let actors : string[] = [];    //Актеры
-        let directors : string[] = []; //Режиссеры
-        let producers : string[] = []; //Продюсеры
-        let operators : string[] = []; //Оперы
-        let writers : string[] = [];   //Писатели
-        let genres : string[] = []; // Жанры
-        let isSeries : boolean = false;
+        let actors: string[] = [];    //Актеры
+        let directors: string[] = []; //Режиссеры
+        let producers: string[] = []; //Продюсеры
+        let operators: string[] = []; //Оперы
+        let writers: string[] = [];   //Писатели
+        let genres: string[] = []; // Жанры
+        let isSeries: boolean = false;
 
         await new Promise(resolve => setTimeout(resolve, randomDelay));
 
@@ -84,8 +84,8 @@ export class AppService {
           movieDto.title = await page.evaluate((el: HTMLElement) => el.innerText, titleEl)
           isSeries = true;
         } else {
-          const titleText : string = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
-          const title : string[] = titleText.split(' ');
+          const titleText: string = await page.evaluate((el: HTMLElement) => el.innerText, titleEl);
+          const title: string[] = titleText.split(' ');
           title.pop();
           movieDto.title = title.join(' ');
 
@@ -107,7 +107,7 @@ export class AppService {
         const elements = await page.$$('[data-test-id="encyclopedic-table"] .styles_row__da_RK');
         for (const element of elements) {
           const titleEl = await element.$('.styles_title__b1HVo');
-          const title : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
+          const title: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), titleEl);
           switch (title) {
             case 'Год производства':
               if (isSeries) {
@@ -123,18 +123,18 @@ export class AppService {
                 }
 
                 const seasonsEl = await element.$('.styles_value__g6yP4');
-                const seasonRaw : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
+                const seasonRaw: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), seasonsEl);
                 movieDto.seasons = Number(seasonRaw.split('(')[1].replace(/\D/g, ""));
                 break;
               }
               const yearEl = await element.$('.styles_value__g6yP4');
-              const year : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
+              const year: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), yearEl);
               movieDto.yearSince = Number(year);
               movieDto.yearTill = Number(year);
               break;
             case 'Жанр':
               const genreEl = await element.$('.styles_value__g6yP4 .styles_value__g6yP4');
-              const genre : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
+              const genre: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), genreEl);
               genres = genre.split(',');
               for (let index = 0; index < genres.length; index++) {
                 if (genres[index][0] == " ") {
@@ -145,17 +145,17 @@ export class AppService {
               break;
             case 'Страна':
               const countryEl = await element.$('.styles_value__g6yP4');
-              const country : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
+              const country: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), countryEl);
               movieDto.country = country;
               break;
             case 'Премьера в России':
               const premierRussiaEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
-              const premierRussia : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
+              const premierRussia: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierRussiaEl);
               movieDto.premierRussia = premierRussia;
               break;
             case 'Премьера в мире':
               const premierEl = await element.$('.styles_value__g6yP4 .styles_link__3QfAk');
-              const premier : string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
+              const premier: string = await page.evaluate((el: HTMLElement) => el.innerText.trim(), premierEl);
               movieDto.premier = premier;
               break;
           }
@@ -168,17 +168,17 @@ export class AppService {
         const rateEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .film-rating-value')
 
         if (rateEl) {
-          const rate : string = await page.evaluate((el: HTMLElement) => el.innerText, rateEl)
+          const rate: string = await page.evaluate((el: HTMLElement) => el.innerText, rateEl)
           movieDto.rate = Number(rate);
         }
 
         const rateQuantityEl = await page.$('.styles_root__2kxYy .styles_md_17__FaWtp .styles_lg_6__eGSDb .styles_countBlock__jxRDI')
 
         if (rateQuantityEl) {
-          const rateQuantityRaw : string = await page.evaluate((el: HTMLElement) => el.innerText, rateQuantityEl);
-          let rateQuantity : string[] = rateQuantityRaw.split(' ');
+          const rateQuantityRaw: string = await page.evaluate((el: HTMLElement) => el.innerText, rateQuantityEl);
+          let rateQuantity: string[] = rateQuantityRaw.split(' ');
           rateQuantity.pop();
-          let rateQuantityCorrect : string = rateQuantity.join('')
+          let rateQuantityCorrect: string = rateQuantity.join('')
           movieDto.rateQuantity = Number(rateQuantityCorrect);
         }
 
@@ -205,22 +205,26 @@ export class AppService {
 
         await new Promise(resolve => setTimeout(resolve, randomDelay));
 
-        movieDto.verticalPhoto = await this.stealVerticalPhoto(page, `${url}covers/`);
+        //movieDto.verticalPhoto = await this.stealVerticalPhoto(page, `${url}covers/`);
+
+        movieDto.verticalPhoto = await this.stealMoviePhoto(page, `${url}covers/`, 1000, 1000);
 
         await new Promise(resolve => setTimeout(resolve, randomDelay));
 
-        movieDto.horizontalPhoto = await this.stealHorizontalPhoto(page, `${url}wall/`)
+        //movieDto.horizontalPhoto = await this.stealHorizontalPhoto(page, `${url}wall/`)
+
+        movieDto.horizontalPhoto = await this.stealMoviePhoto(page, `${url}wall/`, 1600, 900);
 
         if (!movieDto.horizontalPhoto) {
           movieDto.horizontalPhoto = movieDto.verticalPhoto;
         }
         const movie = await firstValueFrom(this.dbClient.send('create_movie', movieDto));
-        await this.dbClient.emit('create_genres', {id: movie.id, arr: genres});
-        await this.dbClient.emit('create_peoples', {id: movie.id, arr: directors});
-        await this.dbClient.emit('create_peoples', {id: movie.id, arr: actors});
-        await this.dbClient.emit('create_peoples', {id: movie.id, arr: producers});
-        await this.dbClient.emit('create_peoples', {id: movie.id, arr: writers});
-        await this.dbClient.emit('create_peoples', {id: movie.id, arr: operators});
+        await this.dbClient.emit('create_genres', { id: movie.id, arr: genres });
+        await this.dbClient.emit('create_peoples', { id: movie.id, arr: directors });
+        await this.dbClient.emit('create_peoples', { id: movie.id, arr: actors });
+        await this.dbClient.emit('create_peoples', { id: movie.id, arr: producers });
+        await this.dbClient.emit('create_peoples', { id: movie.id, arr: writers });
+        await this.dbClient.emit('create_peoples', { id: movie.id, arr: operators });
 
       }
       urls.length = 0;
@@ -229,7 +233,7 @@ export class AppService {
     }
   }
 
-  private async stealCreators(page, url, profession: string) {
+  private async stealCreators(page: Page, url: string, profession: string): Promise<any> {
     let array = [];
 
 
@@ -279,11 +283,11 @@ export class AppService {
     return array;
   }
 
-  private async stealPplImg(page, array) {
+  private async stealPplImg(page: Page, array: any): Promise<string[]> {
     const noImgLink = 'https://yastatic.net/s3/kinopoisk-frontend/common-static/img/projector-logo/placeholder.svg';
     const randomDelay = Math.floor(Math.random() * 1500) + 1000;
     await new Promise(resolve => setTimeout(resolve, randomDelay));
-    let newArr = [];
+    let newArr: string[] = [];
     for (const element of array) {
       await page.goto(element.photo, {
         waitUntil: 'domcontentloaded',
@@ -301,7 +305,7 @@ export class AppService {
     return newArr;
   }
 
-  private async stealVerticalPhoto(page: Page, url: string) {
+  private async stealMoviePhoto(page: Page, url: string, picWidth: number, picHeight: number): Promise<string> {
     url = url.replace('series', "film");
     await page.goto(url, {
       waitUntil: 'domcontentloaded'
@@ -312,27 +316,44 @@ export class AppService {
       const img = await imgEl.evaluate(el => el.getAttribute('href'));
       const resolutionEl = await element.$('.styles_root__zVSCC')
       const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
-      if (Number(width) >= 1000 && Number(height) > 1000) {
+      if (Number(width) >= picWidth && Number(height) > picHeight) {
         return 'https:' + img;
       }
     }
   }
 
-  private async stealHorizontalPhoto(page: Page, url: string) {
-    url = url.replace('series', "film");
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded'
-    })
-    const elements = await page.$$('.styles_root__iY1K3 .styles_root__oV7Oq')
-    for (const element of elements) {
-      const imgEl = await element.$('.styles_root__OQv_q')
-      const img = await imgEl.evaluate(el => el.getAttribute('href'));
-      const resolutionEl = await element.$('.styles_root__zVSCC')
-      const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
-      if (Number(width) >= 1600 && Number(height) >= 900) {
-        return 'https:' + img;
-      }
-    }
-  }
+  // private async stealVerticalPhoto(page: Page, url: string): Promise<string> {
+  //   url = url.replace('series', "film");
+  //   await page.goto(url, {
+  //     waitUntil: 'domcontentloaded'
+  //   })
+  //   const elements = await page.$$('.styles_root__iY1K3 .styles_root__oV7Oq')
+  //   for (const element of elements) {
+  //     const imgEl = await element.$('.styles_root__OQv_q')
+  //     const img = await imgEl.evaluate(el => el.getAttribute('href'));
+  //     const resolutionEl = await element.$('.styles_root__zVSCC')
+  //     const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
+  //     if (Number(width) >= 1000 && Number(height) > 1000) {
+  //       return 'https:' + img;
+  //     }
+  //   }
+  // }
+
+  // private async stealHorizontalPhoto(page: Page, url: string): Promise<string> {
+  //   url = url.replace('series', "film");
+  //   await page.goto(url, {
+  //     waitUntil: 'domcontentloaded'
+  //   })
+  //   const elements = await page.$$('.styles_root__iY1K3 .styles_root__oV7Oq')
+  //   for (const element of elements) {
+  //     const imgEl = await element.$('.styles_root__OQv_q')
+  //     const img = await imgEl.evaluate(el => el.getAttribute('href'));
+  //     const resolutionEl = await element.$('.styles_root__zVSCC')
+  //     const [width, height] = await resolutionEl.evaluate((el: HTMLElement) => el.innerText.split('×'));
+  //     if (Number(width) >= 1600 && Number(height) >= 900) {
+  //       return 'https:' + img;
+  //     }
+  //   }
+  // }
 }
 

@@ -1,4 +1,4 @@
-import { Column, DataType, HasMany, Model, setAttributes, setOptions, Table, Unique } from "sequelize-typescript";
+import { Column, DataType, HasMany, Model, Table} from "sequelize-typescript";
 import { ReviewComment } from "src/review-comments/review-comments.model";
 
 interface ReviewCreationAttr {
