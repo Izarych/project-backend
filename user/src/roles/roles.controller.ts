@@ -1,7 +1,8 @@
-import { Controller } from '@nestjs/common';
+import { Controller} from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RolesService } from './roles.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Role } from './roles.model';
 
 @Controller()
 export class RolesController {
@@ -9,12 +10,12 @@ export class RolesController {
   constructor(private roleService: RolesService) { }
 
   @MessagePattern('create.role')
-  async create(@Payload() roleDto: CreateRoleDto) {
+  async create(@Payload() roleDto: CreateRoleDto): Promise<Role> {
     return this.roleService.createRole(roleDto);
   }
 
   @MessagePattern('get.role.by.value')
-  async getByValue(@Payload() value: string) {
+  async getByValue(@Payload() value: string): Promise<Role> {
     return this.roleService.getRoleByValue(value);
   }
 }
