@@ -1,4 +1,4 @@
-import { Controller} from '@nestjs/common';
+import { BadRequestException, Controller, HttpException, NotFoundException } from '@nestjs/common';
 import { AddRoleDto } from './dto/add-user-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
@@ -11,17 +11,17 @@ export class UsersController {
   constructor(private userService: UsersService) { }
 
   @MessagePattern('create.user')
-  async create(@Payload() userDto: CreateUserDto): Promise<User> {
+  async create(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
     return this.userService.createUser(userDto);
   }
 
   @MessagePattern('create.admin')
-  async createAdmin(@Payload() userDto: CreateUserDto): Promise<User> {
+  async createAdmin(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
     return this.userService.createAdmin(userDto);
   }
 
   @MessagePattern('activate.user')
-  async activateUser(@Payload() link: string): Promise<User> {
+  async activateUser(@Payload() link: string): Promise<User | BadRequestException> {
     return this.userService.activateUser(link);
   }
 
@@ -31,7 +31,7 @@ export class UsersController {
   }
 
   @MessagePattern('get.user.id')
-  async getUserById(@Payload() id: number): Promise<User> {
+  async getUserById(@Payload() id: number): Promise<User | HttpException> {
     return this.userService.getUserById(id);
   }
 
@@ -41,27 +41,27 @@ export class UsersController {
   }
 
   @MessagePattern('get.user.link')
-  async getUserByLink(@Payload() link: string): Promise<User> {
+  async getUserByLink(@Payload() link: string): Promise<User | HttpException> {
     return this.userService.getUserByLink(link);
   }
 
   @MessagePattern('add.role')
-  async addRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto> {
+  async addRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
     return this.userService.addRole(dto);
   }
 
   @MessagePattern('remove.role')
-  async removeRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto> {
+  async removeRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
     return this.userService.removeRole(dto);
   }
 
   @EventPattern('update.user')
-  async update(@Payload() data: Partial<User>): Promise<User>  {
+  async update(@Payload() data: Partial<User>): Promise<User | NotFoundException> {
     return this.userService.updateUser(data);
   }
 
   @EventPattern('delete.user')
-  async delete(@Payload() id: number): Promise<{message: string}> {
+  async delete(@Payload() id: number): Promise<{ message: string } | HttpException> {
     return this.userService.deleteUser(id);
   }
 }

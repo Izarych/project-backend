@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
 import { firstValueFrom } from "rxjs";
@@ -54,8 +55,12 @@ export class UserController {
         }
     })
     @Get('/:id')
-    async getOneByIdUser(@Param('id') id: number) {
-        return this.userService.send('get.user.id', id);
+    async getOneByIdUser(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.userService.send('get.user.id', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Добавление роли пользователю по его id' })
@@ -91,8 +96,12 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Post('/addrole/:id')
-    addRole(@Param('id') userId: number, @Body() dto: AddRoleDto) {
-        return this.userService.send('add.role', { userId, value: dto.value });
+    async addRole(@Param('id') userId: number, @Body() dto: AddRoleDto, @Res() res: Response) {
+        const response = await firstValueFrom(this.userService.send('add.role', { userId, value: dto.value }));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Удаление роли у пользователя' })
@@ -120,8 +129,12 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/removerole/:id/:value')
-    async removeRole(@Param('id') id: number, @Param('value') roleValue: string) {
-        return this.userService.send('remove.role', { userId: id, value: roleValue });
+    async removeRole(@Param('id') id: number, @Param('value') roleValue: string, @Res() res: Response) {
+        const response = await firstValueFrom(this.userService.send('remove.role', { userId: id, value: roleValue }));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Обновление пользователя' })
@@ -159,9 +172,11 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async deleteUser(@Param('id') id: number) {
-        return this.userService.send('delete.user', id);
+    async deleteUser(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.userService.send('delete.user', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
-
-
 }

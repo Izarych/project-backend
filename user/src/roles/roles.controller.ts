@@ -1,4 +1,4 @@
-import { Controller} from '@nestjs/common';
+import { Controller, HttpException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RolesService } from './roles.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -10,7 +10,7 @@ export class RolesController {
   constructor(private roleService: RolesService) { }
 
   @MessagePattern('create.role')
-  async create(@Payload() roleDto: CreateRoleDto): Promise<Role> {
+  async create(@Payload() roleDto: CreateRoleDto): Promise<Role | HttpException> {
     return this.roleService.createRole(roleDto);
   }
 

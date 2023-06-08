@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Inject, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
+import { firstValueFrom } from "rxjs";
 import { CreateRoleDto } from "src/dto/create-role.dto";
 
 @ApiTags('Gateway App. Roles')
@@ -15,8 +17,12 @@ export class RoleController {
     //  @Roles('ADMIN') Пока закомментил гварды
     //  @UseGuards(RolesGuard)
     @Post()
-    async createRole(@Body() dto: CreateRoleDto) {
-        return this.userService.send('create.role', dto);
+    async createRole(@Body() dto: CreateRoleDto, @Res() res: Response) {
+        const response = await firstValueFrom(this.userService.send('create.role', dto));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
 
