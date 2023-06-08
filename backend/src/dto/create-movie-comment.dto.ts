@@ -9,8 +9,8 @@ export class CreateMovieCommentDto {
     readonly commentId?: number;
 
     @ApiProperty({ example: 1, description: "id пользователя" })
-    @IsNotEmpty({ message: "Не должно быть пустым" })
-    @IsNumber({}, { message: 'Должно быть числом' })
+    @IsNotEmpty({ message: "id пользователя не должно быть пустым" })
+    @IsNumber({}, { message: 'id пользователя должно быть числом' })
     readonly userId: number;
 
     @ApiProperty({ example: 'Любой комментарий пользователя', description: "Комментарий" })
@@ -19,7 +19,7 @@ export class CreateMovieCommentDto {
     readonly comment: string;
 
     @ApiProperty({ example: 1, description: "movie id" })
-    @IsNotEmpty({ message: "Не должно быть пустым" })
-    @IsNumber({}, { message: 'Должно быть числом' })
+    @IsNotEmpty({ message: "id фильма не должно быть пустым" })
+    @IsNumber({}, { message: 'id фильма должно быть числом' })
     readonly movieId: number;
 }

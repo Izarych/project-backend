@@ -8,12 +8,8 @@ import { MovieComment } from './movie-comments.model';
 export class MovieCommentsService {
     constructor(@InjectModel(MovieComment) private commentRepository: typeof MovieComment) { }
 
-    async create(dto: CreateMovieCommentDto): Promise<MovieComment | HttpException> {
-        try {
-            return await this.commentRepository.create(dto);
-        } catch (error) {
-            return new HttpException("Review of this user for this movie exists already", HttpStatus.BAD_REQUEST, { cause: error });
-        }
+    async create(dto: CreateMovieCommentDto): Promise<MovieComment> {
+        return await this.commentRepository.create(dto);
     }
 
     async getAll(): Promise<MovieComment[]> {

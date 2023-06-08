@@ -94,8 +94,6 @@ export class MovieCommentController {
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
     @Get()
     async getAllComment() {
         return this.commentService.send('get.all.movie-comment', '');

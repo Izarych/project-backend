@@ -9,8 +9,8 @@ export class CreateReviewCommentDto {
     readonly commentId?: number;
 
     @ApiProperty({ example: 1, description: "id пользователя" })
-    @IsNotEmpty({ message: "Не должно быть пустым" })
-    @IsNumber({}, { message: 'Должно быть числом' })
+    @IsNotEmpty({ message: "id пользователя не должно быть пустым" })
+    @IsNumber({}, { message: 'id пользователя должно быть числом' })
     readonly userId: number;
 
     @ApiProperty({ example: 'Любой комментарий пользователя', description: "Комментарий" })
@@ -19,7 +19,7 @@ export class CreateReviewCommentDto {
     readonly comment: string;
 
     @ApiProperty({ example: 1, description: "review id" })
-    @IsNotEmpty({ message: "Не должно быть пустым" })
-    @IsNumber({}, { message: 'Должно быть числом' })
+    @IsNotEmpty({ message: "id ревью не должно быть пустым" })
+    @IsNumber({}, { message: 'id ревью должно быть числом' })
     readonly reviewId: number;
 }

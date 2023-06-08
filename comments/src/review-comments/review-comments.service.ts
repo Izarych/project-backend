@@ -12,7 +12,7 @@ export class ReviewCommentsService {
         try {
             return await this.commentRepository.create(dto);
         } catch (error) {
-            return new HttpException("Review of this user for this movie exists already", HttpStatus.BAD_REQUEST, { cause: error });
+            return new HttpException(`Review with ${dto.reviewId} ID does not exist`, HttpStatus.BAD_REQUEST, { cause: error });
         }
     }
 

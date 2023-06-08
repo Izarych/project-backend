@@ -10,7 +10,7 @@ export class MovieCommentsController {
     constructor(private movieCommentService: MovieCommentsService) { }
 
     @MessagePattern('create.movie-comment')
-    async create(@Payload() dto: CreateMovieCommentDto): Promise<MovieComment | HttpException> {
+    async create(@Payload() dto: CreateMovieCommentDto): Promise<MovieComment> {
         return this.movieCommentService.create(dto);
     }
 

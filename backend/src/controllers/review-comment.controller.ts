@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
+import { firstValueFrom } from "rxjs";
 import { CreateReviewCommentDto } from "src/dto/create-review-comment.dto";
 import { UpdateReviewCommentDto } from "src/dto/update-review-comment.dto";
 
@@ -21,11 +23,15 @@ export class ReviewCommentController {
         description: 'Отправляем в body данные',
         type: CreateReviewCommentDto
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Post()
-    async createComment(@Body() dto: CreateReviewCommentDto) {
-        return this.commentService.send('create.review-comment', dto);
+    async createComment(@Body() dto: CreateReviewCommentDto, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('create.review-comment', dto))
+        if (response.status) {
+            return res.status(400).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Увеличить рейтинг комментария' })
@@ -41,9 +47,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -67,9 +73,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 0}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 0 }
             }
         }
     })
@@ -87,14 +93,12 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 100}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 100 }
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
     @Get()
     async getAllComment() {
         return this.commentService.send('get.all.review-comment', '');
@@ -113,9 +117,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Комментарий пользователя'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Комментарий пользователя' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -139,9 +143,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Review comment'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Review comment' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -165,9 +169,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -195,9 +199,9 @@ export class ReviewCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Новый комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Новый комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -205,7 +209,7 @@ export class ReviewCommentController {
     @UseGuards(RolesGuard)
     @Put('/:id')
     async updateComment(@Param('id') id: number, @Body() dto: UpdateReviewCommentDto) {
-        return this.commentService.send('update.review-comment', {id: id, comment: dto.comment});
+        return this.commentService.send('update.review-comment', { id: id, comment: dto.comment });
     }
 
     @ApiOperation({ summary: 'Удаление всех комментариев у пользователя' })
