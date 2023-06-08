@@ -52,12 +52,12 @@ export class MovieCommentsController {
     }
 
     @MessagePattern('increase.rate.movie-comment')
-    async increaseRateComment(@Payload() id: number): Promise<MovieComment> {
+    async increaseRateComment(@Payload() id: number): Promise<MovieComment | HttpException> {
         return this.movieCommentService.increaseRate(id);
     }
 
     @MessagePattern('decrease.rate.movie-comment')
-    async decreaseRateComment(@Payload() id: number): Promise<MovieComment> {
+    async decreaseRateComment(@Payload() id: number): Promise<MovieComment | HttpException> {
         return this.movieCommentService.decreaseRate(id);
     }
 }

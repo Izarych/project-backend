@@ -23,13 +23,13 @@ export class ReviewCommentController {
         description: 'Отправляем в body данные',
         type: CreateReviewCommentDto
     })
-    // @Roles('USER', 'ADMIN')
-    // @UseGuards(RolesGuard)
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
     @Post()
     async createComment(@Body() dto: CreateReviewCommentDto, @Res() res: Response) {
-        const response = await firstValueFrom(this.commentService.send('create.review-comment', dto))
+        const response = await firstValueFrom(this.commentService.send('create.review-comment', dto));
         if (response.status) {
-            return res.status(400).json(response);
+            return res.status(response.status).json(response);
         }
         return res.json(response);
     }
@@ -56,8 +56,12 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateComment(@Param('id') id: number) {
-        return this.commentService.send('increase.rate.review-comment', id);
+    async increaseRateComment(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('increase.rate.review-comment', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Понизить рейтинг комментария' })
@@ -82,8 +86,12 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateComment(@Param('id') id: number) {
-        return this.commentService.send('decrease.rate.review-comment', id);
+    async decreaseRateComment(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('decrease.rate.review-comment', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Получение всех комментариев' })
@@ -99,6 +107,8 @@ export class ReviewCommentController {
             }
         }
     })
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
     @Get()
     async getAllComment() {
         return this.commentService.send('get.all.review-comment', '');

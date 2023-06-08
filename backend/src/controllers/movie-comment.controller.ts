@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
+import { firstValueFrom } from "rxjs";
 import { CreateMovieCommentDto } from "src/dto/create-movie-comment.dto";
 import { UpdateMovieCommentDto } from "src/dto/update-movie-comment.dto";
 
@@ -42,17 +44,21 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateComment(@Param('id') id: number) {
-        return this.commentService.send('increase.rate.movie-comment', id);
+    async increaseRateComment(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('increase.rate.movie-comment', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Понизить рейтинг комментария' })
@@ -68,17 +74,21 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 0}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 0 }
             }
         }
     })
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateComment(@Param('id') id: number) {
-        return this.commentService.send('decrease.rate.movie-comment', id);
+    async decreaseRateComment(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('decrease.rate.movie-comment', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Получение всех комментариев' })
@@ -88,9 +98,9 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 100}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 100 }
             }
         }
     })
@@ -112,9 +122,9 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Комментарий пользователя'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Комментарий пользователя' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -136,9 +146,9 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Movie comment'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Movie comment' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -160,9 +170,9 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Любой комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Любой комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -188,9 +198,9 @@ export class MovieCommentController {
         schema: {
             type: 'object',
             properties: {
-                commentId: {type: 'number', example: 1},
-                comment: {type: 'string', example: 'Новый комментарий'},
-                rate: {type: 'number', example: 2}
+                commentId: { type: 'number', example: 1 },
+                comment: { type: 'string', example: 'Новый комментарий' },
+                rate: { type: 'number', example: 2 }
             }
         }
     })
@@ -198,7 +208,7 @@ export class MovieCommentController {
     @UseGuards(RolesGuard)
     @Put('/:id')
     async updateComment(@Param('id') id: number, @Body() dto: UpdateMovieCommentDto) {
-        return this.commentService.send('update.movie-comment', {id: id, comment: dto.comment});
+        return this.commentService.send('update.movie-comment', { id: id, comment: dto.comment });
     }
 
     @ApiOperation({ summary: 'Удаление всех комментариев у пользователя' })

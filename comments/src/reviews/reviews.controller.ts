@@ -50,12 +50,12 @@ export class ReviewsController {
     }
 
     @MessagePattern('increase.rate.review')
-    async increaseRateReview(@Payload() id: number): Promise<Review> {
+    async increaseRateReview(@Payload() id: number): Promise<Review | HttpException> {
         return this.reviewService.increaseRate(id);
     }
 
     @MessagePattern('decrease.rate.review')
-    async decreaseRateReview(@Payload() id: number): Promise<Review> {
+    async decreaseRateReview(@Payload() id: number): Promise<Review | HttpException> {
         return this.reviewService.decreaseRate(id);
     }
 }

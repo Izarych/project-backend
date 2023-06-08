@@ -42,12 +42,22 @@ export class MovieCommentsService {
         return await comment.update(dto);
     }
 
-    async increaseRate(id: number): Promise<MovieComment> {
-        return await this.changeRate(id, 'increase');
+    async increaseRate(id: number): Promise<MovieComment | HttpException> {
+        try {
+            return await this.changeRate(id, 'increase');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
-    async decreaseRate(id: number): Promise<MovieComment> {
-        return await this.changeRate(id, 'decrease');
+    async decreaseRate(id: number): Promise<MovieComment | HttpException> {
+        try {
+            return await this.changeRate(id, 'decrease');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
     private async changeRate(id: number, operation: string): Promise<MovieComment> {

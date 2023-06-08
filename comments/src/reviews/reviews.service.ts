@@ -48,18 +48,28 @@ export class ReviewsService {
         return await review.update(dto);
     }
 
-    async increaseRate(id: number): Promise<Review> {
-        return await this.changeRate(id, 'increase');
+    async increaseRate(id: number): Promise<Review | HttpException> {
+        try {
+            return await this.changeRate(id, 'increase');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
-    async decreaseRate(id: number): Promise<Review> {
-        return await this.changeRate(id, 'decrease');
+    async decreaseRate(id: number): Promise<Review | HttpException> {
+        try {
+            return await this.changeRate(id, 'decrease');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
     private async changeRate(id: number, operation: string): Promise<Review> {
         const review = await this.getOneById(id);
         if (!review) {
-            throw new HttpException(`Review with "${id}" ID not found`, HttpStatus.NOT_FOUND);
+            throw new HttpException(`Review with ${id} ID not found`, HttpStatus.NOT_FOUND);
         }
         if (operation == 'increase') {
             review.rate = review.rate + 1;

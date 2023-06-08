@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
 import { firstValueFrom } from "rxjs";
@@ -23,8 +24,12 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateReview(@Param('id') id: number) {
-        return this.commentService.send('increase.rate.review', id);
+    async increaseRateReview(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('increase.rate.review', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Понижение рейтинга review' })
@@ -38,8 +43,12 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateReview(@Param('id') id: number) {
-        return this.commentService.send('decrease.rate.review', id);
+    async decreaseRateReview(@Param('id') id: number, @Res() res: Response) {
+        const response = await firstValueFrom(this.commentService.send('decrease.rate.review', id));
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Создание review' })
@@ -48,16 +57,15 @@ export class ReviewController {
         type: CreateReviewDto
     })
     @ApiResponse({ status: 201, type: CreateReviewDto })
-    // @Roles('USER', 'ADMIN')
-    // @UseGuards(RolesGuard)
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
     @Post()
-    async createReview(@Body() dto: CreateReviewDto) {
+    async createReview(@Body() dto: CreateReviewDto, @Res() res: Response) {
         const response = await firstValueFrom(this.commentService.send('create.review', dto));
         if (response.status) {
-            throw new HttpException(response.response, response.status);
+            return res.status(response.status).json(response);
         }
-        return response;
-        
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Удаляем все review пользователя' })
@@ -103,8 +111,8 @@ export class ReviewController {
             }
         }
     })
-    // @Roles('USER', 'ADMIN')
-    // @UseGuards(RolesGuard)
+    @Roles('USER', 'ADMIN')
+    @UseGuards(RolesGuard)
     @Get()
     async getAllReview() {
         return this.commentService.send('get.all.review', '');
