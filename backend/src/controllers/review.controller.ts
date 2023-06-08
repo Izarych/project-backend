@@ -54,7 +54,7 @@ export class ReviewController {
     async createReview(@Body() dto: CreateReviewDto) {
         const response = await firstValueFrom(this.commentService.send('create.review', dto));
         if (response.status) {
-            throw new HttpException("Review of this user for this movie exists already", HttpStatus.BAD_REQUEST);
+            throw new HttpException(response.response, response.status);
         }
         return response;
         
