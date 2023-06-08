@@ -118,8 +118,6 @@ export class MovieCommentController {
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
     @Get('/user/:id')
     async getAllCommentByUser(@Param('id') id: number) {
         return this.commentService.send('get.all.movie-comment.user', id);
@@ -144,8 +142,6 @@ export class MovieCommentController {
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
     @Get('/movie/:id')
     async getAllCommentByMovie(@Param('id') id: number) {
         return this.commentService.send('get.all.movie-comment.movie', id);
@@ -170,8 +166,6 @@ export class MovieCommentController {
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
     @Get('/:id')
     async getOneByIdComment(@Param('id') id: number) {
         return this.commentService.send('get.movie-comment', id);
