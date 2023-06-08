@@ -4,7 +4,7 @@ import { AdminService } from './admin.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Movie } from '../movie/movie.model';
 import { Genres } from '../genres/genres.model';
-import { MovieModule } from 'src/movie/movie.module';
+import { MovieModule } from '../movie/movie.module';
 
 @Module({
   controllers: [AdminController],
