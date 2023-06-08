@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
+import { firstValueFrom } from "rxjs";
 import { CreateReviewDto } from "src/dto/create-review.dto";
 import { UpdateReviewDto } from "src/dto/update-review.dto";
 
@@ -47,11 +48,16 @@ export class ReviewController {
         type: CreateReviewDto
     })
     @ApiResponse({ status: 201, type: CreateReviewDto })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Post()
     async createReview(@Body() dto: CreateReviewDto) {
-        return this.commentService.send('create.review', dto);
+        const response = await firstValueFrom(this.commentService.send('create.review', dto));
+        if (response.status) {
+            throw new HttpException("Review of this user for this movie exists already", HttpStatus.BAD_REQUEST);
+        }
+        return response;
+        
     }
 
     @ApiOperation({ summary: 'Удаляем все review пользователя' })
