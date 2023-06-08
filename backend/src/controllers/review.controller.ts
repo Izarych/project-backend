@@ -97,8 +97,8 @@ export class ReviewController {
             }
         }
     })
-    @Roles('USER', 'ADMIN')
-    @UseGuards(RolesGuard)
+    // @Roles('USER', 'ADMIN')
+    // @UseGuards(RolesGuard)
     @Get()
     async getAllReview() {
         return this.commentService.send('get.all.review', '');
