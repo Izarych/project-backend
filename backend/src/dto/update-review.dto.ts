@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString} from "class-validator";
 
 export class UpdateReviewDto {
     @ApiProperty({ example: 'Any review', description: "Review" })
-    @IsNotEmpty({ message: 'Не должен быть пустым' })
-    @IsString({ message: 'Должно быть строкой' })
+    @IsNotEmpty({ message: 'Ревью не должен быть пустым' })
+    @IsString({ message: 'Ревью должно быть строкой' })
     readonly review: string;
 }

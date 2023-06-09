@@ -1,64 +1,64 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/sequelize';
-import {CreateReviewDto} from './dto/create-review.dto';
-import {Review} from './reviews.model';
-import {UpdateReviewDto} from "./dto/update-review.dto";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { Review } from './reviews.model';
+import { UpdateReviewDto } from "./dto/update-review.dto";
 
 @Injectable()
 export class ReviewsService {
     constructor(@InjectModel(Review) private reviewRepository: typeof Review) { }
 
-    async create(dto: CreateReviewDto) {
+    async create(dto: CreateReviewDto): Promise<Review | HttpException> {
         try {
             return await this.reviewRepository.create(dto);
         } catch (error) {
-            return error.parent;
+            return new HttpException("Review of this user for this movie exists already", HttpStatus.BAD_REQUEST, { cause: error });
         }
 
     }
 
-    async removeOneById(id: number) {
+    async removeOneById(id: number): Promise<number> {
         return await this.reviewRepository.destroy({ where: { id: id } });
     }
 
-    async removeAllByUserId(id: number) {
+    async removeAllByUserId(id: number): Promise<number> {
         return await this.reviewRepository.destroy({ where: { userId: id } });
     }
 
-    async getAll() : Promise<Review[]> {
+    async getAll(): Promise<Review[]> {
         return await this.reviewRepository.findAll({
             include: { all: true }
         });
     }
 
-    async getByMovieId(id: number) : Promise<Review[]> {
+    async getByMovieId(id: number): Promise<Review[]> {
         return await this.reviewRepository.findAll({ where: { movieId: id } });
     }
 
-    async getByUserId(id: number) : Promise<Review[]> {
+    async getByUserId(id: number): Promise<Review[]> {
         return await this.reviewRepository.findAll({ where: { userId: id } });
     }
 
-    async getOneById(id: number) : Promise<Review> {
+    async getOneById(id: number): Promise<Review> {
         return await this.reviewRepository.findByPk(id);
     }
 
-    async update(dto: UpdateReviewDto) : Promise<Review> {
-        const review : Review = await this.reviewRepository.findByPk(dto.id);
+    async update(dto: UpdateReviewDto): Promise<Review> {
+        const review: Review = await this.reviewRepository.findByPk(dto.id);
         return await review.update(dto);
     }
 
-    async increaseRate(id: number) {
+    async increaseRate(id: number): Promise<Review> {
         return await this.changeRate(id, 'increase');
     }
 
-    async decreaseRate(id: number) {
+    async decreaseRate(id: number): Promise<Review> {
         return await this.changeRate(id, 'decrease');
     }
 
-    private async changeRate(id: number, operation: string) {
+    private async changeRate(id: number, operation: string): Promise<Review> {
         const review = await this.getOneById(id);
-        if(!review){
+        if (!review) {
             throw new HttpException(`Review with "${id}" ID not found`, HttpStatus.NOT_FOUND);
         }
         if (operation == 'increase') {

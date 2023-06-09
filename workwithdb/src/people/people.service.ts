@@ -10,8 +10,8 @@ export class PeopleService {
         @InjectModel(People) private peopleRepository: typeof People) {
     }
 
-    async createPeoples(movie_id: number, peopleArr: CreatePeopleDto[]) {
-        const movie = await this.movieRepository.findByPk(movie_id);
+    async createPeoples(movie_id: number, peopleArr: CreatePeopleDto[]): Promise<void> {
+        const movie: Movie = await this.movieRepository.findByPk(movie_id);
         for (const element of peopleArr) {
             const [people] = await this.peopleRepository.findOrCreate(
                 {
@@ -25,7 +25,7 @@ export class PeopleService {
         }
     }
 
-    async getPeople() {
+    async getPeople(): Promise<People[]> {
         return await this.peopleRepository.findAll({
             include: [
                 {
@@ -37,7 +37,7 @@ export class PeopleService {
         })
     }
 
-    async getPeopleByFullName(fullName: string) {
+    async getPeopleByFullName(fullName: string): Promise<People[]> {
         const people: People[] = await this.peopleRepository.findAll({
             where: {
                 fullName
@@ -49,7 +49,7 @@ export class PeopleService {
                     through: { attributes: [] }
                 }
             ]
-        })
+        });
 
         return people;
 

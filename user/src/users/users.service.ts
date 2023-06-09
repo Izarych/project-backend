@@ -1,10 +1,10 @@
-import {BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/sequelize';
-import {AddRoleDto} from './dto/add-user-role.dto';
-import {CreateUserDto} from './dto/create-user.dto';
-import {User} from './users.model';
-import {Role} from "../roles/roles.model";
-import {RolesService} from "../roles/roles.service";
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { AddRoleDto } from './dto/add-user-role.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './users.model';
+import { Role } from "../roles/roles.model";
+import { RolesService } from "../roles/roles.service";
 
 
 @Injectable()
@@ -14,24 +14,30 @@ export class UsersService {
     private roleService: RolesService) {
   }
 
-  async createUser(userDto: CreateUserDto) : Promise<User> {
-    const role : Role = await this.roleService.getRoleByValue("USER");
-    const user : User = await this.userRepository.create(userDto);
+  async createUser(userDto: CreateUserDto): Promise<User> {
+    const role: Role = await this.roleService.getRoleByValue("USER");
+    if(!role){
+      throw new BadRequestException('Role "USER" doesnot exists')
+    }
+    const user: User = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
     return user;
   }
 
-  async createAdmin(userDto: CreateUserDto) : Promise<User> {
-    const role : Role = await this.roleService.getRoleByValue("ADMIN");
-    const user : User = await this.userRepository.create(userDto);
+  async createAdmin(userDto: CreateUserDto): Promise<User> {
+    const role: Role = await this.roleService.getRoleByValue("ADMIN");
+    if(!role){
+      throw new BadRequestException('Role "ADMIN" doesnot exists')
+    }
+    const user: User = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
     return user;
   }
 
-  async activateUser(link: string) : Promise<User> {
-    const user : User = await this.userRepository.findOne({where: {activationLink: link}});
+  async activateUser(link: string): Promise<User> {
+    const user: User = await this.userRepository.findOne({ where: { activationLink: link } });
     if (!user) {
       throw new BadRequestException('Invalid link');
     }
@@ -39,35 +45,36 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<User[]> {
     return await this.userRepository.findAll({ include: { all: true } });
   }
 
-  async getUserByEmail(email: string) : Promise<User> {
-    return await this.userRepository.findOne({where: {email}, include: {all: true}});
+  async getUserByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { email }, include: { all: true } });
   }
 
-  async getUserById(id: number) : Promise<User> {
-    const user : User = await this.userRepository.findByPk(id);
+  async getUserById(id: number): Promise<User> {
+    const user: User = await this.userRepository.findByPk(id);
     if (!user) {
       throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
     return user;
-
   }
 
-  async addRole(dto: AddRoleDto) {
+  async addRole(dto: AddRoleDto): Promise<AddRoleDto> {
     return await this.addOrRemoveRole(dto, 'add');
   }
 
-  async deleteUser(id: number) {
-    const user = await this.getUserById(id);
+  async deleteUser(id: number): Promise<{message: string}> {
+    const user : User = await this.getUserById(id);
     await this.userRepository.destroy({ where: { id } });
-    return user;
+    return {
+      message: 'Пользователь был удален'
+    }
   }
 
-  async updateUser(data: Partial<User>) : Promise<User> {
-    const user : User = await this.userRepository.findByPk(data.id);
+  async updateUser(data: Partial<User>): Promise<User> {
+    const user: User = await this.userRepository.findByPk(data.id);
     if (!user) {
       throw new NotFoundException('User doesnt exist');
     }
@@ -75,12 +82,12 @@ export class UsersService {
     return user;
   }
 
-  async removeRole(dto : AddRoleDto) {
+  async removeRole(dto: AddRoleDto): Promise<AddRoleDto> {
     return await this.addOrRemoveRole(dto, 'remove');
   }
 
-  async getUserByLink(link: string) : Promise<User> {
-    const user : User = await this.userRepository.findOne({ where: { activationLink: link } });
+  async getUserByLink(link: string): Promise<User> {
+    const user: User = await this.userRepository.findOne({ where: { activationLink: link } });
     if (!user) {
       throw new HttpException('User doesnt exist', HttpStatus.NOT_FOUND);
     }
@@ -88,9 +95,9 @@ export class UsersService {
   }
 
 
-  private async addOrRemoveRole(dto: AddRoleDto, operation: string) {
-    const user : User = await this.userRepository.findByPk(dto.userId);
-    const role : Role = await this.roleService.getRoleByValue(dto.value);
+  private async addOrRemoveRole(dto: AddRoleDto, operation: string): Promise<AddRoleDto> {
+    const user: User = await this.userRepository.findByPk(dto.userId);
+    const role: Role = await this.roleService.getRoleByValue(dto.value);
 
     if (dto.value == 'USER') {
       throw new HttpException('Role "USER" is disabled for using', HttpStatus.BAD_REQUEST);
