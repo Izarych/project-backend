@@ -96,9 +96,9 @@ export class UserController {
     })
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
-    @Post('/addrole/:id')
-    async addRole<T>(@Param('id') userId: number, @Body() dto: AddRoleDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
-        const response = await firstValueFrom(this.userService.send('add.role', { userId, value: dto.value }));
+    @Get('/addrole/:id/:value')
+    async addRole<T>(@Param('id') userId: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.userService.send('add.role', { userId, value: roleValue }));
         if (response.status) {
             return res.status(response.status).json(response);
         }
