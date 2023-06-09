@@ -4,9 +4,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/s
 import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { CreateReviewCommentDto } from "src/dto/create-review-comment.dto";
 import { UpdateReviewCommentDto } from "src/dto/update-review-comment.dto";
+import { IReviewComment } from "src/interfaces/IReviewComment";
 
 @ApiTags('Gateway App. Review comments')
 @Controller('review-comment')
@@ -26,7 +27,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Post()
-    async createComment(@Body() dto: CreateReviewCommentDto, @Res() res: Response) {
+    async createComment<T>(@Body() dto: CreateReviewCommentDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('create.review-comment', dto));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -56,7 +57,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateComment(@Param('id') id: number, @Res() res: Response) {
+    async increaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('increase.rate.review-comment', id));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -86,7 +87,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateComment(@Param('id') id: number, @Res() res: Response) {
+    async decreaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('decrease.rate.review-comment', id));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -110,7 +111,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get()
-    async getAllComment() {
+    async getAllComment(): Promise<Observable<IReviewComment[]>> {
         return this.commentService.send('get.all.review-comment', '');
     }
 
@@ -136,7 +137,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/user/:id')
-    async getAllCommentByUser(@Param('id') id: number) {
+    async getAllCommentByUser(@Param('id') id: number): Promise<Observable<IReviewComment[]>> {
         return this.commentService.send('get.all.review-comment.user', id);
     }
 
@@ -162,7 +163,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/review/:id')
-    async getAllCommentByReview(@Param('id') id: number) {
+    async getAllCommentByReview(@Param('id') id: number): Promise<Observable<IReviewComment[]>> {
         return this.commentService.send('get.all.review-comment.review', id);
     }
 
@@ -188,7 +189,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/:id')
-    async getOneByIdComment(@Param('id') id: number) {
+    async getOneByIdComment(@Param('id') id: number): Promise<Observable<IReviewComment>> {
         return this.commentService.send('get.review-comment', id);
     }
 
@@ -218,7 +219,7 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateComment(@Param('id') id: number, @Body() dto: UpdateReviewCommentDto) {
+    async updateComment(@Param('id') id: number, @Body() dto: UpdateReviewCommentDto): Promise<Observable<IReviewComment>> {
         return this.commentService.send('update.review-comment', { id: id, comment: dto.comment });
     }
 
@@ -233,7 +234,7 @@ export class ReviewCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    async removeCommentByUserId(@Param('id') id: number) {
+    async removeCommentByUserId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.review-comment.userId', id);
     }
 
@@ -248,7 +249,7 @@ export class ReviewCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async removeCommentByCommentId(@Param('id') id: number) {
+    async removeCommentByCommentId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.review-comment.commentId', id);
     }
 }

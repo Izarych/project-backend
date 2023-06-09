@@ -4,9 +4,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/s
 import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { CreateMovieCommentDto } from "src/dto/create-movie-comment.dto";
 import { UpdateMovieCommentDto } from "src/dto/update-movie-comment.dto";
+import { IMovieComment } from "src/interfaces/IMovieComment";
 
 
 @ApiTags('Gateway App. Movie comments')
@@ -27,7 +28,7 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Post()
-    async createComment(@Body() dto: CreateMovieCommentDto) {
+    async createComment(@Body() dto: CreateMovieCommentDto): Promise<Observable<IMovieComment>> {
         return this.commentService.send('create.movie-comment', dto);
     }
 
@@ -53,7 +54,7 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateComment(@Param('id') id: number, @Res() res: Response) {
+    async increaseRateComment<T>(@Param('id') id: number, @Res() res: Response) : Promise<Response<T, Record<string, T>>>{
         const response = await firstValueFrom(this.commentService.send('increase.rate.movie-comment', id));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -83,7 +84,7 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateComment(@Param('id') id: number, @Res() res: Response) {
+    async decreaseRateComment<T>(@Param('id') id: number, @Res() res: Response) : Promise<Response<T, Record<string, T>>>{
         const response = await firstValueFrom(this.commentService.send('decrease.rate.movie-comment', id));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -105,7 +106,7 @@ export class MovieCommentController {
         }
     })
     @Get()
-    async getAllComment() {
+    async getAllComment() : Promise<Observable<IMovieComment[]>>{
         return this.commentService.send('get.all.movie-comment', '');
     }
 
@@ -129,7 +130,7 @@ export class MovieCommentController {
         }
     })
     @Get('/user/:id')
-    async getAllCommentByUser(@Param('id') id: number) {
+    async getAllCommentByUser(@Param('id') id: number) : Promise<Observable<IMovieComment[]>>{
         return this.commentService.send('get.all.movie-comment.user', id);
     }
 
@@ -153,7 +154,7 @@ export class MovieCommentController {
         }
     })
     @Get('/movie/:id')
-    async getAllCommentByMovie(@Param('id') id: number) {
+    async getAllCommentByMovie(@Param('id') id: number): Promise<Observable<IMovieComment[]>> {
         return this.commentService.send('get.all.movie-comment.movie', id);
     }
 
@@ -177,7 +178,7 @@ export class MovieCommentController {
         }
     })
     @Get('/:id')
-    async getOneByIdComment(@Param('id') id: number) {
+    async getOneByIdComment(@Param('id') id: number) : Promise<Observable<IMovieComment>>{
         return this.commentService.send('get.movie-comment', id);
     }
 
@@ -207,7 +208,7 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateComment(@Param('id') id: number, @Body() dto: UpdateMovieCommentDto) {
+    async updateComment(@Param('id') id: number, @Body() dto: UpdateMovieCommentDto): Promise<Observable<IMovieComment>> {
         return this.commentService.send('update.movie-comment', { id: id, comment: dto.comment });
     }
 
@@ -222,7 +223,7 @@ export class MovieCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    async removeCommentByUserId(@Param('id') id: number) {
+    async removeCommentByUserId(@Param('id') id: number) : Promise<Observable<number>>{
         return this.commentService.send('remove.movie-comment.userId', id);
     }
 
@@ -237,7 +238,7 @@ export class MovieCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async removeCommentByCommentId(@Param('id') id: number) {
+    async removeCommentByCommentId(@Param('id') id: number) : Promise<Observable<number>>{
         return this.commentService.send('remove.movie-comment.commentId', id);
     }
 }

@@ -4,9 +4,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/s
 import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { AddRoleDto } from "src/dto/add-user-role.dto";
 import { UpdateUserDto } from "src/dto/update-user.dto";
+import { IUser } from "src/interfaces/IUser";
 
 @ApiTags('Gateway App. Users')
 @Controller('user')
@@ -31,7 +32,7 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Get()
-    async getAllUsers() {
+    async getAllUsers(): Promise<Observable<IUser[]>> {
         return this.userService.send('get.all.users', '');
     }
 
@@ -55,7 +56,7 @@ export class UserController {
         }
     })
     @Get('/:id')
-    async getOneByIdUser(@Param('id') id: number, @Res() res: Response) {
+    async getOneByIdUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('get.user.id', id));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -96,7 +97,7 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Post('/addrole/:id')
-    async addRole(@Param('id') userId: number, @Body() dto: AddRoleDto, @Res() res: Response) {
+    async addRole<T>(@Param('id') userId: number, @Body() dto: AddRoleDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('add.role', { userId, value: dto.value }));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -129,7 +130,7 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/removerole/:id/:value')
-    async removeRole(@Param('id') id: number, @Param('value') roleValue: string, @Res() res: Response) {
+    async removeRole<T>(@Param('id') id: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('remove.role', { userId: id, value: roleValue }));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -150,12 +151,12 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateUser(@Param('id') id: number, @Body() dto: UpdateUserDto, @Res() res: Response) {
+    async updateUser<T>(@Param('id') id: number, @Body() dto: UpdateUserDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         let response = null;
         if (dto.password) {
             const hashPassword = await firstValueFrom(this.authService.send('hash_password', dto.password));
             response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id, password: hashPassword }));
-        }else{
+        } else {
             response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id }));
         }
 
@@ -180,7 +181,7 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async deleteUser(@Param('id') id: number, @Res() res: Response) {
+    async deleteUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('delete.user', id));
         if (response.status) {
             return res.status(response.status).json(response);

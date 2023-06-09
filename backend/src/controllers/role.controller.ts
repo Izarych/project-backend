@@ -4,8 +4,9 @@ import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { CreateRoleDto } from "src/dto/create-role.dto";
+import { IRole } from "src/interfaces/IRole";
 
 @ApiTags('Gateway App. Roles')
 @Controller('role')
@@ -17,7 +18,7 @@ export class RoleController {
     //  @Roles('ADMIN') Пока закомментил гварды
     //  @UseGuards(RolesGuard)
     @Post()
-    async createRole(@Body() dto: CreateRoleDto, @Res() res: Response) {
+    async createRole<T>(@Body() dto: CreateRoleDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('create.role', dto));
         if (response.status) {
             return res.status(response.status).json(response);
@@ -40,7 +41,7 @@ export class RoleController {
         }
     })
     @Get('/:role')
-    async getByValue(@Param('role') role: string) {
+    async getByValue(@Param('role') role: string): Promise<Observable<IRole>> {
         return this.userService.send('get.role.by.value', role);
     }
 }

@@ -19,8 +19,8 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { UserWithTokens } from './interfaces/IuserWithTokens';
-import { User } from './interfaces/Iuser';
+import { IUserWithTokens } from './interfaces/IUserWithTokens';
+import { IUser } from './interfaces/IUser';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @ApiTags('Authorization')
@@ -47,7 +47,7 @@ export class AppController {
   @Post('/login')
   async login<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData: UserWithTokens = await this.appService.login(dto);
+      const userData: IUserWithTokens = await this.appService.login(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -201,7 +201,7 @@ export class AppController {
     }
   })
   @Get('/check/:email')
-  async checkEmail(@Param('email') email: string): Promise<User> {
+  async checkEmail(@Param('email') email: string): Promise<IUser> {
     return this.appService.checkEmail(email);
   }
 
@@ -249,7 +249,7 @@ export class AppController {
         throw new UnauthorizedException({ message: 'Not authorized' });
       }
       const refreshToken: string = req.headers.cookie.split('=')[1];
-      const userData: UserWithTokens = await this.appService.refresh(refreshToken);
+      const userData: IUserWithTokens = await this.appService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -280,7 +280,7 @@ export class AppController {
   @Post('/registration')
   async registration<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData: UserWithTokens = await this.appService.registration(dto);
+      const userData: IUserWithTokens = await this.appService.registration(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
@@ -308,7 +308,7 @@ export class AppController {
     }
   })
   @Post('/registrationAdmin')
-  async registrationAdmin(@Body() dto: AuthDto): Promise<UserWithTokens> {
+  async registrationAdmin(@Body() dto: AuthDto): Promise<IUserWithTokens> {
     return this.appService.registrationAdmin(dto);
   }
 

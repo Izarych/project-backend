@@ -1,4 +1,4 @@
-export interface UserWithTokens {
+export interface IUserWithTokens {
     accessToken: string;
     refreshToken: string;
     user: {
