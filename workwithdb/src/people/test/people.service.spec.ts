@@ -39,6 +39,7 @@ describe('MovieService', () => {
   ];
 
   const mockPeopleRepository = {
+
     findOrCreate: jest.fn((
       filter: {
         where: {
@@ -56,7 +57,7 @@ describe('MovieService', () => {
       return Promise.resolve([foundHuman]);
     }),
 
-    findAll: jest.fn(() => people)
+    findAll: jest.fn().mockResolvedValue(people)
   }
 
   const mockMovieRepository = {
@@ -154,10 +155,37 @@ describe('MovieService', () => {
         expect(spy).toHaveBeenCalledTimes(1);
       });
 
-      it('should return undefined ', async () => {
+      it('should return all people records ', async () => {
         expect(response).toEqual(people);
       });
 
     });
   });
+
+  describe('getPeopleByFullName', () => {
+
+    describe('when findAll called', () => {
+      let response, spy;
+      const fullName = 'Мэттью МакКонахи';
+
+      beforeAll(async () => {
+        spy = jest.spyOn(mockPeopleRepository, 'findAll').mockResolvedValueOnce([people[2] as People]);
+        response = await peopleService.getPeopleByFullName(fullName)
+      });
+
+      afterAll(async () => {
+        jest.clearAllMocks();
+      });
+
+      it('should call findAll of mockPeopleRepository', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return people by full name ', async () => {
+        expect(response).toEqual([people[2]]);
+      });
+
+    });
+  });
+
 });
