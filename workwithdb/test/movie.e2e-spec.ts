@@ -9,7 +9,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MovieGenres } from '../src/genres/moviegenres.model';
 import { Genres } from '../src/genres/genres.model';
 import { MoviePeople } from '../src/people/moviepeople.model';
-import { Op } from 'sequelize';
 
 describe('Movie (e2e)', () => {
 
@@ -99,6 +98,9 @@ describe('Movie (e2e)', () => {
   ];
 
   const mockMovieRepository = {
+
+    findOne: jest.fn(),
+
     findAll: jest.fn().mockResolvedValue(movies),
 
     findByPk: jest.fn((id: number) =>
@@ -228,11 +230,8 @@ describe('Movie (e2e)', () => {
   describe('/GET movie/human/:fullName', () => {
 
     it(`should return the movies in which the human with the given full name is involved`, () => {
-      const res = request(app.getHttpServer())
-      .get(`/movie/human/${encodeURIComponent('Гай Ричи')}`);
-
-      console.log(res)
-      return res
+      return request(app.getHttpServer())
+        .get(`/movie/human/${encodeURIComponent('Гай Ричи')}`)
         .expect(200)
         .expect([movies[1]]);
     });
@@ -245,6 +244,50 @@ describe('Movie (e2e)', () => {
     it(`should return a movie record with the given id`, () => {
       return request(app.getHttpServer())
         .get(`/movie/${id}`)
+        .expect(200)
+        .expect(movies[0]);
+    });
+  })
+
+  describe('/GET movie/:id/people', () => {
+
+    const id = 1;
+
+    it(`should find movie record with given id and return the people who match it`, () => {
+      return request(app.getHttpServer())
+        .get(`/movie/${id}/people`)
+        .expect(200)
+        .expect(movies[0].people);
+    });
+  })
+
+  describe('/GET movie/:id/genre', () => {
+
+    const id = 1;
+
+    it(`should find movie record with given id and return the genres that match it`, () => {
+      return request(app.getHttpServer())
+        .get(`/movie/${id}/genres`)
+        .expect(200)
+        .expect(movies[0].genres);
+    });
+  })
+
+  describe('/GET movie/title/:title', () => {
+
+    const title = '1+1';
+
+    beforeAll(async () => {
+      jest.spyOn(mockMovieRepository, 'findOne').mockResolvedValueOnce(movies[0]);
+    });
+
+    afterAll(async () => {
+      jest.clearAllMocks();
+    });
+
+    it(`should return movie with sent title`, () => {
+      return request(app.getHttpServer())
+        .get(`/movie/title/${title}`)
         .expect(200)
         .expect(movies[0]);
     });

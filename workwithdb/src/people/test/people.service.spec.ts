@@ -72,9 +72,7 @@ describe('MovieService', () => {
           this[propertyKey] = updatedPeople;
         }
       }
-    }
-
-    ),
+    }),
   }
 
   beforeEach(async () => {
@@ -90,10 +88,8 @@ describe('MovieService', () => {
           provide: getModelToken(Movie),
           useValue: mockMovieRepository
         },
-
       ],
-      imports: [
-      ]
+      imports: []
     }).compile();
     peopleService = moduleRef.get<PeopleService>(PeopleService);
   });
