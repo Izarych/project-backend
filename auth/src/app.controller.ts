@@ -19,8 +19,9 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { UserWithTokens } from './custom_types/userWithTokens.type';
-import { User } from './custom_types/user.type';
+import { UserWithTokens } from './interfaces/IuserWithTokens';
+import { User } from './interfaces/Iuser';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @ApiTags('Authorization')
 @Controller()
@@ -50,7 +51,7 @@ export class AppController {
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error)
     }
   }
 
@@ -66,8 +67,13 @@ export class AppController {
     description: "Resend mail on email, update link in table"
   })
   @Get('/sendlink/:email')
-  async resendLink(@Param('email') email: string): Promise<User> {
-    return this.appService.reSendActivationLink(email);
+  async resendLink<T>(@Param('email') email: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+    try {
+      return res.json(this.appService.reSendActivationLink(email));
+    } catch (error) {
+      return res.status(error.status).json(error)
+    }
+
   }
 
 
@@ -83,8 +89,12 @@ export class AppController {
     description: "Activate account if link is right"
   })
   @Get('/activate/:link')
-  async activate(@Param('link') link: string): Promise<User> {
-    return this.appService.activate(link);
+  async activate<T>(@Param('link') link: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+    try {
+      return res.json(await this.appService.activate(link));
+    } catch (error) {
+      return res.status(error.status).json(error)
+    }
   }
 
 
@@ -201,15 +211,19 @@ export class AppController {
     status: 200,
     description: "Удаление refresh токена из куков и удаление записи в таблице токенов"
   })
+  @UseGuards(JwtAuthGuard)
   @Post('/logout')
   async logout<T>(@Req() req: Request, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
+      if (!req.headers.cookie) {
+        throw new UnauthorizedException({ message: 'Not authorized' });
+      }
       const refreshToken: string = req.headers.cookie.split('=')[1];
       await this.appService.logout(refreshToken);
       res.clearCookie('refreshToken');
       return res.status(204).send();  //ЗАГЛУШКА
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error.response)
     }
   }
 
@@ -239,7 +253,7 @@ export class AppController {
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error.response)
     }
   }
 
@@ -270,7 +284,7 @@ export class AppController {
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error)
     }
   }
 

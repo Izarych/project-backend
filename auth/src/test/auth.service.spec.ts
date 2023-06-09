@@ -52,8 +52,6 @@ describe('AppService', () => {
             switch (command) {
                 case 'get.user.email':
                     return of(userRepository.find(user => user.email === value));
-                case 'get.user.link':
-                    return of(userRepository.find(user => user.activationLink === value));
                 case 'create.user':
                     const user = {
                         id: 3,
@@ -219,33 +217,6 @@ describe('AppService', () => {
 
             it('should return undefinded', async () => {
                 response = await appService.checkEmail(authDtoWrongEmail.email);
-                expect(response).toBeUndefined();
-            });
-        });
-    });
-
-    describe('Check link', () => {
-        describe('when check link called', () => {
-            let checkLinkSpyOn;
-            const rightLink = "testlink2";
-            const wrongLink = "any";
-            beforeEach(async () => {
-                jest.clearAllMocks();
-                checkLinkSpyOn = jest.spyOn(appService, 'checkLink');
-            });
-
-            it('should call app service with link', async () => {
-                response = await appService.checkLink(rightLink);
-                expect(checkLinkSpyOn).toBeCalledWith(rightLink);
-            });
-
-            it('should return user if user in data base', async () => {
-                response = await appService.checkLink(rightLink);
-                expect(response).toEqual(userRepository[1]);
-            });
-
-            it('should return undefinded', async () => {
-                response = await appService.checkLink(wrongLink);
                 expect(response).toBeUndefined();
             });
         });

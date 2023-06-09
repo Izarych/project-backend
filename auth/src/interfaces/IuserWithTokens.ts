@@ -1,6 +1,6 @@
-export type UserWithTokens = {
-    accessToken: string,
-    refreshToken: string,
+export interface UserWithTokens {
+    accessToken: string;
+    refreshToken: string;
     user: {
         id: number,
         email: string,

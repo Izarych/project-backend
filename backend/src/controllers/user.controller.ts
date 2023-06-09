@@ -150,12 +150,20 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updatePassword(@Param('id') id: number, @Body() dto: UpdateUserDto) {
+    async updateUser(@Param('id') id: number, @Body() dto: UpdateUserDto, @Res() res: Response) {
+        let response = null;
         if (dto.password) {
             const hashPassword = await firstValueFrom(this.authService.send('hash_password', dto.password));
-            return this.userService.send('update.user', { ...dto, id: id, password: hashPassword })
+            response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id, password: hashPassword }));
+        }else{
+            response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id }));
         }
-        return this.userService.send('update.user', { ...dto, id: id });
+
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+
+        return res.json(response);
     }
 
     @ApiOperation({ summary: 'Удаление пользователя' })

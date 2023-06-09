@@ -72,12 +72,18 @@ export class UsersService {
 
   async deleteUser(id: number): Promise<{ message: string } | HttpException> {
     try {
-      await this.getUserById(id);
+      const user: User | HttpException = await this.getUserById(id);
+
+      if(user instanceof HttpException){
+        throw new HttpException(user.getResponse(), user.getStatus());
+      }
+      
       await this.userRepository.destroy({ where: { id } });
       return {
         message: 'Пользователь был удален'
       }
     } catch (error) {
+      
       return new HttpException(error.response, error.status, { cause: error });
     }
 
@@ -118,7 +124,7 @@ export class UsersService {
     }
 
     if (!role) {
-      throw new HttpException(`Role "${role}" not found`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`Role "${dto.value}" not found`, HttpStatus.NOT_FOUND);
     }
 
     if (!user) {

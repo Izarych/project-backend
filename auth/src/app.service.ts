@@ -9,9 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UserWithTokens } from './custom_types/userWithTokens.type';
-import { Tokens } from './custom_types/tokens.type';
-import { User } from './custom_types/user.type';
+import { UserWithTokens } from './interfaces/IuserWithTokens';
+import { Tokens } from './interfaces/Itokens';
+import { User } from './interfaces/Iuser';
 
 @Injectable()
 export class AppService {
@@ -41,10 +41,6 @@ export class AppService {
     return await firstValueFrom(this.userService.send('get.user.email', email));
   }
 
-  async checkLink(link: string): Promise<User> {
-    return await firstValueFrom(this.userService.send('get.user.link', link));
-  }
-
   async logout(refreshToken: string): Promise<void> {
     await this.tokenRepository.destroy({ where: { refreshToken } });
   }
@@ -67,6 +63,11 @@ export class AppService {
     const hashPassword: string = await bcrypt.hash(dto.password, 5);
     const link: string = uuid.v4();
     const user: User = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
+
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
     // await this.sendActivationLink(dto.email, link);
     return await this.generateAndSaveTokenAndPayload(user);
   }
@@ -78,6 +79,11 @@ export class AppService {
     const hashPassword: string = await bcrypt.hash(dto.password, 5);
     const link: string = uuid.v4();
     const admin: User = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
+
+    if (!admin.id) {
+      throw new BadRequestException(admin);
+    }
+
     return await this.generateAndSaveTokenAndPayload(admin);
   }
 
@@ -87,13 +93,25 @@ export class AppService {
 
 
   async activate(link: string): Promise<User> {
-    return await firstValueFrom(this.userService.send('activate.user', link));
+    const user: User = await firstValueFrom(this.userService.send('activate.user', link));
+
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
+    return user;
   }
 
   async reSendActivationLink(email: string): Promise<User> {
     const link: string = uuid.v4();
+    const user: User = await firstValueFrom(this.userService.send('update.user', { email, link }));
+
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
     await this.sendActivationLink(email, link);
-    return await firstValueFrom(this.userService.send('update.user', { email, link }));
+    return user;
   }
 
   async sendActivationLink(to: string, link: string): Promise<void> {
@@ -186,6 +204,3 @@ export class AppService {
     return res.data;
   }
 }
-
-
-
