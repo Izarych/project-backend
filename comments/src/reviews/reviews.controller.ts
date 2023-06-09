@@ -11,51 +11,51 @@ export class ReviewsController {
 
     @MessagePattern('create.review')
     async create(@Payload() dto: CreateReviewDto): Promise<Review | HttpException> {
-        return this.reviewService.create(dto);
+        return await this.reviewService.create(dto);
     }
 
     @MessagePattern('remove.review.reviewId')
     async removeByReviewId(@Payload() id: number): Promise<number> {
-        return this.reviewService.removeOneById(id);
+        return await this.reviewService.removeOneById(id);
     }
 
     @MessagePattern('remove.review.userId')
     async removeByUserId(@Payload() id: number): Promise<number> {
-        return this.reviewService.removeAllByUserId(id);
+        return await this.reviewService.removeAllByUserId(id);
     }
 
     @MessagePattern('get.all.review')
     async getAll(): Promise<Review[]> {
-        return this.reviewService.getAll();
+        return await this.reviewService.getAll();
     }
 
     @MessagePattern('get.all.review.user')
     async getAllByUserId(@Payload() userId: number): Promise<Review[]> {
-        return this.reviewService.getByUserId(userId);
+        return await this.reviewService.getByUserId(userId);
     }
 
     @MessagePattern('get.all.review.movie')
     async getAllByMovieId(@Payload() movieId: number): Promise<Review[]> {
-        return this.reviewService.getByMovieId(movieId);
+        return await this.reviewService.getByMovieId(movieId);
     }
 
     @MessagePattern('get.review')
     async getOneById(@Payload() id: number): Promise<Review> {
-        return this.reviewService.getOneById(id);
+        return await this.reviewService.getOneById(id);
     }
 
     @MessagePattern('update.review')
-    async update(@Payload() dto: UpdateReviewDto): Promise<Review> {
-        return this.reviewService.update(dto);
+    async update(@Payload() dto: UpdateReviewDto): Promise<Review | HttpException> {
+        return await this.reviewService.update(dto);
     }
 
     @MessagePattern('increase.rate.review')
     async increaseRateReview(@Payload() id: number): Promise<Review | HttpException> {
-        return this.reviewService.increaseRate(id);
+        return await this.reviewService.increaseRate(id);
     }
 
     @MessagePattern('decrease.rate.review')
     async decreaseRateReview(@Payload() id: number): Promise<Review | HttpException> {
-        return this.reviewService.decreaseRate(id);
+        return await this.reviewService.decreaseRate(id);
     }
 }

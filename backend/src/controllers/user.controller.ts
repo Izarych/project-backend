@@ -58,10 +58,7 @@ export class UserController {
     @Get('/:id')
     async getOneByIdUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('get.user.id', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Добавление роли пользователю по его id' })
@@ -99,10 +96,7 @@ export class UserController {
     @Get('/addrole/:id/:value')
     async addRole<T>(@Param('id') userId: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('add.role', { userId, value: roleValue }));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление роли у пользователя' })
@@ -132,10 +126,7 @@ export class UserController {
     @Delete('/removerole/:id/:value')
     async removeRole<T>(@Param('id') id: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('remove.role', { userId: id, value: roleValue }));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Обновление пользователя' })
@@ -160,11 +151,7 @@ export class UserController {
             response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id }));
         }
 
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление пользователя' })
@@ -183,6 +170,10 @@ export class UserController {
     @Delete('/:id')
     async deleteUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('delete.user', id));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
+    }
+
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
         if (response.status) {
             return res.status(response.status).json(response);
         }

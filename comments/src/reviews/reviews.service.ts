@@ -43,8 +43,13 @@ export class ReviewsService {
         return await this.reviewRepository.findByPk(id);
     }
 
-    async update(dto: UpdateReviewDto): Promise<Review> {
+    async update(dto: UpdateReviewDto): Promise<Review | HttpException> {
         const review: Review = await this.reviewRepository.findByPk(dto.id);
+
+        if (!review) {
+            return new HttpException(`Review with "${dto.id}" ID not found`, HttpStatus.NOT_FOUND);
+        }
+
         return await review.update(dto);
     }
 

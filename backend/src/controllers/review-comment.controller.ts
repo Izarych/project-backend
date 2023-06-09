@@ -29,10 +29,7 @@ export class ReviewCommentController {
     @Post()
     async createComment<T>(@Body() dto: CreateReviewCommentDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('create.review-comment', dto));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Увеличить рейтинг комментария' })
@@ -59,10 +56,7 @@ export class ReviewCommentController {
     @Get('/increase_rate/:id')
     async increaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('increase.rate.review-comment', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Понизить рейтинг комментария' })
@@ -89,10 +83,7 @@ export class ReviewCommentController {
     @Get('/decrease_rate/:id')
     async decreaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('decrease.rate.review-comment', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Получение всех комментариев' })
@@ -219,8 +210,9 @@ export class ReviewCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateComment(@Param('id') id: number, @Body() dto: UpdateReviewCommentDto): Promise<Observable<IReviewComment>> {
-        return this.commentService.send('update.review-comment', { id: id, comment: dto.comment });
+    async updateComment<T>(@Param('id') id: number, @Body() dto: UpdateReviewCommentDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('update.review-comment', { id: id, comment: dto.comment }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление всех комментариев у пользователя' })
@@ -251,5 +243,12 @@ export class ReviewCommentController {
     @Delete('/:id')
     async removeCommentByCommentId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.review-comment.commentId', id);
+    }
+
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 }

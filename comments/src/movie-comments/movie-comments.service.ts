@@ -37,8 +37,13 @@ export class MovieCommentsService {
         return await this.commentRepository.destroy({ where: { userId: id } });
     }
 
-    async update(dto: UpdateMovieCommentDto): Promise<MovieComment> {
+    async update(dto: UpdateMovieCommentDto): Promise<MovieComment | HttpException> {
         const comment: MovieComment = await this.commentRepository.findByPk(dto.id);
+        
+        if (!comment) {
+            return new HttpException(`Comment with "${dto.id}" ID not found`, HttpStatus.NOT_FOUND);
+        }
+
         return await comment.update(dto);
     }
 

@@ -11,53 +11,53 @@ export class MovieCommentsController {
 
     @MessagePattern('create.movie-comment')
     async create(@Payload() dto: CreateMovieCommentDto): Promise<MovieComment> {
-        return this.movieCommentService.create(dto);
+        return await this.movieCommentService.create(dto);
     }
 
     @MessagePattern('get.all.movie-comment')
     async getAll(): Promise<MovieComment[]> {
-        return this.movieCommentService.getAll();
+        return await this.movieCommentService.getAll();
     }
 
 
     @MessagePattern('get.movie-comment')
     async getOneById(@Payload() id: number): Promise<MovieComment> {
-        return this.movieCommentService.getOneById(id);
+        return await this.movieCommentService.getOneById(id);
     }
 
     @MessagePattern('get.all.movie-comment.user')
     async getAllByUser(@Payload() id: number): Promise<MovieComment[]> {
-        return this.movieCommentService.getAllByUser(id);
+        return await this.movieCommentService.getAllByUser(id);
     }
 
     @MessagePattern('get.all.movie-comment.movie')
     async getAllByMovie(@Payload() id: number): Promise<MovieComment[]> {
-        return this.movieCommentService.getAllByMovie(id);
+        return await this.movieCommentService.getAllByMovie(id);
     }
 
     @MessagePattern('remove.movie-comment.commentId')
     async removeByCommentId(@Payload() id: number): Promise<number> {
-        return this.movieCommentService.removeByCommentId(id);
+        return await this.movieCommentService.removeByCommentId(id);
     }
 
 
     @MessagePattern('remove.movie-comment.userId')
     async removeByUserId(@Payload() id: number): Promise<number> {
-        return this.movieCommentService.removeByUserId(id);
+        return await this.movieCommentService.removeByUserId(id);
     }
 
     @MessagePattern('update.movie-comment')
-    async update(@Payload() dto: UpdateMovieCommentDto): Promise<MovieComment> {
-        return this.movieCommentService.update(dto);
+    async update(@Payload() dto: UpdateMovieCommentDto): Promise<MovieComment | HttpException> {
+        return await this.movieCommentService.update(dto);
     }
 
     @MessagePattern('increase.rate.movie-comment')
     async increaseRateComment(@Payload() id: number): Promise<MovieComment | HttpException> {
-        return this.movieCommentService.increaseRate(id);
+        return await this.movieCommentService.increaseRate(id);
     }
 
     @MessagePattern('decrease.rate.movie-comment')
     async decreaseRateComment(@Payload() id: number): Promise<MovieComment | HttpException> {
-        return this.movieCommentService.decreaseRate(id);
+        return await this.movieCommentService.decreaseRate(id);
     }
 }

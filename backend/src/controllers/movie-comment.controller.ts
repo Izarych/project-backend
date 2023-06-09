@@ -54,12 +54,9 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateComment<T>(@Param('id') id: number, @Res() res: Response) : Promise<Response<T, Record<string, T>>>{
+    async increaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('increase.rate.movie-comment', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Понизить рейтинг комментария' })
@@ -84,12 +81,9 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateComment<T>(@Param('id') id: number, @Res() res: Response) : Promise<Response<T, Record<string, T>>>{
+    async decreaseRateComment<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('decrease.rate.movie-comment', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Получение всех комментариев' })
@@ -106,7 +100,7 @@ export class MovieCommentController {
         }
     })
     @Get()
-    async getAllComment() : Promise<Observable<IMovieComment[]>>{
+    async getAllComment(): Promise<Observable<IMovieComment[]>> {
         return this.commentService.send('get.all.movie-comment', '');
     }
 
@@ -130,7 +124,7 @@ export class MovieCommentController {
         }
     })
     @Get('/user/:id')
-    async getAllCommentByUser(@Param('id') id: number) : Promise<Observable<IMovieComment[]>>{
+    async getAllCommentByUser(@Param('id') id: number): Promise<Observable<IMovieComment[]>> {
         return this.commentService.send('get.all.movie-comment.user', id);
     }
 
@@ -178,7 +172,7 @@ export class MovieCommentController {
         }
     })
     @Get('/:id')
-    async getOneByIdComment(@Param('id') id: number) : Promise<Observable<IMovieComment>>{
+    async getOneByIdComment(@Param('id') id: number): Promise<Observable<IMovieComment>> {
         return this.commentService.send('get.movie-comment', id);
     }
 
@@ -208,8 +202,9 @@ export class MovieCommentController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateComment(@Param('id') id: number, @Body() dto: UpdateMovieCommentDto): Promise<Observable<IMovieComment>> {
-        return this.commentService.send('update.movie-comment', { id: id, comment: dto.comment });
+    async updateComment<T>(@Param('id') id: number, @Body() dto: UpdateMovieCommentDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('update.movie-comment', { id: id, comment: dto.comment }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление всех комментариев у пользователя' })
@@ -223,7 +218,7 @@ export class MovieCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    async removeCommentByUserId(@Param('id') id: number) : Promise<Observable<number>>{
+    async removeCommentByUserId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.movie-comment.userId', id);
     }
 
@@ -238,7 +233,15 @@ export class MovieCommentController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async removeCommentByCommentId(@Param('id') id: number) : Promise<Observable<number>>{
+    async removeCommentByCommentId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.movie-comment.commentId', id);
+    }
+
+
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 }

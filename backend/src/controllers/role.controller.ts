@@ -20,10 +20,7 @@ export class RoleController {
     @Post()
     async createRole<T>(@Body() dto: CreateRoleDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.userService.send('create.role', dto));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
 
@@ -43,5 +40,12 @@ export class RoleController {
     @Get('/:role')
     async getByValue(@Param('role') role: string): Promise<Observable<IRole>> {
         return this.userService.send('get.role.by.value', role);
+    }
+
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
     }
 }

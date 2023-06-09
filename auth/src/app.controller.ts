@@ -69,7 +69,7 @@ export class AppController {
   @Get('/sendlink/:email')
   async resendLink<T>(@Param('email') email: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      return res.json(this.appService.reSendActivationLink(email));
+      return res.json(await this.appService.reSendActivationLink(email));
     } catch (error) {
       return res.status(error.status).json(error)
     }
@@ -202,7 +202,7 @@ export class AppController {
   })
   @Get('/check/:email')
   async checkEmail(@Param('email') email: string): Promise<IUser> {
-    return this.appService.checkEmail(email);
+    return await this.appService.checkEmail(email);
   }
 
 
@@ -309,11 +309,11 @@ export class AppController {
   })
   @Post('/registrationAdmin')
   async registrationAdmin(@Body() dto: AuthDto): Promise<IUserWithTokens> {
-    return this.appService.registrationAdmin(dto);
+    return await this.appService.registrationAdmin(dto);
   }
 
   @EventPattern('hash_password')
   async hashPassword(@Payload() password: string): Promise<string> {
-    return this.appService.hashNewPassword(password);
+    return await this.appService.hashNewPassword(password);
   }
 }

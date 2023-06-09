@@ -12,56 +12,56 @@ export class UsersController {
 
   @MessagePattern('create.user')
   async create(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
-    return this.userService.createUser(userDto);
+    return await this.userService.createUser(userDto);
   }
 
   @MessagePattern('create.admin')
   async createAdmin(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
-    return this.userService.createAdmin(userDto);
+    return await this.userService.createAdmin(userDto);
   }
 
   @MessagePattern('activate.user')
   async activateUser(@Payload() link: string): Promise<User | BadRequestException> {
-    return this.userService.activateUser(link);
+    return await this.userService.activateUser(link);
   }
 
   @MessagePattern('get.all.users')
   async getAll(): Promise<User[]> {
-    return this.userService.getAllUsers();
+    return await this.userService.getAllUsers();
   }
 
   @MessagePattern('get.user.id')
   async getUserById(@Payload() id: number): Promise<User | HttpException> {
-    return this.userService.getUserById(id);
+    return await this.userService.getUserById(id);
   }
 
   @MessagePattern('get.user.email')
   async getUserByEmail(@Payload() email: string): Promise<User> {
-    return this.userService.getUserByEmail(email);
+    return await this.userService.getUserByEmail(email);
   }
 
   @MessagePattern('get.user.link')
   async getUserByLink(@Payload() link: string): Promise<User | HttpException> {
-    return this.userService.getUserByLink(link);
+    return await this.userService.getUserByLink(link);
   }
 
   @MessagePattern('add.role')
   async addRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
-    return this.userService.addRole(dto);
+    return await this.userService.addRole(dto);
   }
 
   @MessagePattern('remove.role')
   async removeRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
-    return this.userService.removeRole(dto);
+    return await this.userService.removeRole(dto);
   }
 
   @EventPattern('update.user')
   async update(@Payload() data: Partial<User>): Promise<User | NotFoundException> {
-    return this.userService.updateUser(data);
+    return await this.userService.updateUser(data);
   }
 
   @EventPattern('delete.user')
   async delete(@Payload() id: number): Promise<{ message: string } | HttpException> {
-    return this.userService.deleteUser(id);
+    return await this.userService.deleteUser(id);
   }
 }

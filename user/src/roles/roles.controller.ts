@@ -11,11 +11,11 @@ export class RolesController {
 
   @MessagePattern('create.role')
   async create(@Payload() roleDto: CreateRoleDto): Promise<Role | HttpException> {
-    return this.roleService.createRole(roleDto);
+    return await this.roleService.createRole(roleDto);
   }
 
   @MessagePattern('get.role.by.value')
   async getByValue(@Payload() value: string): Promise<Role> {
-    return this.roleService.getRoleByValue(value);
+    return await this.roleService.getRoleByValue(value);
   }
 }

@@ -27,10 +27,7 @@ export class ReviewController {
     @Get('/increase_rate/:id')
     async increaseRateReview<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('increase.rate.review', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Понижение рейтинга review' })
@@ -46,10 +43,7 @@ export class ReviewController {
     @Get('/decrease_rate/:id')
     async decreaseRateReview<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('decrease.rate.review', id));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Создание review' })
@@ -63,10 +57,7 @@ export class ReviewController {
     @Post()
     async createReview<T>(@Body() dto: CreateReviewDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
         const response = await firstValueFrom(this.commentService.send('create.review', dto));
-        if (response.status) {
-            return res.status(response.status).json(response);
-        }
-        return res.json(response);
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаляем все review пользователя' })
@@ -221,8 +212,15 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateReview(@Param('id') id: number, @Body() dto: UpdateReviewDto): Promise<Observable<IReview>> {
-        return this.commentService.send('update.review', { id: id, review: dto.review });
+    async updateReview<T>(@Param('id') id: number, @Body() dto: UpdateReviewDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('update.review', { id: id, review: dto.review }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
+    }
 }
