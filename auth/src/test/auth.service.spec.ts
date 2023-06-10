@@ -369,28 +369,6 @@ describe('AppService', () => {
         });
     });
 
-    describe('sendActivationLink', () => {
-        describe('when sendActivationLink called', () => {
-            let sendActivationLinkSpyOn;
-            const link = "testlink1";
-            const to = "test@mail.ru";
-            beforeEach(async () => {
-                jest.clearAllMocks();
-                sendActivationLinkSpyOn = jest.spyOn(appService, 'sendActivationLink');
-                response = await appService.sendActivationLink(to, link);
-            });
-
-            it('should call app service with link', async () => {
-                expect(sendActivationLinkSpyOn).toBeCalledWith(to, link);
-            });
-
-            it('should return undefined', async () => {
-                expect(response).toBeUndefined();
-            });
-        });
-    });
-
-
     describe('reSendActivationLink', () => {
         describe('when reSendActivationLink called', () => {
             let sendActivationLinkSpyOn;

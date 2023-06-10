@@ -113,7 +113,7 @@ export class AppService {
     return user;
   }
 
-  async sendActivationLink(to: string, link: string): Promise<void> {
+  private async sendActivationLink(to: string, link: string): Promise<void> {
     this.mailerService
       .sendMail({
         to: `${to}`,
