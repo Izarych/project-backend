@@ -105,12 +105,11 @@ export class AppService {
   async reSendActivationLink(email: string): Promise<IUser> {
     const link: string = uuid.v4();
     const user: IUser = await firstValueFrom(this.userService.send('update.user', { email, link }));
-
     if (!user.id) {
       throw new BadRequestException(user);
     }
 
-    await this.sendActivationLink(email, link);
+    //await this.sendActivationLink(email, link);
     return user;
   }
 
@@ -127,6 +126,7 @@ export class AppService {
   }
 
   private async generateToken(user: IUser): Promise<ITokens> {
+   
     const payload = { userId: user.id, email: user.email, isActivated: user.isActivated, roles: user.roles };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
@@ -145,6 +145,7 @@ export class AppService {
         }
       )
     ]);
+       
     return {
       accessToken,
       refreshToken
@@ -178,7 +179,8 @@ export class AppService {
       user: {
         id: user.id,
         email: user.email,
-        isActivated: user.isActivated
+        isActivated: user.isActivated,
+        roles: user.roles
       }
     };
   }

@@ -24,6 +24,7 @@ describe('AppController', () => {
             email: 'test@example.com',
             password: 'testHashedPassword',
             isActivated: false,
+            roles: []
         }
     };
 

@@ -46,11 +46,28 @@ export class UsersService {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.userRepository.findAll({ include: { all: true } });
+    return await this.userRepository.findAll({
+      include: [
+        {
+          model: Role,
+          attributes: ['id', 'value', 'description'],
+          through: { attributes: [] }
+        }
+      ]
+    });
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email }, include: { all: true } });
+    return await this.userRepository.findOne({
+      where: { email },
+      include: [
+        {
+          model: Role,
+          attributes: ['id', 'value', 'description'],
+          through: { attributes: [] }
+        }
+      ]
+    });
   }
 
   async getUserById(id: number): Promise<User | HttpException> {
@@ -74,23 +91,29 @@ export class UsersService {
     try {
       const user: User | HttpException = await this.getUserById(id);
 
-      if(user instanceof HttpException){
+      if (user instanceof HttpException) {
         throw new HttpException(user.getResponse(), user.getStatus());
       }
-      
+
       await this.userRepository.destroy({ where: { id } });
       return {
         message: 'Пользователь был удален'
       }
     } catch (error) {
-      
+
       return new HttpException(error.response, error.status, { cause: error });
     }
 
   }
 
   async updateUser(data: Partial<User>): Promise<User | NotFoundException> {
-    const user: User = await this.userRepository.findByPk(data.id);
+    let user: User;
+    if (data.id) {
+      user = await this.userRepository.findByPk(data.id);
+    } else if (data.email) {
+      user = await this.userRepository.findOne({ where: { email: data.email } });
+    }
+
     if (!user) {
       return new NotFoundException('User doesnt exist');
     }

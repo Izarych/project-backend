@@ -4,6 +4,7 @@ export interface IUserWithTokens {
     user: {
         id: number,
         email: string,
-        isActivated: boolean
+        isActivated: boolean,
+        roles: any
     }
 };

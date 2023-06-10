@@ -5,7 +5,6 @@ import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
 import { firstValueFrom, Observable } from "rxjs";
-import { AddRoleDto } from "src/dto/add-user-role.dto";
 import { UpdateUserDto } from "src/dto/update-user.dto";
 import { IUser } from "src/interfaces/IUser";
 
@@ -61,16 +60,18 @@ export class UserController {
         return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
-    @ApiOperation({ summary: 'Добавление роли пользователю по его id' })
+    @ApiOperation({ summary: 'Добавление роли пользователю по id пользователя и value роли' })
     @ApiParam({
         name: 'id',
         description: 'id пользователя',
         type: Number,
         example: 1
     })
-    @ApiBody({
-        description: 'Отправляем в body роль которую нужно добавить',
-        type: AddRoleDto
+    @ApiParam({
+        name: 'value',
+        description: 'Значение роли',
+        type: String,
+        example: 'ADMIN'
     })
     @ApiResponse({
         status: 201,
