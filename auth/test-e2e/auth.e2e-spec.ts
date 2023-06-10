@@ -395,4 +395,24 @@ describe('AuthController E2E Test', () => {
         });
     });
 
+    describe('GET /login_vk', () => {
+        const urlPath = "/login_vk";
+
+        it('should return 302 and {}', async () => {
+            const response = {};
+
+            return request(app.getHttpServer()).get(urlPath).expect(302).expect(response);
+        });
+    });
+
+    describe('GET /login_vk_success', () => {
+        const urlPath = "/login_vk_success?code";
+
+        it('should return any', async () => {
+            const response = {};
+
+            return request(app.getHttpServer()).get(urlPath).expect(500).expect(response);
+        });
+    });
+
 });
