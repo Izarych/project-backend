@@ -1,14 +1,23 @@
-import { Head, INestApplication, ValidationPipe } from "@nestjs/common"
+import { INestApplication, ValidationPipe } from "@nestjs/common"
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from 'supertest';
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Token } from "../src/token/token.model";
 import { AppModule } from "../src/app.module";
-
+import { ClientProxy, ClientsModule, MicroserviceOptions, Transport } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
+import { HttpModule } from "@nestjs/axios";
+import { JwtModule } from "@nestjs/jwt";
+import { ConfigModule } from "@nestjs/config";
+import { MailerModule } from "@nestjs-modules/mailer";
+import { AppController } from "../src/app.controller";
+import { AppService } from "../src/app.service";
+import { GoogleStrategy } from "../src/strategy/google.strategy";
 //npm test:e2e:dev -t 'should return any' 
 describe('AuthController E2E Test', () => {
     let app: INestApplication;
-    // let client: ClientProxy;
+    let sender: ClientProxy;
+    //let client: ClientProxy;
 
     const fullCorrectAuthDto = {
         email: "user3@mail.ru",
@@ -36,9 +45,46 @@ describe('AuthController E2E Test', () => {
     };
 
     beforeAll(async () => {
+        // const moduleFixture: TestingModule = await Test.createTestingModule({
+        //     imports: [
+        //         AppModule,
+        //         SequelizeModule.forRoot({
+        //             dialect: 'postgres',
+        //             host: process.env.POSTGRES_HOST,
+        //             port: Number(process.env.POSTGRES_PORT),
+        //             username: process.env.POSTGRES_USER,
+        //             password: process.env.POSTGRES_PASSWORD,
+        //             database: 'tokenstest',
+        //             models: [Token],
+        //             autoLoadModels: true,
+        //             synchronize: true
+        //         }),
+        //         ClientsModule.register([{
+        //             name: 'AUTH_SERVICE',
+        //             transport: Transport.RMQ,
+        //             options: {
+        //                 urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+        //                 queue: 'from_auth_queue_test',
+        //                 queueOptions: {
+        //                     durable: true
+        //                 }
+        //             }
+        //         }]),
+        //     ]
+        // }).compile();
+
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
-                AppModule,
+                HttpModule,
+                SequelizeModule.forFeature([Token]),
+                JwtModule.register({
+                    signOptions: {
+                        expiresIn: '24h'
+                    }
+                }),
+                ConfigModule.forRoot({
+                    envFilePath: `.${process.env.NODE_ENV}.env`
+                }),
                 SequelizeModule.forRoot({
                     dialect: 'postgres',
                     host: process.env.POSTGRES_HOST,
@@ -50,24 +96,113 @@ describe('AuthController E2E Test', () => {
                     autoLoadModels: true,
                     synchronize: true
                 }),
+                ClientsModule.register([{
+                    name: 'AUTH_SERVICE',
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+                        queue: 'from_auth_queue_test',
+                        //queue: 'from_auth_queue',   
+                        queueOptions: {
+                            durable: true
+                        }
+                    }
+                }]),
+                MailerModule.forRoot({
+                    transport: {
+                        host: process.env.MAIL_HOST,
+                        port: Number(process.env.MAIL_PORT),
+                        secure: false,
+                        auth: {
+                            user: process.env.MAIL_ACC,
+                            pass: process.env.MAIL_PASS_SPEC,
+                        },
+                    },
+                }),
+            ], 
+            controllers: [AppController],
+            providers: [AppService, GoogleStrategy],
+        }).compile();
+
+
+        const moduleFixtureSender: TestingModule = await Test.createTestingModule({
+            imports: [
+                ClientsModule.register([{
+                    name: 'TO_AUTH_SERVICE_TEST',
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+                        queue: 'auth_queue',
+                        queueOptions: {
+                            durable: true
+                        }
+                    }
+                }]),
             ]
         }).compile();
 
+
+        // const moduleFixtureClient: TestingModule = await Test.createTestingModule({
+        //     imports: [
+        //         SequelizeModule.forRoot({
+        //             dialect: 'postgres',
+        //             host: process.env.POSTGRES_HOST,
+        //             port: Number(process.env.POSTGRES_PORT),
+        //             username: process.env.POSTGRES_USER,
+        //             password: process.env.POSTGRES_PASSWORD,
+        //             database: 'userstest',
+        //             models: [],
+        //             autoLoadModels: true
+        //         }),
+        //     ]
+        // }).compile();
+
+        //client = moduleFixtureClient.createNestApplication();
+
+        // client.connectMicroservice<MicroserviceOptions>({
+        //     transport: Transport.RMQ,
+        //     options: {
+        //         urls: [`amqp://localhost:5672`],
+        //         queue: 'from_auth_queue_test',
+        //         queueOptions: {
+        //             durable: true,
+        //         },
+        //     },
+        // });
+
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe());
+        app.connectMicroservice<MicroserviceOptions>({
+            transport: Transport.RMQ,
+            options: {
+                urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
+                queue: 'auth_queue',
+                queueOptions: {
+                    durable: true,
+                },
+            },
+        });
         await app.startAllMicroservices();
         await app.init();
+        sender = moduleFixtureSender.get<ClientProxy>('TO_AUTH_SERVICE_TEST');
+        await sender.connect();
+        // client = moduleFixture.get<ClientProxy>('AUTH_SERVICE');
+        // await client.connect();
+
+
     });
 
     afterAll(async () => {
         await app.close();
+        await sender.close();
+        //await client.close();
     })
 
     describe('GET /check/:email', () => {
         const urlPathWithRightEmail = "/check/user3@mail.ru";
         const urlPathWithWrongEmail = "/check/anywrongemail3@mail.ru";
 
-        it('should return user cuz user exists', async () => {
+        it('should return any user cuz user exists', async () => {
             const response = {
                 id: 1,
                 email: 'user3@mail.ru',
@@ -82,6 +217,8 @@ describe('AuthController E2E Test', () => {
                     { id: 2, value: 'Admin', description: 'Admin' }
                 ]
             };
+            console.log(await (await request(app.getHttpServer()).get(urlPathWithRightEmail)).body);
+
 
             return request(app.getHttpServer()).get(urlPathWithRightEmail).expect(200).expect(response);
         });
@@ -406,12 +543,49 @@ describe('AuthController E2E Test', () => {
     });
 
     describe('GET /login_vk_success', () => {
-        const urlPath = "/login_vk_success?code";
-
-        it('should return any', async () => {
-            const response = {};
+        const urlPath = "/login_vk_success?code=something";
+        it('should return 500 cuz cant redirect to not started server ##TOFIX', async () => {
+            const response = { statusCode: 500, message: 'Internal server error' };
 
             return request(app.getHttpServer()).get(urlPath).expect(500).expect(response);
+        });
+    });
+
+    describe('POST /login/vk', () => {
+        const urlPath = "/login/vk";
+        const loginVkBody = { code: "any" };
+        it('should return 422 cuz wrong vk token ???', async () => {
+            const response = {
+                statusCode: 422,
+                message: 'Wrong VK code',
+                error: 'Unprocessable Entity'
+            };
+            return request(app.getHttpServer()).post(urlPath).send(loginVkBody).expect(422).expect(response);
+        });
+    });
+
+
+    describe('GET /login_gmail', () => {
+        const urlPath = "/login_gmail";
+        it('should return 302 and {} ???', async () => {
+            const response = {};
+            return request(app.getHttpServer()).get(urlPath).expect(302).expect(response);
+        });
+    });
+
+    describe('GET /login_gmail_success', () => {
+        const urlPath = "/login_gmail_success";
+        it('should return 302 and {} ##TOFIX', async () => {
+            const response = {};
+            return request(app.getHttpServer()).get(urlPath).expect(302).expect(response);
+        });
+    });
+
+    describe('@EventPattern("hash_password")', () => {
+        it('should return any hashed password', async () => {
+            const password = "testpass";
+            const request = await firstValueFrom(sender.send('hash_password', password));
+            return expect(request).not.toEqual(password);
         });
     });
 

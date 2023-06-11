@@ -180,6 +180,8 @@ export class AppController {
 
     try {
       authData = await this.appService.getVkToken(body.code);
+
+
     } catch (err) {
       throw new UnprocessableEntityException("Wrong VK code");
     }

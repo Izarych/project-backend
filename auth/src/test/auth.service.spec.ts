@@ -337,6 +337,10 @@ describe('AppService', () => {
             it('should return new password', async () => {
                 expect(response).toBe<string>;
             });
+
+            it('new password shouldnt equal old', async () => {
+                expect(response).not.toEqual(testPassword);
+            });
         });
     });
 
