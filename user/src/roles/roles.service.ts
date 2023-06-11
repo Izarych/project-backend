@@ -10,11 +10,7 @@ export class RolesService {
   }
 
   async createRole(roleDto: CreateRoleDto): Promise<Role> {
-    try {
       return await this.roleRepository.create(roleDto);
-    } catch (error) {
-      throw new HttpException('Role exists', HttpStatus.BAD_REQUEST);
-    }
   }
 
   async getRoleByValue(value: string): Promise<Role> {
