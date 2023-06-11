@@ -6,4 +6,4 @@ export interface IUser {
     isActivated: boolean;
     activationLink: string;
     roles: any;
-};
+}

@@ -7,4 +7,4 @@ export interface IUserWithTokens {
         isActivated: boolean,
         roles: any
     }
-};
+}

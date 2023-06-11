@@ -9,9 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
-import { IUserWithTokens } from './interfaces/IUserWithTokens';
-import { ITokens } from './interfaces/ITokens';
-import { IUser } from './interfaces/IUser';
+import { IUserWithTokens } from './interfaces/IuserWithTokens';
+import { ITokens } from './interfaces/Itokens';
+import { IUser } from './interfaces/Iuser';
 
 @Injectable()
 export class AppService {

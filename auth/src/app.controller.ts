@@ -19,8 +19,8 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { IUserWithTokens } from './interfaces/IUserWithTokens';
-import { IUser } from './interfaces/IUser';
+import { IUserWithTokens } from './interfaces/IuserWithTokens';
+import { IUser } from './interfaces/Iuser';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @ApiTags('Authorization')
