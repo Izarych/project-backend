@@ -10,8 +10,6 @@ import { AppModule } from "../src/app.module";
 describe('AuthController E2E Test', () => {
     let app: INestApplication;
     let sender: ClientProxy;
-    let client: INestApplication;
-
     const fullCorrectAuthDto = {
         email: "user3@mail.ru",
         password: "user1"
