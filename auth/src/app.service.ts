@@ -80,10 +80,11 @@ export class AppService {
     const link: string = uuid.v4();
     const admin: IUser = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
 
+    
     if (!admin.id) {
       throw new BadRequestException(admin);
     }
-
+    // await this.sendActivationLink(dto.email, link);
     return await this.generateAndSaveTokenAndPayload(admin);
   }
 
@@ -126,7 +127,7 @@ export class AppService {
   }
 
   private async generateToken(user: IUser): Promise<ITokens> {
-   
+
     const payload = { userId: user.id, email: user.email, isActivated: user.isActivated, roles: user.roles };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
@@ -145,7 +146,7 @@ export class AppService {
         }
       )
     ]);
-       
+
     return {
       accessToken,
       refreshToken

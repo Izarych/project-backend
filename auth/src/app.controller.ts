@@ -310,8 +310,14 @@ export class AppController {
     }
   })
   @Post('/registrationAdmin')
-  async registrationAdmin(@Body() dto: AuthDto): Promise<IUserWithTokens> {
-    return await this.appService.registrationAdmin(dto);
+  async registrationAdmin<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+    try {
+      const userData: IUserWithTokens = await this.appService.registrationAdmin(dto);
+      res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      return res.json(userData);
+    } catch (error) {
+      return res.status(error.status).json(error)
+    }
   }
 
   @EventPattern('hash_password')
