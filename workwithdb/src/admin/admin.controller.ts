@@ -4,8 +4,8 @@ import { UpdateMovieDto } from '../movie/dto/update-movie.dto';
 import { UpdateGenreDto } from '../genres/dto/update-genre.dto';
 import { MovieService } from '../movie/movie.service';
 import { ApiOperation, ApiParam, ApiResponse, ApiBody } from "@nestjs/swagger";
-import { Genres } from 'src/genres/genres.model';
-import { Movie } from 'src/movie/movie.model';
+import { Genres } from '../genres/genres.model';
+import { Movie } from '../movie/movie.model';
 
 @Controller('admin')
 export class AdminController {
