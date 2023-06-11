@@ -5,18 +5,12 @@ import { SequelizeModule } from "@nestjs/sequelize";
 import { Token } from "../src/token/token.model";
 import { ClientProxy, ClientsModule, MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
-import { HttpModule } from "@nestjs/axios";
-import { JwtModule } from "@nestjs/jwt";
-import { ConfigModule } from "@nestjs/config";
-import { MailerModule } from "@nestjs-modules/mailer";
-import { AppController } from "../src/app.controller";
-import { AppService } from "../src/app.service";
-import { GoogleStrategy } from "../src/strategy/google.strategy";
+import { AppModule } from "../src/app.module";
 //npm test:e2e:dev -t 'should return any' 
 describe('AuthController E2E Test', () => {
     let app: INestApplication;
     let sender: ClientProxy;
-    //let client: ClientProxy;
+    let client: INestApplication;
 
     const fullCorrectAuthDto = {
         email: "user3@mail.ru",
@@ -44,46 +38,9 @@ describe('AuthController E2E Test', () => {
     };
 
     beforeAll(async () => {
-        // const moduleFixture: TestingModule = await Test.createTestingModule({
-        //     imports: [
-        //         AppModule,
-        //         SequelizeModule.forRoot({
-        //             dialect: 'postgres',
-        //             host: process.env.POSTGRES_HOST,
-        //             port: Number(process.env.POSTGRES_PORT),
-        //             username: process.env.POSTGRES_USER,
-        //             password: process.env.POSTGRES_PASSWORD,
-        //             database: 'tokenstest',
-        //             models: [Token],
-        //             autoLoadModels: true,
-        //             synchronize: true
-        //         }),
-        //         ClientsModule.register([{
-        //             name: 'AUTH_SERVICE',
-        //             transport: Transport.RMQ,
-        //             options: {
-        //                 urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
-        //                 queue: 'from_auth_queue_test',
-        //                 queueOptions: {
-        //                     durable: true
-        //                 }
-        //             }
-        //         }]),
-        //     ]
-        // }).compile();
-
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
-                HttpModule,
-                SequelizeModule.forFeature([Token]),
-                JwtModule.register({
-                    signOptions: {
-                        expiresIn: '24h'
-                    }
-                }),
-                ConfigModule.forRoot({
-                    envFilePath: `.${process.env.NODE_ENV}.env`
-                }),
+                AppModule,
                 SequelizeModule.forRoot({
                     dialect: 'postgres',
                     host: process.env.POSTGRES_HOST,
@@ -94,33 +51,8 @@ describe('AuthController E2E Test', () => {
                     models: [Token],
                     autoLoadModels: true,
                     synchronize: true
-                }),
-                ClientsModule.register([{
-                    name: 'AUTH_SERVICE',
-                    transport: Transport.RMQ,
-                    options: {
-                        urls: [`amqp://${process.env.RABBITMQ_HOST}:5672`],
-                        queue: 'from_auth_queue_test',
-                        //queue: 'from_auth_queue',   
-                        queueOptions: {
-                            durable: true
-                        }
-                    }
-                }]),
-                MailerModule.forRoot({
-                    transport: {
-                        host: process.env.MAIL_HOST,
-                        port: Number(process.env.MAIL_PORT),
-                        secure: false,
-                        auth: {
-                            user: process.env.MAIL_ACC,
-                            pass: process.env.MAIL_PASS_SPEC,
-                        },
-                    },
-                }),
-            ], 
-            controllers: [AppController],
-            providers: [AppService, GoogleStrategy],
+                })
+            ]
         }).compile();
 
 
@@ -139,36 +71,6 @@ describe('AuthController E2E Test', () => {
                 }]),
             ]
         }).compile();
-
-
-        // const moduleFixtureClient: TestingModule = await Test.createTestingModule({
-        //     imports: [
-        //         SequelizeModule.forRoot({
-        //             dialect: 'postgres',
-        //             host: process.env.POSTGRES_HOST,
-        //             port: Number(process.env.POSTGRES_PORT),
-        //             username: process.env.POSTGRES_USER,
-        //             password: process.env.POSTGRES_PASSWORD,
-        //             database: 'userstest',
-        //             models: [],
-        //             autoLoadModels: true
-        //         }),
-        //     ]
-        // }).compile();
-
-        //client = moduleFixtureClient.createNestApplication();
-
-        // client.connectMicroservice<MicroserviceOptions>({
-        //     transport: Transport.RMQ,
-        //     options: {
-        //         urls: [`amqp://localhost:5672`],
-        //         queue: 'from_auth_queue_test',
-        //         queueOptions: {
-        //             durable: true,
-        //         },
-        //     },
-        // });
-
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe());
         app.connectMicroservice<MicroserviceOptions>({
@@ -185,8 +87,6 @@ describe('AuthController E2E Test', () => {
         await app.init();
         sender = moduleFixtureSender.get<ClientProxy>('TO_AUTH_SERVICE_TEST');
         await sender.connect();
-        // client = moduleFixture.get<ClientProxy>('AUTH_SERVICE');
-        // await client.connect();
 
 
     });
@@ -194,7 +94,6 @@ describe('AuthController E2E Test', () => {
     afterAll(async () => {
         await app.close();
         await sender.close();
-        //await client.close();
     })
 
     describe('GET /check/:email', () => {
