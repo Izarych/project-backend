@@ -22,7 +22,7 @@ export class UsersService {
     const user: User = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
-    return user;
+    return await this.getUserByEmail(user.email);
   }
 
   async createAdmin(userDto: CreateUserDto): Promise<User | BadRequestException> {
@@ -33,7 +33,7 @@ export class UsersService {
     const user: User = await this.userRepository.create(userDto);
     await user.$set('roles', [role.id]);
     user.roles = [role];
-    return user;
+    return await this.getUserByEmail(user.email);
   }
 
   async activateUser(link: string): Promise<User | BadRequestException> {
