@@ -3,7 +3,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import * as request from 'supertest';
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Token } from "../src/token/token.model";
-import { AppModule } from "../src/app.module";
 import { ClientProxy, ClientsModule, MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
 import { HttpModule } from "@nestjs/axios";
@@ -582,7 +581,7 @@ describe('AuthController E2E Test', () => {
     });
 
     describe('@EventPattern("hash_password")', () => {
-        it('should return any hashed password', async () => {
+        it('should return hashed password', async () => {
             const password = "testpass";
             const request = await firstValueFrom(sender.send('hash_password', password));
             return expect(request).not.toEqual(password);
