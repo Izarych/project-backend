@@ -52,8 +52,6 @@ describe('AppService', () => {
             switch (command) {
                 case 'get.user.email':
                     return of(userRepository.find(user => user.email === value));
-                case 'get.user.link':
-                    return of(userRepository.find(user => user.activationLink === value));
                 case 'create.user':
                     const user = {
                         id: 3,
@@ -224,33 +222,6 @@ describe('AppService', () => {
         });
     });
 
-    describe('Check link', () => {
-        describe('when check link called', () => {
-            let checkLinkSpyOn;
-            const rightLink = "testlink2";
-            const wrongLink = "any";
-            beforeEach(async () => {
-                jest.clearAllMocks();
-                checkLinkSpyOn = jest.spyOn(appService, 'checkLink');
-            });
-
-            it('should call app service with link', async () => {
-                response = await appService.checkLink(rightLink);
-                expect(checkLinkSpyOn).toBeCalledWith(rightLink);
-            });
-
-            it('should return user if user in data base', async () => {
-                response = await appService.checkLink(rightLink);
-                expect(response).toEqual(userRepository[1]);
-            });
-
-            it('should return undefinded', async () => {
-                response = await appService.checkLink(wrongLink);
-                expect(response).toBeUndefined();
-            });
-        });
-    });
-
     describe('Login', () => {
         describe('when login called', () => {
             let loginSpyOn;
@@ -366,6 +337,10 @@ describe('AppService', () => {
             it('should return new password', async () => {
                 expect(response).toBe<string>;
             });
+
+            it('new password shouldnt equal old', async () => {
+                expect(response).not.toEqual(testPassword);
+            });
         });
     });
 
@@ -397,28 +372,6 @@ describe('AppService', () => {
 
         });
     });
-
-    describe('sendActivationLink', () => {
-        describe('when sendActivationLink called', () => {
-            let sendActivationLinkSpyOn;
-            const link = "testlink1";
-            const to = "test@mail.ru";
-            beforeEach(async () => {
-                jest.clearAllMocks();
-                sendActivationLinkSpyOn = jest.spyOn(appService, 'sendActivationLink');
-                response = await appService.sendActivationLink(to, link);
-            });
-
-            it('should call app service with link', async () => {
-                expect(sendActivationLinkSpyOn).toBeCalledWith(to, link);
-            });
-
-            it('should return undefined', async () => {
-                expect(response).toBeUndefined();
-            });
-        });
-    });
-
 
     describe('reSendActivationLink', () => {
         describe('when reSendActivationLink called', () => {

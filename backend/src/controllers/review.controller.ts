@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
+import { firstValueFrom, Observable } from "rxjs";
 import { CreateReviewDto } from "src/dto/create-review.dto";
 import { UpdateReviewDto } from "src/dto/update-review.dto";
+import { IReview } from "src/interfaces/IReview";
 
 @ApiTags('Gateway App. Reviews')
 @Controller('review')
@@ -22,8 +25,9 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/increase_rate/:id')
-    async increaseRateReview(@Param('id') id: number) {
-        return this.commentService.send('increase.rate.review', id);
+    async increaseRateReview<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('increase.rate.review', id));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Понижение рейтинга review' })
@@ -37,8 +41,9 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/decrease_rate/:id')
-    async decreaseRateReview(@Param('id') id: number) {
-        return this.commentService.send('decrease.rate.review', id);
+    async decreaseRateReview<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('decrease.rate.review', id));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Создание review' })
@@ -50,8 +55,9 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Post()
-    async createReview(@Body() dto: CreateReviewDto) {
-        return this.commentService.send('create.review', dto);
+    async createReview<T>(@Body() dto: CreateReviewDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('create.review', dto));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаляем все review пользователя' })
@@ -65,7 +71,7 @@ export class ReviewController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/user/:id')
-    async removeReviewByUserId(@Param('id') id: number) {
+    async removeReviewByUserId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.review.userId', id);
     }
 
@@ -80,7 +86,7 @@ export class ReviewController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async removeReviewByReviewId(@Param('id') id: number) {
+    async removeReviewByReviewId(@Param('id') id: number): Promise<Observable<number>> {
         return this.commentService.send('remove.review.reviewId', id);
     }
 
@@ -100,7 +106,7 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get()
-    async getAllReview() {
+    async getAllReview(): Promise<Observable<IReview[]>> {
         return this.commentService.send('get.all.review', '');
     }
 
@@ -125,7 +131,7 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/user/:id')
-    async getAllReviewByUserId(@Param('id') id: number) {
+    async getAllReviewByUserId(@Param('id') id: number): Promise<Observable<IReview[]>> {
         return this.commentService.send('get.all.review.user', id);
     }
 
@@ -150,7 +156,7 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/movie/:id')
-    async getAllReviewByMovieId(@Param('id') id: number) {
+    async getAllReviewByMovieId(@Param('id') id: number): Promise<Observable<IReview[]>> {
         return this.commentService.send('get.all.review.movie', id);
     }
 
@@ -176,7 +182,7 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Get('/:id')
-    async getOneReviewById(@Param('id') id: number) {
+    async getOneReviewById(@Param('id') id: number): Promise<Observable<IReview>> {
         return this.commentService.send('get.review', id);
     }
 
@@ -206,8 +212,15 @@ export class ReviewController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updateReview(@Param('id') id: number, @Body() dto: UpdateReviewDto) {
-        return this.commentService.send('update.review', { id: id, review: dto.review });
+    async updateReview<T>(@Param('id') id: number, @Body() dto: UpdateReviewDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.commentService.send('update.review', { id: id, review: dto.review }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
+    }
 }

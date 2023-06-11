@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { Roles } from "guard/roles-auth.decorator";
 import { RolesGuard } from "guard/roles.guard";
-import { firstValueFrom } from "rxjs";
-import { AddRoleDto } from "src/dto/add-user-role.dto";
+import { firstValueFrom, Observable } from "rxjs";
 import { UpdateUserDto } from "src/dto/update-user.dto";
+import { IUser } from "src/interfaces/IUser";
 
 @ApiTags('Gateway App. Users')
 @Controller('user')
@@ -30,7 +31,7 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Get()
-    async getAllUsers() {
+    async getAllUsers(): Promise<Observable<IUser[]>> {
         return this.userService.send('get.all.users', '');
     }
 
@@ -54,20 +55,23 @@ export class UserController {
         }
     })
     @Get('/:id')
-    async getOneByIdUser(@Param('id') id: number) {
-        return this.userService.send('get.user.id', id);
+    async getOneByIdUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.userService.send('get.user.id', id));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
-    @ApiOperation({ summary: 'Добавление роли пользователю по его id' })
+    @ApiOperation({ summary: 'Добавление роли пользователю по id пользователя и value роли' })
     @ApiParam({
         name: 'id',
         description: 'id пользователя',
         type: Number,
         example: 1
     })
-    @ApiBody({
-        description: 'Отправляем в body роль которую нужно добавить',
-        type: AddRoleDto
+    @ApiParam({
+        name: 'value',
+        description: 'Значение роли',
+        type: String,
+        example: 'ADMIN'
     })
     @ApiResponse({
         status: 201,
@@ -90,9 +94,10 @@ export class UserController {
     })
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
-    @Post('/addrole/:id')
-    addRole(@Param('id') userId: number, @Body() dto: AddRoleDto) {
-        return this.userService.send('add.role', { userId, value: dto.value });
+    @Get('/addrole/:id/:value')
+    async addRole<T>(@Param('id') userId: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.userService.send('add.role', { userId, value: roleValue }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление роли у пользователя' })
@@ -120,8 +125,9 @@ export class UserController {
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/removerole/:id/:value')
-    async removeRole(@Param('id') id: number, @Param('value') roleValue: string) {
-        return this.userService.send('remove.role', { userId: id, value: roleValue });
+    async removeRole<T>(@Param('id') id: number, @Param('value') roleValue: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.userService.send('remove.role', { userId: id, value: roleValue }));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Обновление пользователя' })
@@ -137,12 +143,16 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Put('/:id')
-    async updatePassword(@Param('id') id: number, @Body() dto: UpdateUserDto) {
+    async updateUser<T>(@Param('id') id: number, @Body() dto: UpdateUserDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        let response = null;
         if (dto.password) {
             const hashPassword = await firstValueFrom(this.authService.send('hash_password', dto.password));
-            return this.userService.send('update.user', { ...dto, id: id, password: hashPassword })
+            response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id, password: hashPassword }));
+        } else {
+            response = await firstValueFrom(this.userService.send('update.user', { ...dto, id: id }));
         }
-        return this.userService.send('update.user', { ...dto, id: id });
+
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
     @ApiOperation({ summary: 'Удаление пользователя' })
@@ -159,9 +169,15 @@ export class UserController {
     @Roles('USER', 'ADMIN')
     @UseGuards(RolesGuard)
     @Delete('/:id')
-    async deleteUser(@Param('id') id: number) {
-        return this.userService.send('delete.user', id);
+    async deleteUser<T>(@Param('id') id: number, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+        const response = await firstValueFrom(this.userService.send('delete.user', id));
+        return await this.checkIfErrorCameBackAndSendResponse(response, res);
     }
 
-
+    private async checkIfErrorCameBackAndSendResponse(response: any, res: Response) {
+        if (response.status) {
+            return res.status(response.status).json(response);
+        }
+        return res.json(response);
+    }
 }

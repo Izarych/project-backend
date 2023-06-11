@@ -10,20 +10,18 @@ export class JwtAuthGuard implements CanActivate {
         const req = context.switchToHttp().getRequest();
         try {
             const authHeader = req.headers.authorization;
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TOKEN");
-            console.log(authHeader);
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TOKEN");
+            if (!authHeader) {
+                throw new UnauthorizedException({ message: 'No auth 1' });
+            }
             const bearer = authHeader.split(' ')[0];
             const token = authHeader.split(' ')[1];
             if (bearer !== 'Bearer' || !token) {
-                throw new UnauthorizedException({ message: 'No auth 1' });
+                throw new UnauthorizedException({ message: 'No auth 2' });
             }
             req.user = this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
             return true;
         } catch (error) {
-            console.log(error);
-
-            throw new UnauthorizedException({ message: 'No auth 2' });
+            throw new UnauthorizedException(error.response, error.status);
         }
     }
 

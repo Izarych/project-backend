@@ -20,7 +20,7 @@ export class MovieController {
     })
     @Get()
     async getMovies(): Promise<Movie[]> {
-        return this.movieService.getAllMovies();
+        return await this.movieService.getAllMovies();
     }
 
     @ApiOperation({ summary: 'Получение фильмов по возрастному ограничению' })
@@ -37,7 +37,7 @@ export class MovieController {
     })
     @Get('/age/:ageRate')
     async getMovieByAgeRate(@Param('ageRate') ageRate: number): Promise<Movie[]> {
-        return this.movieService.getMovieByAgeRate(ageRate);
+        return await this.movieService.getMovieByAgeRate(ageRate);
     }
 
     @ApiOperation({ summary: 'Получение фильмов по стране' })
@@ -54,7 +54,7 @@ export class MovieController {
     })
     @Get('/country/:countries')
     async getMovieByCountry(@Param('countries') countries: string): Promise<Movie[]> {
-        return this.movieService.getMovieByCountry(countries);
+        return await this.movieService.getMovieByCountry(countries);
     }
 
     @ApiOperation({ summary: 'Получение фильмов по жанру' })
@@ -71,7 +71,7 @@ export class MovieController {
     })
     @Get('/genre/:genre')
     async getMovieByGenre(@Param('genre') genre: string): Promise<Movie[]> {
-        return this.movieService.getMovieByGenre(genre);
+        return await this.movieService.getMovieByGenre(genre);
     }
 
     @ApiOperation({ summary: 'Получение фильмов по рейтингу' })
@@ -88,7 +88,7 @@ export class MovieController {
     })
     @Get('/rate/:rate')
     async getMovieByRate(@Param('rate') rate: number): Promise<Movie[]> {
-        return this.movieService.getMovieByRate(rate)
+        return await this.movieService.getMovieByRate(rate)
     }
 
     @ApiOperation({ summary: 'Получение фильмов по количеству оценок' })
@@ -105,7 +105,7 @@ export class MovieController {
     })
     @Get('/ratequan/:ratequan')
     async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number): Promise<Movie[]> {
-        return this.movieService.getMovieByRateQuantity(rateQuantity)
+        return await this.movieService.getMovieByRateQuantity(rateQuantity)
     }
 
     @ApiOperation({ summary: 'Получение фильмов по человеку' })
@@ -122,7 +122,7 @@ export class MovieController {
     })
     @Get('/human/:fullName')
     async getMovieByHuman(@Param('fullName') fullName: string): Promise<Movie[]> {
-        return this.movieService.getMovieByHuman(fullName)
+        return await this.movieService.getMovieByHuman(fullName)
     }
 
     @ApiOperation({ summary: 'Получение фильма по id' })
@@ -139,7 +139,7 @@ export class MovieController {
     })
     @Get('/:id')
     async getMovie(@Param('id') id: number): Promise<Movie> {
-        return this.movieService.getMovie(id);
+        return await this.movieService.getMovie(id);
     }
 
     @ApiOperation({ summary: 'Получение всех людей фильма' })
@@ -156,7 +156,7 @@ export class MovieController {
     })
     @Get('/:id/people')
     async getMoviePeople(@Param('id') film_id: number): Promise<People[]> {
-        return this.movieService.getMoviePeople(film_id);
+        return await this.movieService.getMoviePeople(film_id);
     }
 
     @ApiOperation({ summary: 'Получение жанров фильма' })
@@ -173,7 +173,7 @@ export class MovieController {
     })
     @Get('/:id/genres')
     async getMovieGenres(@Param('id') film_id: number): Promise<Genres[]> {
-        return this.movieService.getMovieGenres(film_id);
+        return await this.movieService.getMovieGenres(film_id);
     }
 
     @ApiOperation({ summary: 'Получение фильма по его названию' })
@@ -190,11 +190,11 @@ export class MovieController {
     })
     @Get('/title/:title')
     async getMovieByTitle(@Param('title') title: string): Promise<Movie> {
-        return this.movieService.getMovieByTitle(title);
+        return await this.movieService.getMovieByTitle(title);
     }
 
     @EventPattern('create_movie')
     async createMovie(@Payload() data: CreateMovieDto): Promise<Movie> {
-        return this.movieService.createMovie(data);
+        return await this.movieService.createMovie(data);
     }
 }

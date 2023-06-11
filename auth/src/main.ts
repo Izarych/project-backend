@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import {MicroserviceOptions, Transport} from "@nestjs/microservices";
-import {INestApplication} from "@nestjs/common";
+import {INestApplication, ValidationPipe} from "@nestjs/common";
 
 async function bootstrap() {
   const app : INestApplication = await NestFactory.create(AppModule);
@@ -14,6 +14,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 5002;
   const host = configService.get('RABBITMQ_HOST');
+  app.useGlobalPipes(new ValidationPipe());
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {

@@ -4,8 +4,8 @@ import { UpdateMovieDto } from '../movie/dto/update-movie.dto';
 import { UpdateGenreDto } from '../genres/dto/update-genre.dto';
 import { MovieService } from '../movie/movie.service';
 import { ApiOperation, ApiParam, ApiResponse, ApiBody } from "@nestjs/swagger";
-import { Genres } from 'src/genres/genres.model';
-import { Movie } from 'src/movie/movie.model';
+import { Genres } from '../genres/genres.model';
+import { Movie } from '../movie/movie.model';
 
 @Controller('admin')
 export class AdminController {
@@ -21,8 +21,8 @@ export class AdminController {
     type: Genres
   })
   @Get('/genres')
-  async getGenres() : Promise<Genres[]> {
-    return this.adminService.getAllGenres();
+  async getGenres(): Promise<Genres[]> {
+    return await this.adminService.getAllGenres();
   }
 
   @ApiOperation({ summary: 'Получение жанра по ID' })
@@ -38,8 +38,8 @@ export class AdminController {
     type: Genres
   })
   @Get('/genre/:id')
-  async getGenre(@Param('id') id: number) : Promise<Genres> {
-    return this.adminService.getGenre(id);
+  async getGenre(@Param('id') id: number): Promise<Genres> {
+    return await this.adminService.getGenre(id);
   }
 
 
@@ -54,8 +54,8 @@ export class AdminController {
     type: UpdateGenreDto
   })
   @Put('/genre')
-  async updateGenre(@Body() dto: UpdateGenreDto) : Promise<Genres> {
-    return this.adminService.updateGenre(dto);
+  async updateGenre(@Body() dto: UpdateGenreDto): Promise<Genres> {
+    return await this.adminService.updateGenre(dto);
   }
 
 
@@ -66,8 +66,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movies')
-  async getMovies() : Promise<Movie[]> {
-    return this.movieService.getAllMovies();
+  async getMovies(): Promise<Movie[]> {
+    return await this.movieService.getAllMovies();
   }
 
   @ApiOperation({ summary: 'Получение фильм по ID' })
@@ -83,8 +83,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/:id')
-  async getMovie(@Param('id') id: number) : Promise<Movie> {
-    return this.movieService.getMovie(id);
+  async getMovie(@Param('id') id: number): Promise<Movie> {
+    return await this.movieService.getMovie(id);
   }
 
   @ApiOperation({ summary: 'Получение фильмов по возрастному рейтингу' })
@@ -100,8 +100,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/age/:ageRate')
-  async getMovieByAgeRate(@Param('ageRate') ageRate: number) : Promise<Movie[]> {
-    return this.movieService.getMovieByAgeRate(ageRate);
+  async getMovieByAgeRate(@Param('ageRate') ageRate: number): Promise<Movie[]> {
+    return await this.movieService.getMovieByAgeRate(ageRate);
   }
 
   @ApiOperation({ summary: 'Получение фильмов по странам' })
@@ -117,8 +117,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/country/:countries')
-  async getMovieByCountry(@Param('countries') countries: string) : Promise<Movie[]> {
-    return this.movieService.getMovieByCountry(countries);
+  async getMovieByCountry(@Param('countries') countries: string): Promise<Movie[]> {
+    return await this.movieService.getMovieByCountry(countries);
   }
 
   @ApiOperation({ summary: 'Получение фильмов по жанрам' })
@@ -134,8 +134,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/genre/:genre')
-  async getMovieByGenre(@Param('genre') genre: string) : Promise<Movie[]> {
-    return this.movieService.getMovieByGenre(genre);
+  async getMovieByGenre(@Param('genre') genre: string): Promise<Movie[]> {
+    return await this.movieService.getMovieByGenre(genre);
   }
 
   @ApiOperation({ summary: 'Получение фильмов по рейтингу' })
@@ -151,8 +151,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/rate/:rate')
-  async getMovieByRate(@Param('rate') rate: number) : Promise<Movie[]> {
-    return this.movieService.getMovieByRate(rate)
+  async getMovieByRate(@Param('rate') rate: number): Promise<Movie[]> {
+    return await this.movieService.getMovieByRate(rate)
   }
 
   @ApiOperation({ summary: 'Получение фильмов по количеству оценок' })
@@ -168,8 +168,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/ratequan/:ratequan')
-  async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number) : Promise<Movie[]> {
-    return this.movieService.getMovieByRateQuantity(rateQuantity)
+  async getMovieByRateQuantity(@Param('ratequan') rateQuantity: number): Promise<Movie[]> {
+    return await this.movieService.getMovieByRateQuantity(rateQuantity)
   }
 
   // @ApiOperation({ summary: 'Получение фильмов по полному имени человека' })
@@ -186,7 +186,7 @@ export class AdminController {
   // })
   // @Get('/human/:fullName')
   // async getMovieByHuman(@Param('fullName') fullName: string) : Promise<Movie[]> {
-  //   return this.movieService.getMovieByHuman(fullName)
+  //   return await this.movieService.getMovieByHuman(fullName)
   // }
 
   // @ApiOperation({ summary: 'Получение всех людей участвовавших в фильме' })
@@ -203,7 +203,7 @@ export class AdminController {
   // })
   // @Get('/movie/:id/people')
   // async getMoviePeople(@Param('id') film_id: number) {
-  //   return this.movieService.getMoviePeople(film_id);
+  //   return await this.movieService.getMoviePeople(film_id);
   // }
 
   @ApiOperation({ summary: 'Получение всех жанров фильма' })
@@ -219,8 +219,8 @@ export class AdminController {
     type: Genres
   })
   @Get('/movie/:id/genres')
-  async getMovieGenres(@Param('id') film_id: number) : Promise<Genres[]> {
-    return this.movieService.getMovieGenres(film_id);
+  async getMovieGenres(@Param('id') film_id: number): Promise<Genres[]> {
+    return await this.movieService.getMovieGenres(film_id);
   }
 
   @ApiOperation({ summary: 'Получение фильма по названию' })
@@ -236,8 +236,8 @@ export class AdminController {
     type: Movie
   })
   @Get('/movie/title/:title')
-  async getMovieByTitle(@Param('title') title: string) : Promise<Movie> {
-    return this.movieService.getMovieByTitle(title);
+  async getMovieByTitle(@Param('title') title: string): Promise<Movie> {
+    return await this.movieService.getMovieByTitle(title);
   }
 
   @ApiOperation({ summary: 'Обновление фильма' })
@@ -251,8 +251,8 @@ export class AdminController {
     type: Movie
   })
   @Put('/movie')
-  async updateMovie(@Body() dto: UpdateMovieDto) : Promise<Movie> {
-    return this.adminService.updateMovie(dto);
+  async updateMovie(@Body() dto: UpdateMovieDto): Promise<Movie> {
+    return await this.adminService.updateMovie(dto);
   }
 
   @ApiOperation({ summary: 'Удаление фильма' })
@@ -268,7 +268,7 @@ export class AdminController {
     type: Movie
   })
   @Delete('/movie/:id')
-  async deleteMovie(@Param('id') id: number) : Promise<Movie> {
-    return this.adminService.deleteMovie(id);
+  async deleteMovie(@Param('id') id: number): Promise<Movie> {
+    return await this.adminService.deleteMovie(id);
   }
 }

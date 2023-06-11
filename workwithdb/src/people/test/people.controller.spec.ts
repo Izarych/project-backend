@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PeopleController } from "../people.controller";
 import { PeopleService } from "../people.service";
+import { People } from '../people.model';
 
 
 describe('MovieController', () => {
@@ -33,7 +34,8 @@ describe('MovieController', () => {
           provide: PeopleService,
           useValue: {
             createPeoples: jest.fn(),
-            getPeople: jest.fn(() => people)
+            getPeople: jest.fn().mockResolvedValue(people),
+            getPeopleByFullName: jest.fn()
           },
         },
       ],
@@ -101,6 +103,28 @@ describe('MovieController', () => {
 
       it('should return all people', async () => {
         expect(response).toEqual(people);
+      });
+
+    });
+  });
+
+  describe('getPeopleByFullName', () => {
+    describe('when getPeopleByFullName called', () => {
+
+      let response, spy;
+      const fullName = 'Мэттью МакКонахи';
+
+      beforeEach(async () => {
+        spy = jest.spyOn(peopleService, 'getPeopleByFullName').mockResolvedValueOnce([people[2] as People]);
+        response = await peopleController.getPeopleByFullName(fullName);
+      });
+
+      it('should call app service', async () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return people by full name', async () => {
+        expect(response).toEqual([people[2]]);
       });
 
     });
