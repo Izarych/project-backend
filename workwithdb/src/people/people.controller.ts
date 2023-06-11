@@ -11,7 +11,7 @@ export class PeopleController {
 
     @EventPattern('create_peoples')
     async createPeoples({ id, arr }): Promise<void> {
-        return this.peopleService.createPeoples(id, arr);
+        return await this.peopleService.createPeoples(id, arr);
     }
 
     @ApiOperation({ summary: 'Получение всех людей' })
@@ -22,7 +22,7 @@ export class PeopleController {
     })
     @Get()
     async getPeople(): Promise<People[]> {
-        return this.peopleService.getPeople();
+        return await this.peopleService.getPeople();
     }
 
     @ApiOperation({ summary: 'Получение людей по имени' })
@@ -33,6 +33,6 @@ export class PeopleController {
     })
     @Get('/:fullName')
     async getPeopleByFullName(@Param('fullName') fullName: string): Promise<People[]> {
-        return this.peopleService.getPeopleByFullName(fullName);
+        return await this.peopleService.getPeopleByFullName(fullName);
     }
 }

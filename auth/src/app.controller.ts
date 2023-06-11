@@ -19,8 +19,9 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { UserWithTokens } from './custom_types/userWithTokens.type';
-import { User } from './custom_types/user.type';
+import { IUserWithTokens } from './interfaces/IUserWithTokens';
+import { IUser } from './interfaces/IUser';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @ApiTags('Authorization')
 @Controller()
@@ -46,11 +47,11 @@ export class AppController {
   @Post('/login')
   async login<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData: UserWithTokens = await this.appService.login(dto);
+      const userData: IUserWithTokens = await this.appService.login(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error)
     }
   }
 
@@ -66,8 +67,13 @@ export class AppController {
     description: "Resend mail on email, update link in table"
   })
   @Get('/sendlink/:email')
-  async resendLink(@Param('email') email: string): Promise<User> {
-    return this.appService.reSendActivationLink(email);
+  async resendLink<T>(@Param('email') email: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+    try {
+      return res.json(await this.appService.reSendActivationLink(email));
+    } catch (error) {
+      return res.status(error.status).json(error)
+    }
+
   }
 
 
@@ -83,8 +89,12 @@ export class AppController {
     description: "Activate account if link is right"
   })
   @Get('/activate/:link')
-  async activate(@Param('link') link: string): Promise<User> {
-    return this.appService.activate(link);
+  async activate<T>(@Param('link') link: string, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
+    try {
+      return res.json(await this.appService.activate(link));
+    } catch (error) {
+      return res.status(error.status).json(error)
+    }
   }
 
 
@@ -170,6 +180,8 @@ export class AppController {
 
     try {
       authData = await this.appService.getVkToken(body.code);
+
+
     } catch (err) {
       throw new UnprocessableEntityException("Wrong VK code");
     }
@@ -191,8 +203,8 @@ export class AppController {
     }
   })
   @Get('/check/:email')
-  async checkEmail(@Param('email') email: string): Promise<User> {
-    return this.appService.checkEmail(email);
+  async checkEmail(@Param('email') email: string): Promise<IUser> {
+    return await this.appService.checkEmail(email);
   }
 
 
@@ -201,15 +213,19 @@ export class AppController {
     status: 200,
     description: "Удаление refresh токена из куков и удаление записи в таблице токенов"
   })
+  @UseGuards(JwtAuthGuard)
   @Post('/logout')
   async logout<T>(@Req() req: Request, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
+      if (!req.headers.cookie) {
+        throw new UnauthorizedException({ message: 'Not authorized' });
+      }
       const refreshToken: string = req.headers.cookie.split('=')[1];
       await this.appService.logout(refreshToken);
       res.clearCookie('refreshToken');
       return res.status(204).send();  //ЗАГЛУШКА
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error.response)
     }
   }
 
@@ -235,11 +251,11 @@ export class AppController {
         throw new UnauthorizedException({ message: 'Not authorized' });
       }
       const refreshToken: string = req.headers.cookie.split('=')[1];
-      const userData: UserWithTokens = await this.appService.refresh(refreshToken);
+      const userData: IUserWithTokens = await this.appService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error.response)
     }
   }
 
@@ -266,11 +282,11 @@ export class AppController {
   @Post('/registration')
   async registration<T>(@Body() dto: AuthDto, @Res() res: Response): Promise<Response<T, Record<string, T>>> {
     try {
-      const userData: UserWithTokens = await this.appService.registration(dto);
+      const userData: IUserWithTokens = await this.appService.registration(dto);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
       return res.json(userData);
     } catch (error) {
-      return res.json(error.response)
+      return res.status(error.status).json(error)
     }
   }
 
@@ -294,12 +310,12 @@ export class AppController {
     }
   })
   @Post('/registrationAdmin')
-  async registrationAdmin(@Body() dto: AuthDto): Promise<UserWithTokens> {
-    return this.appService.registrationAdmin(dto);
+  async registrationAdmin(@Body() dto: AuthDto): Promise<IUserWithTokens> {
+    return await this.appService.registrationAdmin(dto);
   }
 
   @EventPattern('hash_password')
   async hashPassword(@Payload() password: string): Promise<string> {
-    return this.appService.hashNewPassword(password);
+    return await this.appService.hashNewPassword(password);
   }
 }

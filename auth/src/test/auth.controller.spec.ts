@@ -4,6 +4,7 @@ import { AppService } from "../app.service";
 import { JwtModule } from "@nestjs/jwt";
 import { HttpModule } from "@nestjs/axios";
 import { Response, Request } from 'express';
+import { UnauthorizedException } from '@nestjs/common';
 
 
 describe('AppController', () => {
@@ -23,6 +24,7 @@ describe('AppController', () => {
             email: 'test@example.com',
             password: 'testHashedPassword',
             isActivated: false,
+            roles: []
         }
     };
 
@@ -135,9 +137,16 @@ describe('AppController', () => {
     describe('resendLink', () => {
         describe('when resendLink called', () => {
             let response;
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+                status: jest.fn(),
+                cookie: jest.fn()
+            };
             beforeEach(async () => {
                 jest.spyOn(appService, 'reSendActivationLink').mockResolvedValue(user);
-                response = await appController.resendLink(authDto.email);
+                response = await appController.resendLink(authDto.email, mockResponse as Response);
             });
 
             it('should call app service with email', async () => {
@@ -152,9 +161,16 @@ describe('AppController', () => {
     describe('activate', () => {
         describe('when activate called', () => {
             let response;
+            let mockResponse: any = {
+                json: jest.fn().mockImplementation((result) => {
+                    return result;
+                }),
+                status: jest.fn(),
+                cookie: jest.fn()
+            };
             beforeEach(async () => {
                 jest.spyOn(appService, 'activate').mockResolvedValue(user);
-                response = await appController.activate(link);
+                response = await appController.activate(link,mockResponse as Response);
             });
 
             it('should call app service with link', async () => {
@@ -286,13 +302,16 @@ describe('AppController', () => {
                 json: jest.fn().mockImplementation((result) => {
                     return result;
                 }),
-                status: jest.fn(),
+                status: jest.fn(function (any){
+                    return this
+                }),
                 cookie: jest.fn(),
                 clearCookie: jest.fn(),
+                send: jest.fn()
             };
             const mockRequest: any = {
                 headers: {
-                    cookie: "any"
+                    cookie: "refresh=lkjdfaw"
                 }
             };
             beforeEach(async () => {
@@ -300,7 +319,7 @@ describe('AppController', () => {
                 jest.clearAllMocks()
             });
 
-            it('should call app service with body', async () => {
+            it('should call app service', async () => {
 
                 response = await appController.logout(mockRequest as Request, mockResponse as Response);
                 expect(appService.logout).toHaveBeenCalled();
@@ -326,7 +345,9 @@ describe('AppController', () => {
                 json: jest.fn().mockImplementation((result) => {
                     return result;
                 }),
-                status: jest.fn(),
+                status: jest.fn(function (any){
+                    return this
+                }),
                 cookie: jest.fn(),
                 clearCookie: jest.fn(),
             };

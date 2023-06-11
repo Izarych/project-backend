@@ -9,9 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import * as uuid from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UserWithTokens } from './custom_types/userWithTokens.type';
-import { Tokens } from './custom_types/tokens.type';
-import { User } from './custom_types/user.type';
+import { IUserWithTokens } from './interfaces/IUserWithTokens';
+import { ITokens } from './interfaces/ITokens';
+import { IUser } from './interfaces/IUser';
 
 @Injectable()
 export class AppService {
@@ -21,8 +21,8 @@ export class AppService {
     @Inject('AUTH_SERVICE') private userService: ClientProxy,
     private readonly mailerService: MailerService) { }
 
-  async login(dto: AuthDto): Promise<UserWithTokens> {
-    const user: User = await this.checkEmail(dto.email);
+  async login(dto: AuthDto): Promise<IUserWithTokens> {
+    const user: IUser = await this.checkEmail(dto.email);
 
     if (!user) {
       throw new BadRequestException('User does not exist');
@@ -37,47 +37,53 @@ export class AppService {
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async checkEmail(email: string): Promise<User> {
+  async checkEmail(email: string): Promise<IUser> {
     return await firstValueFrom(this.userService.send('get.user.email', email));
-  }
-
-  async checkLink(link: string): Promise<User> {
-    return await firstValueFrom(this.userService.send('get.user.link', link));
   }
 
   async logout(refreshToken: string): Promise<void> {
     await this.tokenRepository.destroy({ where: { refreshToken } });
   }
 
-  async refresh(refreshToken: string): Promise<UserWithTokens> {
+  async refresh(refreshToken: string): Promise<IUserWithTokens> {
     const userData = await this.validateRefreshToken(refreshToken);
     const tokenFromDB = this.tokenRepository.findOne({ where: { refreshToken } });
     if (!userData || !tokenFromDB) {
       throw new UnauthorizedException({ message: 'No auth' });
     }
 
-    const user: User = await this.checkEmail(userData.email);
+    const user: IUser = await this.checkEmail(userData.email);
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async registration(dto: AuthDto): Promise<UserWithTokens> {
+  async registration(dto: AuthDto): Promise<IUserWithTokens> {
     if (await this.checkEmail(dto.email)) {
       throw new BadRequestException('User with such email exists');
     }
     const hashPassword: string = await bcrypt.hash(dto.password, 5);
     const link: string = uuid.v4();
-    const user: User = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
+    const user: IUser = await firstValueFrom(this.userService.send('create.user', { ...dto, password: hashPassword, activationLink: link }));
+
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
     // await this.sendActivationLink(dto.email, link);
     return await this.generateAndSaveTokenAndPayload(user);
   }
 
-  async registrationAdmin(dto: AuthDto): Promise<UserWithTokens> {
+  async registrationAdmin(dto: AuthDto): Promise<IUserWithTokens> {
     if (await this.checkEmail(dto.email)) {
       throw new BadRequestException('User with such email exists');
     }
     const hashPassword: string = await bcrypt.hash(dto.password, 5);
     const link: string = uuid.v4();
-    const admin: User = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
+    const admin: IUser = await firstValueFrom(this.userService.send('create.admin', { ...dto, password: hashPassword, activationLink: link }));
+
+    if (!admin.id) {
+      throw new BadRequestException(admin);
+    }
+
     return await this.generateAndSaveTokenAndPayload(admin);
   }
 
@@ -86,17 +92,28 @@ export class AppService {
   }
 
 
-  async activate(link: string): Promise<User> {
-    return await firstValueFrom(this.userService.send('activate.user', link));
+  async activate(link: string): Promise<IUser> {
+    const user: IUser = await firstValueFrom(this.userService.send('activate.user', link));
+
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
+    return user;
   }
 
-  async reSendActivationLink(email: string): Promise<User> {
+  async reSendActivationLink(email: string): Promise<IUser> {
     const link: string = uuid.v4();
-    await this.sendActivationLink(email, link);
-    return await firstValueFrom(this.userService.send('update.user', { email, link }));
+    const user: IUser = await firstValueFrom(this.userService.send('update.user', { email, link }));
+    if (!user.id) {
+      throw new BadRequestException(user);
+    }
+
+    //await this.sendActivationLink(email, link);
+    return user;
   }
 
-  async sendActivationLink(to: string, link: string): Promise<void> {
+  private async sendActivationLink(to: string, link: string): Promise<void> {
     this.mailerService
       .sendMail({
         to: `${to}`,
@@ -108,7 +125,8 @@ export class AppService {
       .catch((error) => console.log(error));
   }
 
-  private async generateToken(user: User): Promise<Tokens> {
+  private async generateToken(user: IUser): Promise<ITokens> {
+   
     const payload = { userId: user.id, email: user.email, isActivated: user.isActivated, roles: user.roles };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign({
@@ -127,6 +145,7 @@ export class AppService {
         }
       )
     ]);
+       
     return {
       accessToken,
       refreshToken
@@ -152,15 +171,16 @@ export class AppService {
     }
   }
 
-  private async generateAndSaveTokenAndPayload(user: any): Promise<UserWithTokens> {
-    const tokens: Tokens = await this.generateToken(user);
+  private async generateAndSaveTokenAndPayload(user: any): Promise<IUserWithTokens> {
+    const tokens: ITokens = await this.generateToken(user);
     await this.saveToken(user.id, tokens.refreshToken);
     return {
       ...tokens,
       user: {
         id: user.id,
         email: user.email,
-        isActivated: user.isActivated
+        isActivated: user.isActivated,
+        roles: user.roles
       }
     };
   }
@@ -186,6 +206,3 @@ export class AppService {
     return res.data;
   }
 }
-
-
-

@@ -41,17 +41,32 @@ export class ReviewCommentsService {
         return await this.commentRepository.destroy({ where: { userId: id } });
     }
 
-    async update(dto: UpdateReviewCommentDto): Promise<ReviewComment> {
+    async update(dto: UpdateReviewCommentDto): Promise<ReviewComment | HttpException> {
         const comment: ReviewComment = await this.commentRepository.findByPk(dto.id);
+
+        if (!comment) {
+            return new HttpException(`Comment with "${dto.id}" ID not found`, HttpStatus.NOT_FOUND);
+        }
+
         return await comment.update(dto);
     }
 
-    async increaseRate(id: number): Promise<ReviewComment> {
-        return await this.changeRate(id, 'increase');
+    async increaseRate(id: number): Promise<ReviewComment | HttpException> {
+        try {
+            return await this.changeRate(id, 'increase');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
-    async decreaseRate(id: number): Promise<ReviewComment> {
-        return await this.changeRate(id, 'decrease');
+    async decreaseRate(id: number): Promise<ReviewComment | HttpException> {
+        try {
+            return await this.changeRate(id, 'decrease');
+        } catch (error) {
+            return new HttpException(error.response, error.status, { cause: error });
+        }
+
     }
 
     private async changeRate(id: number, operation: string): Promise<ReviewComment> {

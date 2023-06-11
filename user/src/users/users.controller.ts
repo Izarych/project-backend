@@ -1,4 +1,4 @@
-import { Controller} from '@nestjs/common';
+import { BadRequestException, Controller, HttpException, NotFoundException } from '@nestjs/common';
 import { AddRoleDto } from './dto/add-user-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
@@ -11,57 +11,57 @@ export class UsersController {
   constructor(private userService: UsersService) { }
 
   @MessagePattern('create.user')
-  async create(@Payload() userDto: CreateUserDto): Promise<User> {
-    return this.userService.createUser(userDto);
+  async create(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
+    return await this.userService.createUser(userDto);
   }
 
   @MessagePattern('create.admin')
-  async createAdmin(@Payload() userDto: CreateUserDto): Promise<User> {
-    return this.userService.createAdmin(userDto);
+  async createAdmin(@Payload() userDto: CreateUserDto): Promise<User | BadRequestException> {
+    return await this.userService.createAdmin(userDto);
   }
 
   @MessagePattern('activate.user')
-  async activateUser(@Payload() link: string): Promise<User> {
-    return this.userService.activateUser(link);
+  async activateUser(@Payload() link: string): Promise<User | BadRequestException> {
+    return await this.userService.activateUser(link);
   }
 
   @MessagePattern('get.all.users')
   async getAll(): Promise<User[]> {
-    return this.userService.getAllUsers();
+    return await this.userService.getAllUsers();
   }
 
   @MessagePattern('get.user.id')
-  async getUserById(@Payload() id: number): Promise<User> {
-    return this.userService.getUserById(id);
+  async getUserById(@Payload() id: number): Promise<User | HttpException> {
+    return await this.userService.getUserById(id);
   }
 
   @MessagePattern('get.user.email')
   async getUserByEmail(@Payload() email: string): Promise<User> {
-    return this.userService.getUserByEmail(email);
+    return await this.userService.getUserByEmail(email);
   }
 
   @MessagePattern('get.user.link')
-  async getUserByLink(@Payload() link: string): Promise<User> {
-    return this.userService.getUserByLink(link);
+  async getUserByLink(@Payload() link: string): Promise<User | HttpException> {
+    return await this.userService.getUserByLink(link);
   }
 
   @MessagePattern('add.role')
-  async addRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto> {
-    return this.userService.addRole(dto);
+  async addRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
+    return await this.userService.addRole(dto);
   }
 
   @MessagePattern('remove.role')
-  async removeRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto> {
-    return this.userService.removeRole(dto);
+  async removeRole(@Payload() dto: AddRoleDto): Promise<AddRoleDto | HttpException> {
+    return await this.userService.removeRole(dto);
   }
 
   @EventPattern('update.user')
-  async update(@Payload() data: Partial<User>): Promise<User>  {
-    return this.userService.updateUser(data);
+  async update(@Payload() data: Partial<User>): Promise<User | NotFoundException> {
+    return await this.userService.updateUser(data);
   }
 
   @EventPattern('delete.user')
-  async delete(@Payload() id: number): Promise<{message: string}> {
-    return this.userService.deleteUser(id);
+  async delete(@Payload() id: number): Promise<{ message: string } | HttpException> {
+    return await this.userService.deleteUser(id);
   }
 }
