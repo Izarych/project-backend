@@ -9,8 +9,12 @@ export class RolesService {
   constructor(@InjectModel(Role) private roleRepository: typeof Role) {
   }
 
-  async createRole(roleDto: CreateRoleDto): Promise<Role> {
+  async createRole(roleDto: CreateRoleDto): Promise<Role | HttpException> {
+    try {
       return await this.roleRepository.create(roleDto);
+    } catch (error) {
+      return new HttpException('Role exists', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async getRoleByValue(value: string): Promise<Role> {
